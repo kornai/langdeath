@@ -1,0 +1,109 @@
+{% load staticfiles %}
+<link rel="stylesheet" type="text/css" href="{% static 'dld/default.css' %}" />
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<!--
+Design by Free CSS Templates
+http://www.freecsstemplates.org
+Released for free under a Creative Commons Attribution 2.5 License
+
+Name       : Outstretched 
+Description: A two-column, fixed-width design with dark color scheme.
+Version    : 1.0
+Released   : 20131014
+
+-->
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title></title>
+<meta name="keywords" content="" />
+<meta name="description" content="" />
+<link href="http://fonts.googleapis.com/css?family=Source+Sans+Pro:200,300,400,600,700,900" rel="stylesheet" />
+<link href="default.css" rel="stylesheet" type="text/css" media="all" />
+<link href="fonts.css" rel="stylesheet" type="text/css" media="all" />
+<!--[if IE 6]>
+<link href="default_ie6.css" rel="stylesheet" type="text/css" />
+<![endif]-->
+</head>
+<body>
+<div id="wrapper">
+	<div id="header-wrapper">
+		<div id="header" class="container">
+			<div id="logo">
+				<h1><a href="#">Digital language death</a></h1>
+			</div>
+		</div>
+		<div id="menu" class="container">
+			<ul>
+				<li class="current_page_item"><a href="news" accesskey="1" title="">News</a></li>
+				<li><a href="list" accesskey="1" title="">Languages</a></li>
+				<li><a href="about" accesskey="1" title="">About us</a></li>
+			</ul>
+		</div>
+	</div>
+	<div id="page" class="container">
+        <!--
+		<div id="sidebar1">
+			<div id="box1">
+				<h2>Praesent mattis</h2>
+				<ul class="style1">
+					<li class="first"><a href="#">Vestibulum luctus venenatis dui</a></li>
+					<li><a href="#">Aenean elementum facilisis ligula</a></li>
+					<li><a href="#">Ut tincidunt elit vitae augue</a></li>
+					<li><a href="#">Sed quis odio sagittis leo vehicula</a></li>
+				</ul>
+				<a href="#" class="button">Read More</a> </div>
+			<div id="box2">
+				<h2>Nulla luctus</h2>
+				<ul class="style1">
+					<li class="first"><a href="#">Vestibulum luctus venenatis dui</a></li>
+					<li><a href="#">Aenean elementum facilisis ligula</a></li>
+					<li><a href="#">Ut tincidunt elit vitae augue</a></li>
+					<li><a href="#">Aenean elementum facilisis ligula</a></li>
+				</ul>
+				<a href="#" class="button">Read More</a> </div>
+		</div>
+        -->
+		<div id="content">
+            {% block content %}
+            {% endblock content %}
+		</div>
+        <!--
+		<div id="sidebar2">
+			<div>
+				<h2> mattis condimentum</h2>
+				<ul class="style2">
+					<li class="first">
+						<h3><a href="#">Maecenas luctus lectus</a></h3>
+						<p><a href="#">Quisque dictum integer nisl risus,  convallis,  congue, and nibh.</a></p>
+					</li>
+					<li>
+						<h3><a href="#">Integer gravida nibh</a></h3>
+						<p><a href="#">Quisque dictum integer nisl risus, sagittis, rutrum id, congue, and nibh.</a></p>
+					</li>
+					<li>
+						<h3><a href="#">Fusce ultrices fringilla</a></h3>
+						<p><a href="#">Quisque dictum  nisl risus, sagittis convallis, rutrum id, congue nibh.</a></p>
+					</li>
+					<li>
+						<h3><a href="#">Integer gravida nibh</a></h3>
+						<p><a href="#">Quisque dictum risus, sagittis convallis, rutrum  congue, and nibh.</a></p>
+					</li>
+				</ul>
+				<a href="#" class="button">Read More</a> </div>
+		</div>
+        -->
+	</div>
+	<div id="portfolio-wrapper">
+		<div id="portfolio" class="container">
+			<div class="title">
+				<h2>Mathematical Linguistics Group</h2>
+				<span class="byline">MTA NYTI</span> </div>
+		</div>
+	</div>
+</div>
+<div id="footer">
+	<p>Copyright (c) 2014 example.com. All rights reserved. Design by <a href="http://www.freecsstemplates.org/" rel="nofollow">FreeCSSTemplates.org</a>. Photos by <a href="http://fotogrph.com/">Fotogrph</a>.</p>
+</div>
+</body>
+</html>

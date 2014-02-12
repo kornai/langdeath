@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+{% load staticfiles %}
+
+{% block content %}
+English name: {{ object.name }}
+<br />
+alternative names: {{ object.name2 }}
+<br />
+SIL code: {{ object.sil }}
+<br />
+L1: {{ object.l1_speakers.eth }}
+{% endblock content %}
