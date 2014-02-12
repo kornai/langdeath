@@ -6,7 +6,7 @@
     {% if latest_updated_langs %}
         <ul>
         {% for lang in latest_updated_langs %}
-            <li><a href="/lang/{{ lang.iso639_3 }}">{{ lang.name }}</a></li>
+            <li><a href="/lang/{{ lang.sil }}">{{ lang.name }}</a></li>
         {% endfor %}
         </ul>
     {% else %}
