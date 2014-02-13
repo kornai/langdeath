@@ -9,7 +9,5 @@ class Language(models.Model):
     sil = models.CharField(max_length=10, primary_key=True)
     last_updated = models.DateTimeField('last updated')
     l1_speakers = JSONField()
-    #character_entropy = models.CharField(max_length=10)
-    
 
 

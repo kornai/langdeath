@@ -61,11 +61,8 @@ def search(request):
         form = LanguageSearchForm(request.POST)
         if form.is_valid():
             langs = form.get_languages()
-            #t = loader.get_template('index.html')
-            #c = RequestContext(request, {'languages': langs})
             context = {'languages': langs}
             return render(request, 'index.html', context)
-            return HttpResponseRedirect(t.render(c), content_type="application/xhtml+xml")
     else:
         form = LanguageSearchForm()
     return render(request, 'search.html', {'form': form})
