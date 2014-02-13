@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% load staticfiles %}
+
+{% block content %}
+    <h2>Results</h2>
+    {% if languages %}
+    <table>
+        <tr><td>English name</td>
+            <td>Alternative name(s)</td>
+            <td>SIL code</td>
+        </tr>
+        {% for lang in languages %}
+        <tr>
+            <td><a href="/lang/{{ lang.sil }}">{{ lang.name }}</a></td>
+            <td>{{ lang.name2 }}</td>
+            <td>{{ lang.sil }}</td>
+        </tr>
+        {% endfor %}
+    </table>
+    {% else %}
+        <p>No langs are available.</p>
+    {% endif %}
+{% endblock content %}
