@@ -33,38 +33,18 @@ class AboutUsView(generic.TemplateView):
     template_name = 'about.html'
 
 
-class SearchResultsView(generic.ListView):
-    template_name = 'index.html'
-    model = Language
-
-
 def index(request):
     context = {'languages': Language.objects.order_by('-last_updated')}
     return render(request, 'index.html', context)
 
 def search(request):
-    #if request.method == 'POST':
-        #form = LanguageSearchForm(request.POST)
-        #if form.is_valid():
-            #langs = form.get_results()
-    #try:
-        #name = request.POST['name']
-    #except:
-        #return render(request, 'search.html', {
-        #})
-    #else:
-        #langs = Language.objects.filter(name__startswith=name)
-        #context = {'languages': langs}
-        #return render(request, 'index.html', context)
-#
     if request.method == 'POST':
         form = LanguageSearchForm(request.POST)
         if form.is_valid():
             langs = form.get_languages()
             context = {'languages': langs}
-            return render(request, 'index.html', context)
+            return render(request, 'results.html', context)
     else:
         form = LanguageSearchForm()
     return render(request, 'search.html', {'form': form})
-
 
