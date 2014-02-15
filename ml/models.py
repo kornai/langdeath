@@ -2,29 +2,36 @@ from django.db import models
 
 from django.contrib.auth.models import User
 from django.db.models.signals import post_save
- 
 
-class Publication(models.Model):
-    authors = models.ManyToMany(UserProfile)
-    year = models.IntegerField()
+
+class UserProfile(models.Model):
+    user = models.OneToOneField(User, blank=True)
 
     def __unicode__(self):
-        return ' '.join(self.authors)
+        return ' '.join([self.user.first_name,
+                         self.user.last_name])
 
 
-class UserProfile(models.Model):  
-    user = models.OneToOneField(User)
-    publications = models.ManyToManyField(Publication)
-    full_name = models.TextField(max_length=100)
- 
-    def __str__(self):  
-          return "%s's profile" % self.user  
- 
-def create_user_profile(sender, instance, created, **kwargs):  
-    if created:  
-       profile, created = UserProfile.objects.get_or_create(user=instance)  
- 
+class Publication(models.Model):
+    year = models.IntegerField(blank=True)
+    title = models.CharField(max_length=200)
+
+    def __unicode__(self):
+        return self.title + ' (' + str(self.year) + ')'
+
+
+class Authorship(models.Model):
+    author = models.ForeignKey(UserProfile)
+    publication = models.ForeignKey(Publication)
+
+    def __unicode__(self):
+        return 'authorship: {0} {1}'.format(self.author, self.publication)
+
+
+def create_user_profile(sender, instance, created, **kwargs):
+    if created:
+        profile, created = UserProfile.objects.get_or_create(user=instance)
+
 post_save.connect(create_user_profile, sender=User)
- 
-User.profile = property(lambda u: u.get_profile() )
 
+User.profile = property(lambda u: u.get_profile())
