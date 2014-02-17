@@ -1,5 +1,10 @@
-from django.shortcuts import render
+#from django.shortcuts import render
 from django.views import generic
+import logging
+
+logger = logging.getLogger('langdeath')
+
 
 class UserListView(generic.TemplateView):
-    template_name = 'about.html'
+    template_name = 'ml_index.html'
+    logger.debug('UserListView created')
