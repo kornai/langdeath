@@ -87,3 +87,43 @@ STATIC_URL = '/static/'
 # Settings added by us
 
 AUTH_PROFILE_MODULE = 'ml.UserProfile'
+STATICFILES_DIR = (
+    os.path.join(BASE_DIR, 'static'))
+
+import logging
+
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'handlers': {
+        'file': {
+            'level': 'DEBUG',
+            'class': 'logging.FileHandler',
+            'filename': os.path.join(BASE_DIR, 'debug.log'),
+            'formatter': 'verbose',
+        },
+    },
+    'formatters': {
+        'verbose': {
+            'format': '%(levelname)s %(asctime)s %(module)s '
+            '%(process)d %(thread)d %(message)s'
+        },
+        'simple': {
+            'format': '%(asctime)s %(levelname)s %(message)s'
+        },
+    },
+    'loggers': {
+        'django.request': {
+            'handlers': ['file'],
+            'level': 'DEBUG',
+            'propagate': True,
+        },
+        'langdeath': {
+            'handlers': ['file'],
+            'level': 'DEBUG',
+            'formatter': 'verbose',
+        }
+    },
+}
+logger = logging.getLogger('langdeath')
+logger.debug(STATICFILES_DIR)
