@@ -1,0 +1,8 @@
+{% extends "ml_base.html" %}
+{% load staticfiles %}
+
+{% block content %}
+<h2>{{ user.user.first_name }} {{ user.user.last_name }}</h2>
+<br />
+{{ user.user.email }}
+{% endblock content %}

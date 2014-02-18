@@ -25,6 +25,8 @@ class Publication(models.Model):
 
 class UserProfile(models.Model):  
     user = models.OneToOneField(User)
+    group_member = models.BooleanField(default=False)
+    leader = models.BooleanField(default=False)
  
     def __unicode__(self):  
         name = ''
