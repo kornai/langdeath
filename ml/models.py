@@ -27,7 +27,8 @@ class UserProfile(models.Model):
     user = models.OneToOneField(User)
     group_member = models.BooleanField(default=False)
     leader = models.BooleanField(default=False)
- 
+    image = models.ImageField(upload_to='profile', blank=True)
+
     def __unicode__(self):  
         name = ''
         if not self.user.last_name or not self.user.first_name:

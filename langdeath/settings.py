@@ -127,3 +127,6 @@ LOGGING = {
 }
 logger = logging.getLogger('langdeath')
 logger.debug(STATICFILES_DIR)
+
+MEDIA_ROOT=os.path.join(BASE_DIR, 'media')
+MEDIA_URL='/media/'

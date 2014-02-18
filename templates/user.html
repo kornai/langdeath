@@ -5,4 +5,19 @@
 <h2>{{ user.user.first_name }} {{ user.user.last_name }}</h2>
 <br />
 {{ user.user.email }}
+
+{% if user.image %}
+<div class="profile_image">
+    <img src="{{ user.image.url }}">
+</div>
+{% endif %}
+
+{% if user.authorship_set.all %}
+<h3>Publications</h3>
+<ul>
+    {% for p in user.authorship_set.all %}
+    <li><a href="/ml/publ/{{p.publication.id}}">{{ p.publication }}</a></li>
+    {% endfor %}
+</ul>
+{% endif %}
 {% endblock content %}

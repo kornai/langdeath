@@ -79,6 +79,13 @@ hr {
 	margin: 0px auto;
 }
 
+.profile_image {
+	background: #308576;
+    position: fixed;
+    top: 0px;
+    right: 0px;
+}
+
 .clearfix {
 	clear: both;
 }
@@ -182,6 +189,12 @@ hr {
 #content {
 	float: left;
 	width: 600px;
+}
+
+#content img {
+    position: absolute;
+    top: 0px;
+    right: 20px;
 }
 
 /** SIDEBAR 1 */
