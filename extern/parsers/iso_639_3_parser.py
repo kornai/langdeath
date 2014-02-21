@@ -50,15 +50,6 @@ class ParseISO639_3(OnlineParser):
                 self.lang_dict[sil_code].iso_scope = scope
                 self.lang_dict[sil_code].iso_type = language_type
                 self.lang_dict[sil_code].names.add(ref_name)
-                #if part2b:
-                #    self.lang_dict[sil_code].other_iso_codes[
-                #        '639-2_bibliographic'] = part2b
-                #if part2t:
-                #    self.lang_dict[sil_code].other_iso_codes[
-                #        '639-2_terminology'] = part2t
-                #if part1:
-                #    self.lang_dict[sil_code].other_iso_codes[
-                #        '639-1'] = part1
 
     def parse_macrolangs(self):
         with self.iso_zip_file.open(
