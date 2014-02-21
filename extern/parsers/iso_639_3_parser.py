@@ -18,10 +18,15 @@ class LanguageUpdate():
 
 
 class ParseISO639_3(OnlineParser):
+    '''
+    self.lang_dict = { iso_code : LanguageUpdate }
+    '''
     def __init__(self):
+        self.lang_dict = defaultdict(LanguageUpdate)
+
+    def parse(self):
         (iso_zip_filen, headers) = urllib.urlretrieve(
             'http://www-01.sil.org/iso639-3/iso-639-3_Code_Tables_20140203.zip')
-        self.lang_dict = defaultdict(LanguageUpdate)
         self.dir_ = 'iso-639-3_Code_Tables_20140203/'
         self.iso_zip_file = zipfile.ZipFile(iso_zip_filen, 'r')
         self.parse_main_table()
