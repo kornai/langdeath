@@ -59,7 +59,8 @@ def parse_rows(table):
 
 def get_dictionary(string):
 
-    title = string.split('<h1 class="title" id="page-title">')[1].split('</h1>')[0]
+    title = string.split('<h1 class="title" id="page-title">')[1]\
+	    .split('</h1>')[0]
     country_whole = string.split('<h2>')[1].split('>')[1]
     
     
@@ -108,14 +109,16 @@ def get_ethnologue(sil_code):
     try:	
         html = response.read()
         dictionary = get_dictionary(html)
-        dictionary_print(dictionary, 0)
+	return dictionary
     except:	
         sys.stderr.write('Error while parsing {0}\n'.format(url))
+        
 
 def main():
 
     sil_code = sys.argv[1]
-    get_ethnologue(sil_code)
+    dictionary = get_ethnologue(sil_code)
+    dictionary_print(dictionary, 0)
 
 if __name__ == "__main__":
     main()

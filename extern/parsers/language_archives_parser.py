@@ -73,14 +73,15 @@ def get_lang_archive(sil_code):
     try:	
         html = response.read()
         dictionary = get_dictionary(html)
-        dictionary_print(dictionary)
+	return dictionary
     except:	
         sys.stderr.write('Error while parsing {0}\n'.format(url))
 
 def main():
 
     sil_code = sys.argv[1]
-    get_lang_archive(sil_code)
+    dictionary = get_lang_archive(sil_code)
+    dictionary_print(dictionary)
 
 if __name__ == "__main__":
     main()
