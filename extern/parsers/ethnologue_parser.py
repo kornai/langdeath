@@ -3,13 +3,11 @@ import urllib2
 
 from base_parsers import OnlineParser
 
-
 def strip_nonstring(string):
 
     while len(string) > 0 and string[0] == '<':
         string = string.split('>')[1].split('<')[0]
     return string
-
 
 def get_value_dictionary(lista):
 
@@ -26,7 +24,6 @@ def get_value_dictionary(lista):
         dictionary[key] = value
     return dictionary 
 
-
 def parse_attachement(attachement_rows):
 
     dictionary = {}
@@ -38,7 +35,6 @@ def parse_attachement(attachement_rows):
         value_dictionary = get_value_dictionary(value_list)
         dictionary[key] = value_dictionary
     return dictionary    
-
 
 def parse_rows(table):
 
@@ -56,13 +52,11 @@ def parse_rows(table):
         dictionary[key] = value
     return dictionary    
 
-
 def get_dictionary(string):
 
     title = string.split('<h1 class="title" id="page-title">')[1]\
 	    .split('</h1>')[0]
     country_whole = string.split('<h2>')[1].split('>')[1]
-    
     
     country = country_whole.split('</a')[0]
     first_table_rows = string.split('<div class="field-label">')[1:-1]\
@@ -82,7 +76,6 @@ def get_dictionary(string):
         dictionary_2 = parse_attachement(attachement_rows) 
         dictionary[attachement_title] = dictionary_2
     return dictionary
-
 
 def dictionary_print(dictionary, depth):
 
@@ -112,7 +105,6 @@ def get_ethnologue(sil_code):
 	return dictionary
     except:	
         sys.stderr.write('Error while parsing {0}\n'.format(url))
-        
 
 def main():
 

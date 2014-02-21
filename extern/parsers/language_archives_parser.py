@@ -16,7 +16,6 @@ def parse_table(table):
 
     return dictionary
 
-
 def parse_table_list(table_list):
 
     dictionary = {}
@@ -26,7 +25,6 @@ def parse_table_list(table_list):
         dictionary[name] = info_dict 
     
     return dictionary
-
 
 def get_dictionary(string):
   
@@ -44,7 +42,6 @@ def get_dictionary(string):
     dictionary['Code'] = code
     
     return dictionary
-
 
 def dictionary_print(dictionary):
 
