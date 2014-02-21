@@ -45,7 +45,7 @@ def get_dictionary(string):
 
 def dictionary_print(dictionary):
 
-    lista = ['Name', 'Code', 'Primary texts', 'Lexical resources',\
+    list_ = ['Name', 'Code', 'Primary texts', 'Lexical resources',\
 	    'Language descriptions', 'Other resources about the language',\
 	    'Other resources in the language'] 
 
