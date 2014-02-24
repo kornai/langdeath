@@ -23,11 +23,11 @@ class ParseISO639_3(OnlineParser):
     '''
     def __init__(self):
         self.lang_dict = defaultdict(LanguageUpdate)
+        self.url = 'http://www-01.sil.org/iso639-3/iso-639-3_Code_Tables_20140203.zip'
 
-    def parse(self):
-        (iso_zip_filen, headers) = urllib.urlretrieve(
-            'http://www-01.sil.org/iso639-3/iso-639-3_Code_Tables_20140203.zip')
-        self.dir_ = 'iso-639-3_Code_Tables_20140203/'
+    def parse(self, url):
+        (iso_zip_filen, headers) = urllib.urlretrieve(self.url)
+        self.dir_ = self.url.rsplit(self.url,1)[1].split('.')[0]
         self.iso_zip_file = zipfile.ZipFile(iso_zip_filen, 'r')
         self.parse_main_table()
         self.parse_macrolangs()
