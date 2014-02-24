@@ -2,7 +2,7 @@ class BaseParser(object):
     pass
 
 class OnlineParser(BaseParser):
-    """Inherit this class if parser will do everything on its own,
+    """Inherit this class if the parser will do everything on its own,
     downloading, parsing, no assistance, supplementary files are needed
     """
 
