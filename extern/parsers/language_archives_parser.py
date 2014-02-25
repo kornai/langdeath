@@ -1,67 +1,85 @@
 import sys
 import urllib2
+import logging
 
 from base_parsers import OnlineParser
 
 class LanguageArchivesParser(OnlineParser):
 
-    def __init__(self, sil_code):
-	self.sil_code = sil_code
-	self.url = 'http://www.language-archives.org/language/{0}'\
-		.format(self.sil_code) 
-	self.dictionary = {}	
-
-    def parse_table(self, table):
-    
-        rows = table.split('<li>')[1:]
-        self.dictionary['All'] = len(rows)
-        online_count = 0
-        for row in rows:
-            if '<span class="online_indicator">' in row:
-                online_count += 1
-        self.dictionary['Online'] = online_count
-    
-    def parse_table_list(self, table_list):
-    
-        for table in table_list:
-            name = table.split('</h2>')[0]
-            info_dict = self.parse_table(table.split('<ol>')[1]\
-		    .split('</ol>')[0])
-            self.dictionary[name] = info_dict 
-    
-    def fill_dictionary(self, string):
-      
-        name_wrapped = string.split('about the')[1].split('</title>')[0]
-        if 'language'in name_wrapped:
-            name = name_wrapped.split('language')[0].strip(' ')
-        else:
-            name = name_wrapped
-        code = string.split('<p>ISO 639-3:')[1].split('>')[1].split('</a')[0]\
-    	    .strip()
-        dictionary_item_inputs = string.split('<h2>')[1:] 
-        self.parse_table_list(dictionary_item_inputs)
-        self.dictionary['Name'] = name
-        self.dictionary['Code'] = code
-        
-    def get_attributes(self):
+    def parse_table(self, item):
         
         try:
-    	    response = urllib2.urlopen(self.url)
-        except:
-            sys.stderr.write('Error while downloading {0}\n'.format(self.url))
-    	    quit()
-        try: 	
+            table = item.split('<ol>')[1].split('</ol>')[0]
+            rows = table.split('<li>')[1:]
+            online_count = 0
+            for row in rows:
+                if '<span class="online_indicator">' in row:
+                    online_count += 1
+            return len(rows), online_count        
+        except Exception as e:
+            logging.debug('{0} in LanguageArchivesParser.parse_table'
+                          .format(type(e)))
+    
+    def get_tabular_data(self, html):
+
+        try:
+            d = {}
+            lines = html.split('<h2>')[1:]
+            for item in lines:
+                category = item.split('</h2>')[0]
+                counts = self.parse_table(item)
+                d[category] = counts
+            return d
+        except Exception as e:
+            logging.debug('{0} in LanguageArchivesParser.get_tabular_data'
+                          .format(type(e)))
+
+    def get_name(self, string):
+
+        try:
+            name_wrapped = string.split('about the')[1].split('</title>')[0]
+            if 'language'in name_wrapped:
+                name = name_wrapped.split('language')[0].strip(' ')
+            else:
+                name = name_wrapped
+            return name
+        except Exception as e:
+            logging.debug('{0} in LanguageArchivesParser.get_name'\
+                          .format(type(e)))
+
+    def parse(self, sil_codes):
+        
+        for sil in sil_codes:
+            html = self.get_html(sil)
+            dictionary = {}
+            dictionary['Name'] = self.get_name(html)
+            d = self.get_tabular_data(html)
+            if d != None:
+                for key in d:
+                    dictionary[key] = {}
+                    all_, online = d[key]
+                    dictionary[key]['All'] = all_
+                    dictionary[key]['Online'] = online
+            yield dictionary        
+
+    def get_html(self, sil_code):
+        
+        url = 'http://www.language-archives.org/language/{0}'\
+                .format(sil_code)
+        try:
+    	    response = urllib2.urlopen(url)
             html = response.read()
-            self.fill_dictionary(html)
-    	    return self.dictionary
-	except:	
-            sys.stderr.write('Error while parsing {0}\n'.format(self.url))
+            return html
+        except:
+            logging.debug('Error while downloading {0}\n'.format(url))
 
 def main():
 
-    sil_code = sys.argv[1]
-    parser = LanguageArchivesParser(sil_code)
-    print repr(parser.get_attributes())
+    sil_codes = sys.argv[1:]
+    logging.basicConfig(level=logging.DEBUG)
+    parser = LanguageArchivesParser()
+    for d in parser.parse(sil_codes):
+        print d
 
 if __name__ == "__main__":
     main()

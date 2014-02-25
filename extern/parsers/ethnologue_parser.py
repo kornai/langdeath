@@ -7,11 +7,6 @@ from base_parsers import OnlineParser
 
 class EthnologueParser(OnlineParser):
 
-    def __init__(self, sil_code):
-        self.sil_code = sil_code
-        self.url = 'http://www.ethnologue.com/language/{0}'.format(sil_code)
-        self.dictionary = {}
-
     def strip_nonstring(self, string):
          
         while len(string) > 0 and string[0] == '<':
@@ -30,8 +25,8 @@ class EthnologueParser(OnlineParser):
                     inner_dictionary[key] = value
             return inner_dictionary        
         except Exception as e:
-            logging.debug('{0} in EthnologueParser.parse_attachement_block()')\
-                    .format(type(e))
+            logging.debug('{0} in EthnologueParser.parse_attachement_block()'+\
+                          ' sil:{1}'.format(type(e), self.sil))
      
     def parse_row(self, row):
         try: 
@@ -46,45 +41,39 @@ class EthnologueParser(OnlineParser):
             value = self.strip_nonstring(value_extras).strip()
             return key, value
         except Exception as e:
-            logging.debug('{0} in EthnologueParser.parse_row(), at row\n{1}'\
-                          .format(type(e), row))
-            quit()
+            logging.debug('{0} in EthnologueParser.parse_row(), at row\n{1} '+\
+                          'sil:{2}'.format(type(e), row, self.sil))
     
-    def fill_title(self, string):
+    def get_title(self, string):
         try:
-            title = string.split('<h1 class="title" id="page-title">')[1]\
+            return string.split('<h1 class="title" id="page-title">')[1]\
                 .split('</h1>')[0]
-            self.dictionary['Name'] = title        
         except Exception as e:
-            logging.debug('{0} in EthnologueParser.fill_title()'\
-                    .format(type(e)))
-            quit()
+            logging.debug('{0} in EthnologueParser.get_title() sil:{1}'\
+                    .format(type(e), self.sil))
 
-    def fill_country(self, string):
+    def get_country(self, string):
         try:
-            country = string.split('<h2>')[1].split('>')[1].split('</a')[0]
-            self.dictionary['Country'] = country
+            return string.split('<h2>')[1].split('>')[1].split('</a')[0]
         except Exception as e:
-            logging.debug('{0} in EthnologueParser.fill_country()'\
-                    .format(type(e)))
-            quit() 
+            logging.debug('{0} in EthnologueParser.get_country(), sil:{1}'\
+                    .format(type(e), self.sil))
     
-    def fill_main_table_rows(self, string):
+    def process_main_table_rows(self, string):
         try:
             main_rows = string.split('<div class="field-label">')[1:-1]\
                 + [string.split('<div class="field-label">')[-1]\
                 .split('<div class="attachment attachment-after">')[0]]
-        except Exception as e:
-            logging.debug('{0} in EthnologueParser.fill_main_table_rows()'\
-                    .format(type(e)))
-            quit()
-            
-        for row in main_rows:
-            key, value = self.parse_row(row)
-            self.dictionary[key] = value
+            res = []
+            for row in main_rows:
+                res.append(self.parse_row(row))
+            return res    
 
+        except Exception as e:
+            logging.debug('{0} in EthnologueParser.process_main_table_rows()'+\
+                          ' sil:{1}'.format(type(e), self.sil))
+            
     def get_attachement_title(self, attachement):
-        
         try:
             if not '<div class="view-header">' in attachement:
                 return None
@@ -93,22 +82,19 @@ class EthnologueParser(OnlineParser):
                         [1].split('</h3>')[0]
                 return attachement_title
         except Exception as e:
-            logging.debug('{0} in EthnologueParser.get_attachement_title()'\
-                          .format(type(e)))
-            quit()
+            logging.debug('{0} in EthnologueParser.get_attachement_title()'+
+                           ' sil:{1}'.format(type(e), self.sil))
 
     def get_attachement(self, string):
         try:
-
             attachement = string.split('<div class="attachment ' +
             'attachment-after">')[1].split('<aside class=' + 
                      '"grid-6 region region-sidebar-second "id="' + 
                                           'region-sidebar-second">')[0]
             return attachement
         except Exception as e:
-            logging.debug('{0} in EthnologueParser.get_attachement()'\
-                          .format(type(e)))
-            quit()
+            logging.debug('{0} in EthnologueParser.get_attachement(), sil:{1}'\
+                          .format(type(e), self.sil))
 
     def get_attachement_blocks_titles(self, attachement): 
         try:
@@ -119,59 +105,61 @@ class EthnologueParser(OnlineParser):
             return attachement_blocks, attachment_titles
         except Exception as e:
             logging.debug(\
-            '{0} in EthnologueParser.get_attachement_blocks_titles()'\
-                          .format(type(e)))
-            quit()
+            '{0} in EthnologueParser.get_attachement_blocks_titles(),sil:{1}'\
+                          .format(type(e), self.sil))
 
-    def fill_attachement(self, string):
+    def get_attachement_dict(self, string):
         attachement = self.get_attachement(string)
         attachement_title = self.get_attachement_title(attachement)
         if attachement_title == None:
-            return
-        self.dictionary[attachement_title] = {}
-        attachement_blocks, attachment_titles = \
+            return 
+        attachement_dict = {}
+        blocks, titles = \
                 self.get_attachement_blocks_titles(attachement)
-        for i, block in enumerate(attachement_blocks):
-            block_title = attachment_titles[i]
-            self.dictionary[attachement_title][block_title] = {}
+        for i, block in enumerate(blocks):
+            block_title = titles[i]
+            attachement_dict[block_title] = {}
             inner_dictionary = self.parse_attachement_block(block)
             for key in inner_dictionary:
-                self.dictionary[attachement_title][block_title][key]\
+                attachement_dict[block_title][key]\
                         = inner_dictionary[key]
+        return attachement_title, attachement_dict             
 
-    def fill_dictionary(self, string):
-        
-        self.fill_title(string)
-        self.fill_country(string)
-        self.fill_main_table_rows(string)
-        self.fill_attachement(string)
+    def parse(self, sil_codes):
+        for sil_code in sil_codes:
+            self.sil = sil_code
+            html = self.get_html(sil_code)
+            dictionary = {}
+            dictionary['Name'] = self.get_title(html)
+            dictionary['Country'] = self.get_country(html)
+            main_items = self.process_main_table_rows(html)
+            if main_items != None:
+                for i in main_items:
+                    key, value = i
+                    dictionary[key] = value
+            attachement_info = self.get_attachement_dict(html)   
+            if attachement_info != None:
+                t, dict_ = attachement_info
+                dictionary[t] = dict_
+            yield dictionary
 
-    def get_html(self):
+    def get_html(self, sil_code):
         try:
-            response = urllib2.urlopen(self.url)
+            url = 'http://www.ethnologue.com/language/{0}'.format(sil_code)
+            response = urllib2.urlopen(url)
             html = response.read()
             return html
         except Exception as e:
             logging.debug('Error {0} while downloading {1}\n'\
-            .format(e, self.url))
-            quit()
-
-    def get_attributes(self):
-
-        html = self.get_html()
-        self.fill_dictionary(html)
-        for key in self.dictionary:
-            if len(key) > 50:
-                logging.debug('Probably missparsed')
-
-        return self.dictionary
+            .format(e, url))
 
 def main():
 
-    sil_code = sys.argv[1]
+    sil_codes = sys.argv[1:]
     logging.basicConfig(level=logging.DEBUG)
-    parser = EthnologueParser(sil_code)
-    print parser.get_attributes()
+    parser = EthnologueParser()
+    for d in parser.parse(sil_codes):
+        print d
 
 if __name__ == "__main__":
     main()
