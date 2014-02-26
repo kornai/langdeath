@@ -1,0 +1,15 @@
+{% extends "ml_base.html" %}
+{% load staticfiles %}
+
+{% block content %}
+    <h2>Resources</h2>
+    {% if resources %}
+        <ul>
+        {% for res in resources %}
+            <li><a href="{{ TODO }}">{{ pub }}</a></li>
+        {% endfor %}
+        </ul>
+    {% else %}
+        <p>No resources available.</p>
+    {% endif %}
+{% endblock content %}

@@ -35,6 +35,9 @@ class ResourcesView(generic.ListView):
     template_name = 'res_list.html'
     context_object_name = 'resources'
 
+    def get_queryset(self):
+        return []
+
 
 class IndexView(generic.TemplateView):
     template_name = 'ml_home.html'
