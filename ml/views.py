@@ -23,6 +23,11 @@ def get_profile(request, username):
     return render(request, 'user.html', context)
 
 
+class PublicationDetailView(generic.DetailView):
+    template_name = 'publ_detail.html'
+    model = Publication
+
+
 class PublicationListView(generic.ListView):
     template_name = 'publ_list.html'
     context_object_name = 'publications'
