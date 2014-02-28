@@ -6,7 +6,7 @@
     {% if publications %}
         <ul>
         {% for pub in publications %}
-            <li><a href="{{ TODO }}">{{ pub }}</a></li>
+            <li><a href="/ml/publ/{{ pub.id }}">{{ pub }}</a></li>
         {% endfor %}
         </ul>
     {% else %}
