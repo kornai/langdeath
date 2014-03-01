@@ -2,14 +2,12 @@
 {% load staticfiles %}
 
 {% block content %}
-    <h2>List of languages</h2>
-    {% if languages %}
+    <h2>Home</h2>
+    {% if news %}
         <ul>
-        {% for lang in languages %}
-            <li><a href="/lang/{{ lang.sil }}">{{ lang.name }}</a></li>
+        {% for art in news %}
+            <li><a href="/news/{{ news.id }}">{{ news.title }}</a></li>
         {% endfor %}
         </ul>
-    {% else %}
-        <p>No langs are available.</p>
     {% endif %}
 {% endblock content %}
