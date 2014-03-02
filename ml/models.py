@@ -9,6 +9,9 @@ class Resource(models.Model):
     description = models.TextField(max_length=2000)
     url = models.TextField(max_length=200, blank=True)
 
+    def __unicode__(self):
+        return self.name
+
 
 class Publication(models.Model):
     title = models.TextField(max_length=200)
