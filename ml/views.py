@@ -1,7 +1,7 @@
 from django.shortcuts import render
 from django.views import generic
 
-from ml.models import UserProfile, Publication
+from ml.models import UserProfile, Publication, Resource
 
 
 class GroupView(generic.ListView):
@@ -41,7 +41,7 @@ class ResourcesView(generic.ListView):
     context_object_name = 'resources'
 
     def get_queryset(self):
-        return []
+        return Resource.objects.order_by('name')
 
 
 class IndexView(generic.TemplateView):
