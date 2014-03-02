@@ -2,7 +2,7 @@ from django.db import models
 
 from django.contrib.auth.models import User
 from django.db.models.signals import post_save
- 
+
 
 class Publication(models.Model):
     title = models.TextField(max_length=200)
@@ -19,35 +19,39 @@ class Publication(models.Model):
             if not author.first_name or not author.last_name:
                 s.append(author.username)
             else:
-                s.append(u'{0}. {1}'.format(author.first_name[0], author.last_name))
+                s.append(u'{0}. {1}'.format(author.first_name[0],
+                                            author.last_name))
         return ', '.join(s)
 
 
-class UserProfile(models.Model):  
+class UserProfile(models.Model):
     user = models.OneToOneField(User)
-    group_member = models.BooleanField(default=False)
-    leader = models.BooleanField(default=False)
+    membership_choices = (('M', 'Member'),
+                          ('X', 'Ex-member'),
+                          ('N', 'Non-member'),
+                          ('L', 'Leader'))
+    membership = models.CharField(max_length=1,
+                                  choices=membership_choices,
+                                  default='N')
     image = models.ImageField(upload_to='profile', blank=True)
 
-    def __unicode__(self):  
+    def __unicode__(self):
         name = ''
         if not self.user.last_name or not self.user.first_name:
             name = self.user.username
         else:
             name = self.user.first_name + ' ' + self.user.last_name
         return name
- 
+
 
 class PublicationAuthorship(models.Model):
     author = models.ForeignKey(UserProfile)
     publication = models.ForeignKey(Publication)
 
 
-def create_user_profile(sender, instance, created, **kwargs):  
-    if created:  
-       profile, created = UserProfile.objects.get_or_create(user=instance)  
- 
-post_save.connect(create_user_profile, sender=User)
- 
-User.profile = property(lambda u: u.get_profile() )
+def create_user_profile(sender, instance, created, **kwargs):
+    if created:
+        profile, created = UserProfile.objects.get_or_create(user=instance)
 
+post_save.connect(create_user_profile, sender=User)
+User.profile = property(lambda u: u.get_profile())
