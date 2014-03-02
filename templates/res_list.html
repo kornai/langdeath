@@ -6,7 +6,7 @@
     {% if resources %}
         <ul>
         {% for res in resources %}
-            <li><a href="{{ TODO }}">{{ pub }}</a></li>
+            <li><a href="/ml/res/{{ res.id }}">{{ res }}</a></li>
         {% endfor %}
         </ul>
     {% else %}
