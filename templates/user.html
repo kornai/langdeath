@@ -20,4 +20,13 @@
     {% endfor %}
 </ul>
 {% endif %}
+
+{% if user.resourceauthorship_set.all %}
+<h3>Resources</h3>
+<ul>
+    {% for res in user.resourceauthorship_set.all %}
+    <li><a href="/ml/res/{{ res.resource.id }}">{{ res.resource }}</a></li>
+    {% endfor %}
+</ul>
+{% endif %}
 {% endblock content %}
