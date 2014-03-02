@@ -36,6 +36,11 @@ class PublicationListView(generic.ListView):
         return Publication.objects.order_by('-year')
 
 
+class ResourceDetailView(generic.DetailView):
+    template_name = 'res_detail.html'
+    model = Resource
+
+
 class ResourcesView(generic.ListView):
     template_name = 'res_list.html'
     context_object_name = 'resources'
