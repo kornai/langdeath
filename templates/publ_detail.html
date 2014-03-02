@@ -4,7 +4,7 @@
 {% block content %}
 <h2>{{ object.title }}</h2>
 
-{% for authorship in object.authorship_set.all %}
+{% for authorship in object.publicationauthorship_set.all %}
 {% if forloop.last %}
 <a href="/ml/user/{{ authorship.author.user }}">{{ authorship.author.user.first_name }} {{ authorship.author.user.last_name }} </a>
 {% else %}

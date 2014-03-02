@@ -14,7 +14,7 @@ class Publication(models.Model):
 
     def short_authors_list(self):
         s = list()
-        for authorship in self.authorship_set.all():
+        for authorship in self.publicationauthorship_set.all():
             author = authorship.author.user
             if not author.first_name or not author.last_name:
                 s.append(author.username)
@@ -38,7 +38,7 @@ class UserProfile(models.Model):
         return name
  
 
-class Authorship(models.Model):
+class PublicationAuthorship(models.Model):
     author = models.ForeignKey(UserProfile)
     publication = models.ForeignKey(Publication)
 

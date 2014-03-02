@@ -3,16 +3,16 @@ from django.contrib import admin
 from ml import models
 
 
-class AuthorshipInline(admin.StackedInline):
-    model = models.Authorship
+class PublicationAuthorshipInline(admin.StackedInline):
+    model = models.PublicationAuthorship
     extra = 3
 
 class PublicationAdmin(admin.ModelAdmin):
     fieldsets = [
         (None,               {'fields': ['title', 'year']}),
     ]
-    inlines = [AuthorshipInline]
+    inlines = [PublicationAuthorshipInline]
 
 admin.site.register(models.Publication, PublicationAdmin)
 admin.site.register(models.UserProfile)
-admin.site.register(models.Authorship)
+admin.site.register(models.PublicationAuthorship)

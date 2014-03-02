@@ -12,10 +12,10 @@
 </div>
 {% endif %}
 
-{% if user.authorship_set.all %}
+{% if user.publicationauthorship_set.all %}
 <h3>Publications</h3>
 <ul>
-    {% for p in user.authorship_set.all %}
+    {% for p in user.publicationauthorship_set.all %}
     <li><a href="/ml/publ/{{p.publication.id}}">{{ p.publication }}</a></li>
     {% endfor %}
 </ul>
