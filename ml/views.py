@@ -9,12 +9,12 @@ class GroupView(generic.ListView):
     context_object_name = 'users'
 
     def get_queryset(self):
-        try:
-            users = [UserProfile.objects.get(leader=True)]
-        except UserProfile.DoesNotExist:
-            users = []
-        users.extend(list(UserProfile.objects.filter(
-            group_member=True, leader=False)))
+        users = dict()
+        users['leader'] = UserProfile.objects.get(membership='L')
+        users['members'] = list(UserProfile.objects.filter(
+            membership='M'))
+        users['exmembers'] = list(UserProfile.objects.filter(
+            membership='X'))
         return users
 
 
