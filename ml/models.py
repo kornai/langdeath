@@ -4,6 +4,12 @@ from django.contrib.auth.models import User
 from django.db.models.signals import post_save
 
 
+class Resource(models.Model):
+    name = models.TextField(max_length=200)
+    description = models.TextField(max_length=2000)
+    url = models.TextField(max_length=200, blank=True)
+
+
 class Publication(models.Model):
     title = models.TextField(max_length=200)
     year = models.IntegerField()
@@ -47,6 +53,11 @@ class UserProfile(models.Model):
 class PublicationAuthorship(models.Model):
     author = models.ForeignKey(UserProfile)
     publication = models.ForeignKey(Publication)
+
+
+class ResourceAuthorship(models.Model):
+    author = models.ForeignKey(UserProfile)
+    resource = models.ForeignKey(Resource)
 
 
 def create_user_profile(sender, instance, created, **kwargs):
