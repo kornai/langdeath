@@ -9,7 +9,7 @@ from dld.forms import LanguageSearchForm
 
 
 class LanguageListView(generic.ListView):
-    template_name = 'index.html'
+    template_name = 'dld_index.html'
     context_object_name = 'languages'
     
     def get_queryset(self):
@@ -17,7 +17,7 @@ class LanguageListView(generic.ListView):
 
 
 class NewsView(generic.ListView):
-    template_name = 'news.html'
+    template_name = 'dld_news.html'
     context_object_name = 'latest_updated_langs'
     
     def get_queryset(self):
@@ -25,17 +25,13 @@ class NewsView(generic.ListView):
 
 
 class LanguageDetailsView(generic.DetailView):
-    template_name = 'detail.html'
+    template_name = 'lang_detail.html'
     model = Language
     
 
-class AboutUsView(generic.TemplateView):
-    template_name = 'about.html'
-
-
 def index(request):
     context = {'languages': Language.objects.order_by('-last_updated')}
-    return render(request, 'index.html', context)
+    return render(request, 'dld_index.html', context)
 
 def search(request):
     if request.method == 'POST':
@@ -43,8 +39,8 @@ def search(request):
         if form.is_valid():
             langs = form.get_languages()
             context = {'languages': langs}
-            return render(request, 'results.html', context)
+            return render(request, 'lang_results.html', context)
     else:
         form = LanguageSearchForm()
-    return render(request, 'search.html', {'form': form})
+    return render(request, 'lang_search.html', {'form': form})
 

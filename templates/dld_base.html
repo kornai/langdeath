@@ -19,8 +19,8 @@ Released   : 20131014
 <meta name="keywords" content="" />
 <meta name="description" content="" />
 <link href="http://fonts.googleapis.com/css?family=Source+Sans+Pro:200,300,400,600,700,900" rel="stylesheet" />
-<link href="default.css" rel="stylesheet" type="text/css" media="all" />
-<link href="fonts.css" rel="stylesheet" type="text/css" media="all" />
+<link href="{% static 'dld/default.css' %}" rel="stylesheet" type="text/css" media="all" />
+<link href="{% static 'fonts.css' %}" rel="stylesheet" type="text/css" media="all" />
 <!--[if IE 6]>
 <link href="default_ie6.css" rel="stylesheet" type="text/css" />
 <![endif]-->
@@ -35,10 +35,10 @@ Released   : 20131014
 		</div>
 		<div id="menu" class="container">
 			<ul>
-				<li class="current_page_item"><a href="news" accesskey="1" title="">News</a></li>
-				<li><a href="list" accesskey="1" title="">Languages</a></li>
-				<li><a href="search" accesskey="1" title="">Search</a></li>
-				<li><a href="about" accesskey="1" title="">About us</a></li>
+				<li class="current_page_item"><a href="/lang" accesskey="1" title="">News</a></li>
+				<li><a href="/lang/list" accesskey="1" title="">Languages</a></li>
+				<li><a href="/lang/search" accesskey="1" title="">Search</a></li>
+				<li><a href="/ml" accesskey="1" title="">About us</a></li>
 			</ul>
 		</div>
 	</div>

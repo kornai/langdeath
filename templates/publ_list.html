@@ -1,0 +1,15 @@
+{% extends "ml_base.html" %}
+{% load staticfiles %}
+
+{% block content %}
+    <h2>Publications</h2>
+    {% if publications %}
+        <ul>
+        {% for pub in publications %}
+            <li><a href="/ml/publ/{{ pub.id }}">{{ pub }}</a></li>
+        {% endfor %}
+        </ul>
+    {% else %}
+        <p>No publications available.</p>
+    {% endif %}
+{% endblock content %}
