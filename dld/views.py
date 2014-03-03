@@ -29,10 +29,6 @@ class LanguageDetailsView(generic.DetailView):
     model = Language
     
 
-class AboutUsView(generic.TemplateView):
-    template_name = 'about.html'
-
-
 def index(request):
     context = {'languages': Language.objects.order_by('-last_updated')}
     return render(request, 'index.html', context)
