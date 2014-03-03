@@ -5,7 +5,7 @@ html, body {
 body {
 	margin: 0px;
 	padding: 0px;
-	background: #333 url(images/overlay.png) repeat;
+	background: #333 url(../images/overlay.png) repeat;
 	font-family: 'Source Sans Pro', sans-serif;
 	font-size: 12pt;
 	font-weight: 400;
@@ -349,7 +349,7 @@ ul.style3 .first {
 		overflow: hidden;
 		padding: 5em 0em;
 		background: rgba(0,0,0,.02);
-		background-image: url(images/overlay.png);
+		background-image: url(../images/overlay.png);
 		background-repeat: repeat;
 		border-top: 1px solid rgba(0,0,0,.05);
 	}
