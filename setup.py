@@ -18,5 +18,6 @@ setup(
     install_requires=[
         'django==1.6',
         'django-jsonfield',
+        'Pillow==2.3',
     ]
 )
