@@ -1,6 +1,6 @@
-from lang_db import LanguageDB
-from langdeath_exceptions import UnknownLanguageException
-from parsers.iso_639_3_parser import ParseISO639_3
+from ld.lang_db import LanguageDB
+from ld.langdeath_exceptions import UnknownLanguageException
+from ld.parsers.iso_639_3_parser import ParseISO639_3
 
 
 class ParserAggregator(object):
