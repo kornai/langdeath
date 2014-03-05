@@ -19,5 +19,6 @@ setup(
         'django==1.6',
         'django-jsonfield',
         'Pillow==2.3',
+        'South==0.8',
     ]
 )
