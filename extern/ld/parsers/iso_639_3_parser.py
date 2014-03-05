@@ -4,7 +4,7 @@ import zipfile
 import os
 
 from base_parsers import OnlineParser
-from langdeath.lang_db import LanguageUpdate
+from ld.lang_db import LanguageUpdate
 
 class ParseISO639_3(OnlineParser):
     """
