@@ -1,0 +1,13 @@
+{% extends "ml_base.html" %}
+{% load staticfiles %}
+
+{% block content %}
+    <h2>Home</h2>
+    {% if news %}
+        <ul>
+        {% for art in news %}
+            <li><a href="/news/{{ news.id }}">{{ news.title }}</a></li>
+        {% endfor %}
+        </ul>
+    {% endif %}
+{% endblock content %}

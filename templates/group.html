@@ -1,0 +1,29 @@
+{% extends "ml_base.html" %}
+{% load staticfiles %}
+
+{% block content %}
+    {% if users %}
+        {% if users.leader %}
+            <h2>Leader</h2>
+                <a href="user/{{ users.leader.user.username }}">{{ users.leader.user.first_name }} {{ users.leader.user.last_name }}</a>
+        {% endif %}
+        {% if users.members %}
+            <h2>Members</h2>
+                <ul>
+                {% for user in users.members %}
+                <li><a href="user/{{ user.user.username }}">{{ user.user.first_name }} {{ user.user.last_name }}</a></li>
+                {% endfor %}
+                </ul>
+        {% endif %}
+        {% if users.exmembers %}
+            <h2>Ex-members</h2>
+                <ul>
+                {% for user in users.exmembers %}
+                <li><a href="user/{{ user.user.username }}">{{ user.user.first_name }} {{ user.user.last_name }}</a></li>
+                {% endfor %}
+                </ul>
+        {% endif %}
+    {% else %}
+        <p>No users available.</p>
+    {% endif %}
+{% endblock content %}

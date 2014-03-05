@@ -1,0 +1,63 @@
+{% load staticfiles %}
+<link rel="stylesheet" type="text/css" href="{% static 'ml/default.css' %}" />
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<!--
+Design by Free CSS Templates
+http://www.freecsstemplates.org
+Released for free under a Creative Commons Attribution 2.5 License
+
+Name       : Outstretched 
+Description: A two-column, fixed-width design with dark color scheme.
+Version    : 1.0
+Released   : 20131014
+
+-->
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title></title>
+<meta name="keywords" content="" />
+<meta name="description" content="" />
+<link href="http://fonts.googleapis.com/css?family=Source+Sans+Pro:200,300,400,600,700,900" rel="stylesheet" />
+<link href="{% static 'ml/default.css' %}" rel="stylesheet" type="text/css" media="all" />
+<link href="{% static 'fonts.css' %}" rel="stylesheet" type="text/css" media="all" />
+<!--[if IE 6]>
+<link href="default_ie6.css" rel="stylesheet" type="text/css" />
+<![endif]-->
+</head>
+<body>
+<div id="wrapper">
+	<div id="header-wrapper">
+		<div id="header" class="container">
+			<div id="logo">
+                <h1><a href="home">Mathematical Linguistics Group</a></h1>
+			</div>
+		</div>
+		<div id="menu" class="container">
+			<ul>
+				<li class="current_page_item"><a href="/ml/" accesskey="1" title="">News</a></li>
+				<li><a href="/ml/publ" accesskey="1" title="">Publications</a></li>
+				<li><a href="/ml/res" accesskey="1" title="">Resources</a></li>
+				<li><a href="/ml/about" accesskey="1" title="">About us</a></li>
+				<li><a href="/lang" accesskey="1" title="">Languages</a></li>
+			</ul>
+		</div>
+	</div>
+	<div id="page" class="container">
+		<div id="content">
+            {% block content %}
+            {% endblock content %}
+		</div>
+	</div>
+	<div id="portfolio-wrapper">
+		<div id="portfolio" class="container">
+			<div class="title">
+                <span class="byline"><a href="http://www.nytud.hu">MTA NYTI</a></span> </div>
+		</div>
+	</div>
+</div>
+<div id="footer">
+	<p>Copyright (c) 2014 example.com. All rights reserved. Design by <a href="http://www.freecsstemplates.org/" rel="nofollow">FreeCSSTemplates.org</a>. Photos by <a href="http://fotogrph.com/">Fotogrph</a>.</p>
+</div>
+</body>
+</html>
