@@ -4,19 +4,7 @@ import zipfile
 import os
 
 from base_parsers import OnlineParser
-
-
-class LanguageUpdate():
-    # this class definition should be somewhere else
-    def __init__(self):
-        self.macrolangs = set()
-        self.other_iso_codes = {}
-        self.names = set()
-        # TODO book which name is from which source
-        # iso-639-3 itself is inconsistent
-        self.inverted_names = set()
-        self.other_iso_codes = defaultdict(set)
-
+from langdeath.lang_db import LanguageUpdate
 
 class ParseISO639_3(OnlineParser):
     """
