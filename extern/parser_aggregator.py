@@ -1,5 +1,7 @@
 from lang_db import LanguageDB
 from langdeath_exceptions import UnknownLanguageException
+from parsers.iso_639_3_parser import ParseISO639_3
+
 
 class ParserAggregator(object):
     """This class will go through every parser, calling them, merging
@@ -7,9 +9,13 @@ class ParserAggregator(object):
     two langauges (or any other data) that are possibly the same
     """
     def __init__(self):
-        self.parsers = []
-        self.lang_db = LanguageDB
+        self.parsers = [ParseISO639_3()]
+        self.lang_db = LanguageDB()
         self.trusted_parsers = set([])
+
+    def run(self):
+        for parser in self.parsers:
+            self.call_parser(parser)
 
     def call_parser(self, parser):
         for lang in parser.parse():
@@ -23,10 +29,16 @@ class ParserAggregator(object):
             elif len(candidates) == 0:
                 if parser.name in self.trusted_parsers:
                     self.lang_db.add_new_language(lang)
-                    pass
                 else:
                     msg = "{0} parser produced a language with data " + \
-                            "{1} that seems to be a new language, but" + \
-                            "this parser is not a trusted parser"
+                        "{1} that seems to be a new language, but" + \
+                        "this parser is not a trusted parser"
                     raise UnknownLanguageException(msg)
 
+
+def main():
+    pa = ParserAggregator()
+    pa.run()
+
+if __name__ == "__main__":
+    main()
