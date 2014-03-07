@@ -23,6 +23,11 @@ class ParseISO639_3(OnlineParser):
         self.parse_inverted_name()
         self.parse_retirements()
         os.remove(iso_zip_filen)
+        for lang_upd in self.lang_dict.itervalues():
+            if lang_upd.iso_scope == 'S': 
+                # special situations
+                continue
+            yield lang_upd
 
     def parse_main_table(self):
         """
@@ -47,9 +52,7 @@ class ParseISO639_3(OnlineParser):
                 if sil_code == 'Id': 
                     # header 
                     continue
-                if scope == 'S': 
-                    # special situations
-                    continue
+                self.lang_dict[sil_code].code = sil_code
                 self.lang_dict[sil_code].other_iso_codes['639-1'].add(part1)
                 self.lang_dict[sil_code].iso_scope = scope
                 self.lang_dict[sil_code].iso_type = language_type
@@ -113,5 +116,11 @@ class ParseISO639_3(OnlineParser):
                 if change_to:
                     if old_code == 'Id':
                         # header
+                        continue
+                    elif change_to == old_code:
+                        # data error with language yuu
+                        continue
+                    elif change_to not in self.lang_dict:
+                        # data error, lcq --> ppr insted of ppr --> lcq
                         continue
                     self.lang_dict[change_to].other_iso_codes[ret_reason].add(old_code)
