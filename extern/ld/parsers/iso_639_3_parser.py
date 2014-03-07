@@ -53,9 +53,11 @@ class ParseISO639_3(OnlineParser):
                     # header 
                     continue
                 d = self.lang_dict[sil_code]
-                d.name = ref_name
+                d.english_name = ref_name
                 d.sil = sil_code
-                d.other_codes = {'iso-639-1': [part1]}
+                if part1:
+                    d.other_codes = {'iso-639-1': [part1]}
+
                 # TODO do we care about the followings?
                 d.iso_scope = scope
                 d.iso_type = language_type
