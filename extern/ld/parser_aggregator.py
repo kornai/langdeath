@@ -1,3 +1,5 @@
+import logging
+
 from ld.lang_db import LanguageDB
 from ld.langdeath_exceptions import UnknownLanguageException
 from ld.parsers.iso_639_3_parser import ParseISO639_3
@@ -18,7 +20,13 @@ class ParserAggregator(object):
             self.call_parser(parser)
 
     def call_parser(self, parser):
+        c = 0
         for lang in parser.parse():
+            c += 1
+            if c % 100 == 0:
+                logging.info("Added {0} langs from parser {1}".format(
+                    c, type(parser)))
+
             candidates = self.lang_db.get_closest(lang)
             if len(candidates) > 1:
                 best = self.lang_db.choose_candidate(candidates)
@@ -37,6 +45,7 @@ class ParserAggregator(object):
 
 
 def main():
+    logging.basicConfig(level=logging.INFO)
     pa = ParserAggregator()
     pa.run()
 
