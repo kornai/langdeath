@@ -11,7 +11,7 @@ class ParserAggregator(object):
     def __init__(self):
         self.parsers = [ParseISO639_3()]
         self.lang_db = LanguageDB()
-        self.trusted_parsers = set([])
+        self.trusted_parsers = set([ParseISO639_3])
 
     def run(self):
         for parser in self.parsers:
@@ -27,7 +27,7 @@ class ParserAggregator(object):
                 best = candidates[0]
                 self.lang_db.update_lang_data(best, lang)
             elif len(candidates) == 0:
-                if parser.name in self.trusted_parsers:
+                if type(parser) in self.trusted_parsers:
                     self.lang_db.add_new_language(lang)
                 else:
                     msg = "{0} parser produced a language with data " + \
