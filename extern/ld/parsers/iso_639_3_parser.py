@@ -4,19 +4,7 @@ import zipfile
 import os
 
 from base_parsers import OnlineParser
-
-
-class LanguageUpdate():
-    # this class definition should be somewhere else
-    def __init__(self):
-        self.macrolangs = set()
-        self.other_iso_codes = {}
-        self.names = set()
-        # TODO book which name is from which source
-        # iso-639-3 itself is inconsistent
-        self.inverted_names = set()
-        self.other_iso_codes = defaultdict(set)
-
+from ld.lang_db import LanguageUpdate
 
 class ParseISO639_3(OnlineParser):
     """
@@ -64,11 +52,15 @@ class ParseISO639_3(OnlineParser):
                 if sil_code == 'Id': 
                     # header 
                     continue
-                self.lang_dict[sil_code].code = sil_code
-                self.lang_dict[sil_code].other_iso_codes['639-1'].add(part1)
-                self.lang_dict[sil_code].iso_scope = scope
-                self.lang_dict[sil_code].iso_type = language_type
-                self.lang_dict[sil_code].names.add(ref_name)
+                d = self.lang_dict[sil_code]
+                d.english_name = ref_name
+                d.sil = sil_code
+                if part1:
+                    d.other_codes = {'iso-639-1': [part1]}
+
+                # TODO do we care about the followings?
+                d.iso_scope = scope
+                d.iso_type = language_type
 
     def parse_macrolangs(self):
         """
@@ -88,7 +80,7 @@ class ParseISO639_3(OnlineParser):
                 if macro == 'M_Id': 
                     # header 
                     continue
-                self.lang_dict[indiv].macrolangs.add(macro)
+                self.lang_dict[indiv].macrolangs = set([macro])
                 #self.lang_dict[indiv].iso_stat = stat
 
     def parse_inverted_name(self):
@@ -105,7 +97,7 @@ class ParseISO639_3(OnlineParser):
                 if sil_code == 'Id': 
                     # header 
                     continue
-                self.lang_dict[sil_code].inverted_names.add(inverted_name)
+                self.lang_dict[sil_code].inverted_names = set([inverted_name])
 
     def parse_retirements(self):
         """
@@ -135,4 +127,5 @@ class ParseISO639_3(OnlineParser):
                     elif change_to not in self.lang_dict:
                         # data error, lcq --> ppr insted of ppr --> lcq
                         continue
-                    self.lang_dict[change_to].other_iso_codes[ret_reason].add(old_code)
+                    # TODO makrai fix this please, I comment it out to run
+                    # self.lang_dict[change_to].other_iso_codes[ret_reason].add(old_code)
