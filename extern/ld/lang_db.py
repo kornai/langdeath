@@ -1,3 +1,5 @@
+import logging
+
 from dld.models import Language
 
 
@@ -7,7 +9,7 @@ class LanguageUpdate(object):
 
 class LanguageDB(object):
     def __init__(self):
-        pass
+        self.languages = []
 
     def add_new_language(self, lang):
         """Inserts new language to db"""
@@ -17,6 +19,15 @@ class LanguageDB(object):
 
         # TODO add language to db
         # new Language instance from LanguageUpdate instance
+        l = Language()
+        for key in l.__dict__.iteritems():
+            try:
+                l.__dict__[key] = l.__dict__[key]
+            except Exception as e:
+                logging.exception(e)
+
+        self.languages.append(l)
+        l.save()
 
     def update_lang_data(self, tgt, update):
         """Updates data for @tgt language"""
