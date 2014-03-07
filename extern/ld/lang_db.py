@@ -19,10 +19,13 @@ class LanguageDB(object):
 
         # TODO add language to db
         # new Language instance from LanguageUpdate instance
+        logging.debug("adding lang {0}".format(lang.sil))
         l = Language()
-        for key in l.__dict__.iteritems():
+        for key in l.__dict__.iterkeys():
             try:
-                l.__dict__[key] = l.__dict__[key]
+                l.__dict__[key] = lang.__dict__[key]
+            except KeyError:
+                pass
             except Exception as e:
                 logging.exception(e)
 
