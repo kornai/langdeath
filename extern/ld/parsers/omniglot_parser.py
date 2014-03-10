@@ -5,6 +5,10 @@ from base_parsers import OnlineParser
 from iso_639_3_parser import LanguageUpdate
 
 def name_to_code(ref_name):
+    """
+    returns most probable ISO code of the language called ref_name, based on
+    other resources
+    """
     # TODO import this function from somewhere
     return ref_name
 
