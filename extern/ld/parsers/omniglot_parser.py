@@ -42,6 +42,10 @@ class OmniglotParser(OnlineParser):
         self.url = 'http://www.omniglot.com/writing/languages.htm'
         
     def parse(self):
+        """
+        yields LanguageUpdates of languages listed by Omniglot with in_omniglot
+        atrribute set to True
+        """
         html_parser = OmniglotHTMLParser()
         html_filen, headers = urllib.urlretrieve(self.url)
         html_parser.feed(open(html_filen).read())
