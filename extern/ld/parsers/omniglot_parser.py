@@ -4,14 +4,6 @@ from HTMLParser import HTMLParser
 from base_parsers import OnlineParser
 from iso_639_3_parser import LanguageUpdate
 
-def name_to_code(ref_name):
-    """
-    returns most probable ISO code of the language called ref_name, based on
-    other resources
-    """
-    # TODO import this function from somewhere
-    return ref_name
-
 
 class OmniglotHTMLParser(HTMLParser):
     def __init__(self):
@@ -25,19 +17,32 @@ class OmniglotHTMLParser(HTMLParser):
             self.in_list = True
         elif self.in_list and tag == 'a':
             self.in_name = True
+            self.lang_ud = LanguageUpdate()
+            self.lang_ud.name = ''
+            self.lang_ud.in_omniglot = True
+        elif tag == 'p':
+            self.in_name = False
 
     def handle_endtag(self, tag):
         if tag == 'ol':
             self.in_list = False
         elif tag == 'a':
             self.in_name = False
+            if self.in_list and self.lang_ud.name not in ['', 'top']:
+                self.lang_updates.append(self.lang_ud)
+
+    def handle_text(self, text):
+        if self.in_name:
+            self.lang_ud.name += self.unescape(text)
 
     def handle_data(self, data):
-        if self.in_name:
-            lang_ud = LanguageUpdate()
-            lang_ud.code = name_to_code(data)
-            lang_ud.in_omniglot = True
-            self.lang_updates.append(lang_ud)
+        self.handle_text(data)
+
+    def handle_entityref(self, name):
+        self.handle_text('&'+name+';')
+
+    def handle_charref(self, name):
+        self.handle_entityref('#'+name)
 
 
 class OmniglotParser(OnlineParser):
