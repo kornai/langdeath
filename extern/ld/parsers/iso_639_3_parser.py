@@ -53,7 +53,7 @@ class ParseISO639_3(OnlineParser):
                     # header 
                     continue
                 d = self.lang_dict[sil_code]
-                d.english_name = ref_name
+                d.name = ref_name
                 d.sil = sil_code
                 if part1:
                     d.other_codes = {'iso-639-1': [part1]}
