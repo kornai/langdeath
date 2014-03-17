@@ -12,7 +12,7 @@ class Language(models.Model):
     iso_type = models.CharField(max_length=100, blank=True)
 
     def __unicode__(self):
-        return u"{0} ({1})".format(self.english_name, self.sil)
+        return u"{0} ({1})".format(self.name, self.sil)
 
 
 class Code(models.Model):
