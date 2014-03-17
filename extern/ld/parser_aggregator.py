@@ -41,7 +41,8 @@ class ParserAggregator(object):
                     msg = "{0} parser produced a language with data " + \
                         "{1} that seems to be a new language, but" + \
                         "this parser is not a trusted parser"
-                    raise UnknownLanguageException(msg)
+                    raise UnknownLanguageException(msg.format(
+                        type(parser), lang.__dict__))
 
 
 def main():
