@@ -36,7 +36,7 @@ class Country(models.Model):
     area = models.FloatField(default=0, blank=True)
     population = models.IntegerField()
     continent = models.CharField(max_length=100)
-    tld = models.CharField(max_length=100)
+    tld = models.CharField(max_length=10)
     native_name = models.CharField(max_length=100, blank=True)
 
 
