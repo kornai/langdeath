@@ -3,6 +3,7 @@ import logging
 from ld.lang_db import LanguageDB
 from ld.langdeath_exceptions import UnknownLanguageException
 from ld.parsers.iso_639_3_parser import ParseISO639_3
+from ld.parsers.omniglot_parser import OmniglotParser
 
 
 class ParserAggregator(object):
@@ -11,7 +12,7 @@ class ParserAggregator(object):
     two langauges (or any other data) that are possibly the same
     """
     def __init__(self):
-        self.parsers = [ParseISO639_3()]
+        self.parsers = [ParseISO639_3(), OmniglotParser()]
         self.lang_db = LanguageDB()
         self.trusted_parsers = set([ParseISO639_3])
 
