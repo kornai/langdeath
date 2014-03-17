@@ -3,7 +3,7 @@ import urllib2
 import re
 
 from base_parsers import OnlineParser
-from ld.language_exceptions import LangdeathException 
+from ld.langdeath_exceptions import LangdeathException 
 
 
 class EthnologueParser(OnlineParser):
