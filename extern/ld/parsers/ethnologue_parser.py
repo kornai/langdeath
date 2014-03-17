@@ -28,7 +28,7 @@ class EthnologueParser(OnlineParser):
         except Exception as e:
             raise LangdeathException(
             '{0} in EthnologueParser.parse_attachement_block()' +
-                          ' sil:{1}'.format(type(e), self.sil))
+                ' sil:{1}'.format(type(e), self.sil))
 
     def parse_row(self, row):
         try:
@@ -45,7 +45,7 @@ class EthnologueParser(OnlineParser):
         except Exception as e:
             raise LangdeathException(
                 '{0} in EthnologueParser.parse_row(), at row\n{1} ' +
-                          'sil:{2}'.format(type(e), row, self.sil))
+                    'sil:{2}'.format(type(e), row, self.sil))
 
     def get_title(self, string):
         try:
@@ -72,11 +72,11 @@ class EthnologueParser(OnlineParser):
             res = []
             for row in main_rows:
                 res.append(self.parse_row(row))
-            return res 
+            return res
         except Exception as e:
             raise LangdeathException(
             '{0} in EthnologueParser.process_main_table_rows()' +
-                          ' sil:{1}'.format(type(e), self.sil))
+                ' sil:{1}'.format(type(e), self.sil))
 
     def get_attachement_title(self, attachement):
         try:
@@ -89,7 +89,7 @@ class EthnologueParser(OnlineParser):
         except Exception as e:
             raise LangdeathException(
             '{0} in EthnologueParser.get_attachement_title()' +
-                           ' sil:{1}'.format(type(e), self.sil))
+                ' sil:{1}'.format(type(e), self.sil))
 
     def get_attachement(self, string):
         try:
