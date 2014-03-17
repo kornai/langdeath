@@ -8,10 +8,18 @@ class Language(models.Model):
     native_name = models.CharField(max_length=100)
     sil = models.CharField(max_length=10, primary_key=True)
     last_updated = models.DateTimeField('last updated', default=timezone.now())
+    iso_scope = models.CharField(max_length=20, blank=True)
+    iso_type = models.CharField(max_length=100, blank=True)
     in_omniglot = models.BooleanField(default=False)
 
     def __unicode__(self):
-        return u"{0} ({1})".format(self.english_name, self.sil)
+        return u"{0} ({1})".format(self.name, self.sil)
+
+
+class Code(models.Model):
+    language = models.ForeignKey("Language")
+    code_name = models.CharField(max_length=100)
+    code = models.CharField(max_length=100)
 
 
 class AlternativeName(models.Model):

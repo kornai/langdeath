@@ -1,6 +1,6 @@
 import logging
 
-from dld.models import Language
+from dld.models import Language, Code
 
 
 class LanguageUpdate(object):
@@ -10,6 +10,22 @@ class LanguageUpdate(object):
 class LanguageDB(object):
     def __init__(self):
         self.languages = []
+        self.spec_fields = set(["other_codes"])
+
+    def add_attr(self, name, data, lang):
+        if name in self.spec_fields:
+            self.add_spec_attr(name, data, lang)
+        else:
+            lang.__dict__[name] = data
+
+    def add_spec_attr(self, name, data, lang):
+        if name == "other_codes":
+            for src, code in data.iteritems():
+                c = Code()
+                c.code_name = src
+                c.code = code
+                c.language_id = lang
+                c.save()
 
     def add_new_language(self, lang):
         """Inserts new language to db"""
@@ -21,11 +37,11 @@ class LanguageDB(object):
         # new Language instance from LanguageUpdate instance
         logging.debug("adding lang {0}".format(lang.sil))
         l = Language()
-        for key in l.__dict__.iterkeys():
+        for key in lang.__dict__.iterkeys():
+            if key.startswith("_"):
+                continue
             try:
-                l.__dict__[key] = lang.__dict__[key]
-            except KeyError:
-                pass
+                self.add_attr(key, lang.__dict__[key], l)
             except Exception as e:
                 logging.exception(e)
 
