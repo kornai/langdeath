@@ -16,11 +16,7 @@ class LanguageDB(object):
         if name in self.spec_fields:
             self.add_spec_attr(name, data, lang)
         else:
-            for key in data.__dict__:
-                if key.startswith("_"):
-                    continue
-
-                lang.__dict__[key] = data.__dict__[key]
+            lang.__dict__[name] = data
 
     def add_spec_attr(self, name, data, lang):
         if name == "other_codes":
@@ -28,7 +24,7 @@ class LanguageDB(object):
                 c = Code()
                 c.code_name = src
                 c.code = code
-                c.language = lang
+                c.language_id = lang
                 c.save()
 
     def add_new_language(self, lang):
@@ -42,8 +38,10 @@ class LanguageDB(object):
         logging.debug("adding lang {0}".format(lang.sil))
         l = Language()
         for key in lang.__dict__.iterkeys():
+            if key.startswith("_"):
+                continue
             try:
-                self.add_attr(key, lang[key], l)
+                self.add_attr(key, lang.__dict__[key], l)
             except Exception as e:
                 logging.exception(e)
 
