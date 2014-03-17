@@ -49,7 +49,7 @@ class OmniglotParser(OnlineParser):
 
     def __init__(self):
         self.url = 'http://www.omniglot.com/writing/languages.htm'
-        
+
     def parse(self):
         """
         yields LanguageUpdates of languages listed by Omniglot with in_omniglot
