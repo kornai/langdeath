@@ -22,20 +22,27 @@ class AlternativeName(models.Model):
 
 class Speaker(models.Model):
     language = models.ForeignKey("Language")
-    l_type = models.ChoiceField(choices=[("L1", "L1"), ("L2", "L2")])
+    l_type = models.CharField(max_length=2,
+                              choices=[("L1", "L1"), ("L2", "L2")])
     source = models.CharField(max_length=100)
 
 
 class Country(models.Model):
+    """iso3611"""
+    iso = models.CharField(max_length=2)
+    iso3 = models.CharField(max_length=3)
     name = models.CharField(max_length=100)
+    capital = models.CharField(max_length=100)
+    area = models.IntegerField()
+    population = models.IntegerField()
+    continent = models.CharField(max_length=100)
+    tld = models.CharField(max_length=100)
     native_name = models.CharField(max_length=100, blank=True)
-    iso3611_1 = models.CharField(max_length=3)
-    region = models.CharField(max_length=100, blank=True)
 
 
 class LanguageCountry(models.Model):
     language = models.ForeignKey("Language")
-    country = models.ForeighKey("Country")
+    country = models.ForeignKey("Country")
 
 
 class CountryName(models.Model):
