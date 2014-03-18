@@ -93,7 +93,7 @@ class CrubadanParser(OnlineParser):
         url = 'http://borel.slu.edu/crubadan/stadas.html'
         try:
             response = urllib2.urlopen(url)
-            html = response.read()
+            html = response.read().decode('utf-8')
             return html
         except:
             raise LangdeathException(
@@ -104,7 +104,7 @@ def main():
 
     parser = CrubadanParser()
     for d in parser.parse():
-        print d
+        print repr(d)
 
 if __name__ == "__main__":
     main()
