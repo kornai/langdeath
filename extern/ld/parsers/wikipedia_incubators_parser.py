@@ -17,7 +17,7 @@ class WikipediaIncubatorsParser(OnlineParser):
                 m = pattern.search(rest)
         except Exception as e:
             raise LangdeathException(
-                '{0} in LanguageArchivesParser.generate_rows'
+                '{0} in WikipediaIncubatorsParser.generate_rows'
                 .format(type(e)))
 
     def get_tabular(self, html):
@@ -28,7 +28,7 @@ class WikipediaIncubatorsParser(OnlineParser):
             return m.groups()[0]
         except Exception as e:
             raise LangdeathException(
-                '{0} in LanguageArchivesParser.get_tabular'
+                '{0} in WikipediaIncubatorsParser.get_tabular'
                     .format(type(e)))
 
     def replace_html_formatting(self, row):
@@ -46,7 +46,7 @@ class WikipediaIncubatorsParser(OnlineParser):
                     for item in re.split('<td.*?>', row)[1:]]
         except Exception as e:
             raise LangdeathException(
-                '{0} in LanguageArchivesParser.split_row'
+                '{0} in WikipediaIncubatorsParser.split_row'
                 .format(type(e)))
 
     def get_row_dict(self, column_titles, cells):
@@ -56,7 +56,7 @@ class WikipediaIncubatorsParser(OnlineParser):
                          for i in xrange(len(column_titles))])
         except Exception as e:
             raise LangdeathException(
-                '{0} in LanguageArchivesParser.get_row_dict'
+                '{0} in WikipediaIncubatorsParser.get_row_dict'
                 .format(type(e)))
 
     def split_headline(self, headline):
@@ -71,7 +71,7 @@ class WikipediaIncubatorsParser(OnlineParser):
             return header, rest
         except Exception as e:
             raise LangdeathException(
-                '{0} in LanguageArchivesParser.strip_header'
+                '{0} in WikipediaIncubatorsParser.strip_header'
                 .format(type(e)))
 
     def get_wp_tabular(self, tabular_):
@@ -82,7 +82,7 @@ class WikipediaIncubatorsParser(OnlineParser):
             return wp_tabular
         except Exception as e:
             raise LangdeathException(
-                '{0} in LanguageArchivesParser.get_wp_tabular'
+                '{0} in WikipediaIncubatorsParser.get_wp_tabular'
                 .format(type(e)))
 
     def generate_dictionaries(self, string):

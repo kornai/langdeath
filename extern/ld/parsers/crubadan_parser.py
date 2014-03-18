@@ -18,7 +18,7 @@ class CrubadanParser(OnlineParser):
                 m = pattern.search(rest)
         except Exception as e:
             raise LangdeathException(
-                '{0} in LanguageArchivesParser.generate_rows'
+                '{0} in CrubadanParser.generate_rows'
                 .format(type(e)))
 
     def get_tabular(self, html):
@@ -29,7 +29,7 @@ class CrubadanParser(OnlineParser):
             return m.groups()[0]
         except Exception as e:
             raise LangdeathException(
-                '{0} in LanguageArchivesParser.get_tabular'
+                '{0} in CrubadanParser.get_tabular'
                     .format(type(e)))
 
     def replace_html_formatting(self, row):
@@ -46,7 +46,7 @@ class CrubadanParser(OnlineParser):
                     for item in re.split('<td.*?>', row)[1:]]
         except Exception as e:
             raise LangdeathException(
-                '{0} in LanguageArchivesParser.split_row'
+                '{0} in CrubadanParser.split_row'
                 .format(type(e)))
 
     def get_row_dict(self, column_titles, cells):
@@ -56,7 +56,7 @@ class CrubadanParser(OnlineParser):
                          for i in xrange(len(column_titles))])
         except Exception as e:
             raise LangdeathException(
-                '{0} in LanguageArchivesParser.get_row_dict'
+                '{0} in CrubadanParser.get_row_dict'
                 .format(type(e)))
 
     def get_row_pattern(self):
@@ -69,7 +69,7 @@ class CrubadanParser(OnlineParser):
             return header, rest
         except Exception as e:
             raise LangdeathException(
-                '{0} in LanguageArchivesParser.strip_header'
+                '{0} in CrubadanParser.strip_header'
                 .format(type(e)))
 
     def generate_dictionaries(self, string):

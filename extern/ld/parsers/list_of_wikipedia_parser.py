@@ -18,7 +18,7 @@ class WikipediaListOfLanguagesParser(OnlineParser):
                 m = pattern.search(rest)
         except Exception as e:
             raise LangdeathException(
-                '{0} in LanguageArchivesParser.generate_rows'
+                '{0} in WikipediaListOfLanguagesParser.generate_rows'
                 .format(type(e)))
 
     def generate_tabulars(self, html):
@@ -33,7 +33,7 @@ class WikipediaListOfLanguagesParser(OnlineParser):
                 m = pattern.search(rest)
         except Exception as e:
             raise LangdeathException(
-                '{0} in LanguageArchivesParser.generate_tabulars'
+                '{0} in WikipediaListOfLanguagesParser.generate_tabulars'
                     .format(type(e)))
 
     def split_headline(self, headline):
@@ -43,7 +43,7 @@ class WikipediaListOfLanguagesParser(OnlineParser):
                     .split('<th>')
         except Exception as e:
             raise LangdeathException(
-                '{0} in LanguageArchivesParser.split_headline'
+                '{0} in WikipediaListOfLanguagesParser.split_headline'
                 .format(type(e)))
 
     def replace_html_formatting(self, row):
@@ -60,7 +60,7 @@ class WikipediaListOfLanguagesParser(OnlineParser):
             return [item.strip('</td>') for item in re.split('<td.*?>', row)]
         except Exception as e:
             raise LangdeathException(
-                '{0} in LanguageArchivesParser.split_row'
+                '{0} in WikipediaListOfLanguagesParser.split_row'
                 .format(type(e)))
 
     def get_row_dict(self, column_titles, cells):
@@ -71,7 +71,7 @@ class WikipediaListOfLanguagesParser(OnlineParser):
 
         except Exception as e:
             raise LangdeathException(
-                '{0} in LanguageArchivesParser.get_row_dict'
+                '{0} in WikipediaListOfLanguagesParser.get_row_dict'
                 .format(type(e)))
 
     def generate_dictionaries(self, string):
