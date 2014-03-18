@@ -5,7 +5,7 @@ from base_parsers import OnlineParser
 from ld.langdeath_exceptions import LangdeathException
 
 
-class WikipediaListOfLanguages(OnlineParser):
+class WikipediaListOfLanguagesParser(OnlineParser):
 
     def generate_rows(self, tabular):
 
@@ -18,7 +18,7 @@ class WikipediaListOfLanguages(OnlineParser):
                 m = pattern.search(rest)
         except Exception as e:
             raise LangdeathException(
-                '{0} in LanguageArchivesParser.generate_row'
+                '{0} in LanguageArchivesParser.generate_rows'
                 .format(type(e)))
 
     def generate_tabulars(self, html):
@@ -104,7 +104,7 @@ class WikipediaListOfLanguages(OnlineParser):
 
 def main():
 
-    parser = WikipediaListOfLanguages()
+    parser = WikipediaListOfLanguagesParser()
     for d in parser.parse():
         print d
 
