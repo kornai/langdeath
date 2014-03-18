@@ -53,12 +53,11 @@ class ParseISO639_3(OnlineParser):
                     # header 
                     continue
                 d = self.lang_dict[sil_code]
-                d.english_name = ref_name
+                d.name = ref_name.decode("utf-8")
                 d.sil = sil_code
                 if part1:
                     d.other_codes = {'iso-639-1': [part1]}
 
-                # TODO do we care about the followings?
                 d.iso_scope = scope
                 d.iso_type = language_type
 
@@ -127,5 +126,3 @@ class ParseISO639_3(OnlineParser):
                     elif change_to not in self.lang_dict:
                         # data error, lcq --> ppr insted of ppr --> lcq
                         continue
-                    # TODO makrai fix this please, I comment it out to run
-                    # self.lang_dict[change_to].other_iso_codes[ret_reason].add(old_code)
