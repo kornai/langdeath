@@ -2,7 +2,7 @@ import re
 
 from base_parsers import OnlineParser
 from ld.langdeath_exceptions import ParserException
-from utils import get_html
+from utils import get_html, replace_html_formatting
 
 
 class WikipediaListOfLanguagesParser(OnlineParser):
@@ -50,17 +50,11 @@ class WikipediaListOfLanguagesParser(OnlineParser):
                 '{0} in WikipediaListOfLanguagesParser.split_headline'
                 .format(type(e)))
 
-    def replace_html_formatting(self, row):
-
-        row = re.sub('<[/]{0,1}a.*?>', '', row)
-        row = re.sub('<[/]{0,1}b>', '', row)
-        return row
-
     def split_row(self, row):
 
         try:
             row = row.replace('\n', '')
-            row = self.replace_html_formatting(row)
+            row = replace_html_formatting(row)
             return [item.strip('</td>') for item in re.split('<td.*?>', row)]
         except Exception as e:
             raise ParserException(

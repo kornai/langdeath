@@ -2,7 +2,7 @@ import re
 
 from base_parsers import OnlineParser
 from ld.langdeath_exceptions import ParserException
-from utils import get_html
+from utils import get_html, replace_html_formatting
 
 class CrubadanParser(OnlineParser):
     
@@ -35,16 +35,11 @@ class CrubadanParser(OnlineParser):
                 '{0} in CrubadanParser.get_tabular'
                     .format(type(e)))
 
-    def replace_html_formatting(self, row):
-
-        row = re.sub('<[/]{0,1}a.*?>', '', row)
-        return row
-
     def split_row(self, row):
 
         try:
             row = row.replace('\n', '')
-            row = self.replace_html_formatting(row)
+            row = replace_html_formatting(row)
             return [item.strip('</td> ')
                     for item in re.split('<td.*?>', row)[1:]]
         except Exception as e:
