@@ -1,9 +1,8 @@
-import urllib2
 import re
 
 from base_parsers import OnlineParser
 from ld.langdeath_exceptions import ParserException
-
+from utils import get_html
 
 class CrubadanParser(OnlineParser):
     
@@ -88,19 +87,9 @@ class CrubadanParser(OnlineParser):
 
     def parse(self):
 
-        html = self.get_html()
+        html = get_html(self.url)
         for dict_ in self.generate_dictionaries(html):
             yield dict_
-
-    def get_html(self):
-
-        try:
-            response = urllib2.urlopen(self.url)
-            html = response.read().decode('utf-8')
-            return html
-        except:
-            raise ParserException(
-                'Error while downloading {0}\n'.format(self.url))
 
 
 def main():

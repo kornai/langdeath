@@ -1,12 +1,16 @@
 import sys
-import urllib2
 import re
 
 from base_parsers import OnlineParser
 from ld.langdeath_exceptions import ParserException 
+from utils import get_html
 
 
 class EthnologueParser(OnlineParser):
+
+    def __init__(self):
+
+        self.base_url = 'http://www.ethnologue.com/language'
 
     def strip_nonstring(self, string):
 
@@ -135,7 +139,8 @@ class EthnologueParser(OnlineParser):
     def parse(self, sil_codes):
         for sil_code in sil_codes:
             self.sil = sil_code
-            html = self.get_html(sil_code)
+            url = '{0}/{1}'.format(self.base_url, self.sil)
+            html = get_html(url)
             dictionary = {}
             dictionary['Name'] = self.get_title(html)
             dictionary['Country'] = self.get_country(html)
@@ -150,16 +155,6 @@ class EthnologueParser(OnlineParser):
                 dictionary[t] = dict_
             yield dictionary
 
-    def get_html(self, sil_code):
-        try:
-            url = 'http://www.ethnologue.com/language/{0}'.format(sil_code)
-            response = urllib2.urlopen(url)
-            html = response.read()
-            return html
-        except Exception as e:
-            raise ParserException(
-            'Error {0} while downloading {1}\n'
-            .format(e, url))
 
 def main():
 
