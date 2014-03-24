@@ -6,6 +6,10 @@ from ld.langdeath_exceptions import ParserException
 
 
 class WikipediaListOfLanguagesParser(OnlineParser):
+    
+    def __init__(self):
+
+        self.url = 'http://meta.wikimedia.org/wiki/List_of_Wikipedias'
 
     def generate_rows(self, tabular):
 
@@ -92,14 +96,13 @@ class WikipediaListOfLanguagesParser(OnlineParser):
 
     def get_html(self):
 
-        url = 'http://meta.wikimedia.org/wiki/List_of_Wikipedias'
         try:
-            response = urllib2.urlopen(url)
+            response = urllib2.urlopen(self.url)
             html = response.read().decode('utf-8')
             return html
         except:
             raise ParserException(
-                'Error while downloading {0}\n'.format(url))
+                'Error while downloading {0}\n'.format(self.url))
 
 
 def main():

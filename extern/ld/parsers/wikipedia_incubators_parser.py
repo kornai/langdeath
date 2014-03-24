@@ -6,8 +6,13 @@ from ld.langdeath_exceptions import ParserException
 
 
 class WikipediaIncubatorsParser(OnlineParser):
+    
+    def __init__(self):
+
+        self.url = 'http://incubator.wikimedia.org/wiki/Incubator:Wikis'
 
     def generate_rows(self, tabular):
+
         pattern = re.compile('<tr.*?>(.*?)</tr>(.*)', re.DOTALL)
         try:
             m = pattern.search(tabular)
@@ -104,14 +109,13 @@ class WikipediaIncubatorsParser(OnlineParser):
 
     def get_html(self):
 
-        url = 'http://incubator.wikimedia.org/wiki/Incubator:Wikis'
         try:
-            response = urllib2.urlopen(url)
+            response = urllib2.urlopen(self.url)
             html = response.read().decode('utf-8')
             return html
         except:
             raise ParserException(
-                'Error while downloading {0}\n'.format(url))
+                'Error while downloading {0}\n'.format(self.url))
 
 
 def main():

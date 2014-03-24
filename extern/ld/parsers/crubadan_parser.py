@@ -6,6 +6,10 @@ from ld.langdeath_exceptions import ParserException
 
 
 class CrubadanParser(OnlineParser):
+    
+    def __init__(self):
+
+        self.url = 'http://borel.slu.edu/crubadan/stadas.html'
 
     def generate_rows(self, tabular):
 
@@ -90,18 +94,17 @@ class CrubadanParser(OnlineParser):
 
     def get_html(self):
 
-        url = 'http://borel.slu.edu/crubadan/stadas.html'
         try:
-            response = urllib2.urlopen(url)
+            response = urllib2.urlopen(self.url)
             html = response.read().decode('utf-8')
             return html
         except:
             raise ParserException(
-                'Error while downloading {0}\n'.format(url))
+                'Error while downloading {0}\n'.format(self.url))
 
 
 def main():
-
+    
     parser = CrubadanParser()
     for d in parser.parse():
         print repr(d)
