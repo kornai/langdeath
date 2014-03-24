@@ -2,7 +2,7 @@ import urllib2
 import re
 
 from base_parsers import OnlineParser
-from ld.langdeath_exceptions import LangdeathException
+from ld.langdeath_exceptions import ParserException
 
 
 class WikipediaListOfLanguagesParser(OnlineParser):
@@ -17,7 +17,7 @@ class WikipediaListOfLanguagesParser(OnlineParser):
                 yield row
                 m = pattern.search(rest)
         except Exception as e:
-            raise LangdeathException(
+            raise ParserException(
                 '{0} in WikipediaListOfLanguagesParser.generate_rows'
                 .format(type(e)))
 
@@ -32,7 +32,7 @@ class WikipediaListOfLanguagesParser(OnlineParser):
                 yield header, tabular
                 m = pattern.search(rest)
         except Exception as e:
-            raise LangdeathException(
+            raise ParserException(
                 '{0} in WikipediaListOfLanguagesParser.generate_tabulars'
                     .format(type(e)))
 
@@ -42,7 +42,7 @@ class WikipediaListOfLanguagesParser(OnlineParser):
             return headline.replace('\n', '').replace('</th>', '')\
                     .split('<th>')
         except Exception as e:
-            raise LangdeathException(
+            raise ParserException(
                 '{0} in WikipediaListOfLanguagesParser.split_headline'
                 .format(type(e)))
 
@@ -59,7 +59,7 @@ class WikipediaListOfLanguagesParser(OnlineParser):
             row = self.replace_html_formatting(row)
             return [item.strip('</td>') for item in re.split('<td.*?>', row)]
         except Exception as e:
-            raise LangdeathException(
+            raise ParserException(
                 '{0} in WikipediaListOfLanguagesParser.split_row'
                 .format(type(e)))
 
@@ -70,7 +70,7 @@ class WikipediaListOfLanguagesParser(OnlineParser):
                          for i in xrange(len(column_titles))])
 
         except Exception as e:
-            raise LangdeathException(
+            raise ParserException(
                 '{0} in WikipediaListOfLanguagesParser.get_row_dict'
                 .format(type(e)))
 
@@ -98,7 +98,7 @@ class WikipediaListOfLanguagesParser(OnlineParser):
             html = response.read().decode('utf-8')
             return html
         except:
-            raise LangdeathException(
+            raise ParserException(
                 'Error while downloading {0}\n'.format(url))
 
 

@@ -3,7 +3,7 @@ import urllib2
 import logging
 
 from base_parsers import OnlineParser
-from ld.langdeath_exceptions import LangdeathException
+from ld.langdeath_exceptions import ParserException
 
 class LanguageArchivesParser(OnlineParser):
 
@@ -18,7 +18,7 @@ class LanguageArchivesParser(OnlineParser):
                     online_count += 1
             return len(rows), online_count
         except Exception as e:
-            raise LangdeathException(
+            raise ParserException(
                 '{0} in LanguageArchivesParser.parse_table'
                     .format(type(e)))
 
@@ -33,7 +33,7 @@ class LanguageArchivesParser(OnlineParser):
                 d[category] = counts
             return d
         except Exception as e:
-            raise LangdeathException(
+            raise ParserException(
                 '{0} in LanguageArchivesParser.get_tabular_data'
                     .format(type(e)))
 
@@ -47,7 +47,7 @@ class LanguageArchivesParser(OnlineParser):
                 name = name_wrapped
             return name
         except Exception as e:
-            raise LangdeathException(
+            raise ParserException(
                 '{0} in LanguageArchivesParser.get_name'
                     .format(type(e)))
 
@@ -75,7 +75,7 @@ class LanguageArchivesParser(OnlineParser):
             html = response.read()
             return html
         except:
-            raise LangdeathException(
+            raise ParserException(
                 'Error while downloading {0}\n'.format(url))
 
 

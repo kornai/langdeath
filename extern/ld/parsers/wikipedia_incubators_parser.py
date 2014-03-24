@@ -2,7 +2,7 @@ import urllib2
 import re
 
 from base_parsers import OnlineParser
-from ld.langdeath_exceptions import LangdeathException
+from ld.langdeath_exceptions import ParserException
 
 
 class WikipediaIncubatorsParser(OnlineParser):
@@ -16,7 +16,7 @@ class WikipediaIncubatorsParser(OnlineParser):
                 yield row
                 m = pattern.search(rest)
         except Exception as e:
-            raise LangdeathException(
+            raise ParserException(
                 '{0} in WikipediaIncubatorsParser.generate_rows'
                 .format(type(e)))
 
@@ -27,7 +27,7 @@ class WikipediaIncubatorsParser(OnlineParser):
             m = pattern.search(html)
             return m.groups()[0]
         except Exception as e:
-            raise LangdeathException(
+            raise ParserException(
                 '{0} in WikipediaIncubatorsParser.get_tabular'
                     .format(type(e)))
 
@@ -45,7 +45,7 @@ class WikipediaIncubatorsParser(OnlineParser):
             return [item.strip('</td> ')
                     for item in re.split('<td.*?>', row)[1:]]
         except Exception as e:
-            raise LangdeathException(
+            raise ParserException(
                 '{0} in WikipediaIncubatorsParser.split_row'
                 .format(type(e)))
 
@@ -55,7 +55,7 @@ class WikipediaIncubatorsParser(OnlineParser):
             return dict([(column_titles[i], cells[i])
                          for i in xrange(len(column_titles))])
         except Exception as e:
-            raise LangdeathException(
+            raise ParserException(
                 '{0} in WikipediaIncubatorsParser.get_row_dict'
                 .format(type(e)))
 
@@ -70,7 +70,7 @@ class WikipediaIncubatorsParser(OnlineParser):
             header, rest = pattern.search(tabular_).groups()
             return header, rest
         except Exception as e:
-            raise LangdeathException(
+            raise ParserException(
                 '{0} in WikipediaIncubatorsParser.strip_header'
                 .format(type(e)))
 
@@ -81,7 +81,7 @@ class WikipediaIncubatorsParser(OnlineParser):
             wp_tabular = pattern.search(tabular_).groups()[0]
             return wp_tabular
         except Exception as e:
-            raise LangdeathException(
+            raise ParserException(
                 '{0} in WikipediaIncubatorsParser.get_wp_tabular'
                 .format(type(e)))
 
@@ -110,7 +110,7 @@ class WikipediaIncubatorsParser(OnlineParser):
             html = response.read().decode('utf-8')
             return html
         except:
-            raise LangdeathException(
+            raise ParserException(
                 'Error while downloading {0}\n'.format(url))
 
 

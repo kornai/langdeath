@@ -2,7 +2,7 @@ import urllib2
 import re
 
 from base_parsers import OnlineParser
-from ld.langdeath_exceptions import LangdeathException
+from ld.langdeath_exceptions import ParserException
 
 
 class CrubadanParser(OnlineParser):
@@ -17,7 +17,7 @@ class CrubadanParser(OnlineParser):
                 yield row
                 m = pattern.search(rest)
         except Exception as e:
-            raise LangdeathException(
+            raise ParserException(
                 '{0} in CrubadanParser.generate_rows'
                 .format(type(e)))
 
@@ -28,7 +28,7 @@ class CrubadanParser(OnlineParser):
             m = pattern.search(html)
             return m.groups()[0]
         except Exception as e:
-            raise LangdeathException(
+            raise ParserException(
                 '{0} in CrubadanParser.get_tabular'
                     .format(type(e)))
 
@@ -45,7 +45,7 @@ class CrubadanParser(OnlineParser):
             return [item.strip('</td> ')
                     for item in re.split('<td.*?>', row)[1:]]
         except Exception as e:
-            raise LangdeathException(
+            raise ParserException(
                 '{0} in CrubadanParser.split_row'
                 .format(type(e)))
 
@@ -55,7 +55,7 @@ class CrubadanParser(OnlineParser):
             return dict([(column_titles[i], cells[i])
                          for i in xrange(len(column_titles))])
         except Exception as e:
-            raise LangdeathException(
+            raise ParserException(
                 '{0} in CrubadanParser.get_row_dict'
                 .format(type(e)))
 
@@ -68,7 +68,7 @@ class CrubadanParser(OnlineParser):
             header, rest = pattern.search(tabular_).groups()
             return header, rest
         except Exception as e:
-            raise LangdeathException(
+            raise ParserException(
                 '{0} in CrubadanParser.strip_header'
                 .format(type(e)))
 
@@ -96,7 +96,7 @@ class CrubadanParser(OnlineParser):
             html = response.read().decode('utf-8')
             return html
         except:
-            raise LangdeathException(
+            raise ParserException(
                 'Error while downloading {0}\n'.format(url))
 
 
