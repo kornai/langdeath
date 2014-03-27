@@ -155,7 +155,7 @@ class EthnologueParser(OnlineParser):
                 dictionary[t] = dict_
             yield dictionary
 
-
+{u'ISO 639-3': u'aaa', 'Name': u'Ghotuo', u'Classification': u'Niger-Congo, Atlantic-Congo, Volta-Congo, Benue-Congo, Edoid, North-Central, Ghotuo-Uneme-Yekhee', 'Country': u'Nigeria', None: {}, u'Location': u'Edo State, Owan East LGA, Ogbodo.', u'Language Maps': u'Nigeria, Map  6', u'Language Resources': u'OLAC resources in and about Ghotuo', u'Language Status': u'6a (Vigorous).', u'Population': u'9,000 (1994).'}
 def main():
 
     sil_codes = sys.argv[1:]
