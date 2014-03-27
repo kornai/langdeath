@@ -2,9 +2,14 @@ import logging
 
 from django.db import transaction
 
+from dld.models import Language
+
 from ld.lang_db import LanguageDB
 from ld.langdeath_exceptions import UnknownLanguageException
+
+# parsers
 from ld.parsers.iso_639_3_parser import ParseISO639_3
+from ld.parsers.ethnologue_parser import EthnologueParser
 
 
 class ParserAggregator(object):
@@ -13,18 +18,29 @@ class ParserAggregator(object):
     two langauges (or any other data) that are possibly the same
     """
     def __init__(self):
-        self.parsers = [ParseISO639_3()]
+        self.parsers = [ParseISO639_3(), EthnologueParser()]
+        self.parsers = [EthnologueParser()]
         self.lang_db = LanguageDB()
         self.trusted_parsers = set([ParseISO639_3])
+        self.parsers_needs_sil = set([EthnologueParser])
 
     def run(self):
         for parser in self.parsers:
             self.call_parser(parser)
 
-    @transaction.commit_manually
+    def choose_parse_call(self, parser):
+        parse_call = None
+        if type(parser) in self.parsers_needs_sil:
+            sils = Language.objects.values_list("sil", flat=True)
+            parse_call = lambda: parser.parse(sils)
+        else:
+            parse_call = lambda: parser.parse()
+        return parse_call
+
+    #@transaction.commit_manually
     def call_parser(self, parser):
         c = 0
-        for lang in parser.parse():
+        for lang in self.choose_parse_call(parser)():
             c += 1
             if c % 100 == 0:
                 logging.info("Added {0} langs from parser {1}".format(
@@ -46,7 +62,7 @@ class ParserAggregator(object):
                         "this parser is not a trusted parser"
                     raise UnknownLanguageException(msg.format(
                         type(parser), lang.__dict__))
-        transaction.commit()
+        #transaction.commit()
 
 
 def main():
