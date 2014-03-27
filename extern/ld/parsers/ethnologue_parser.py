@@ -1,12 +1,16 @@
 import sys
-import urllib2
 import re
 
 from base_parsers import OnlineParser
-from ld.langdeath_exceptions import LangdeathException 
+from ld.langdeath_exceptions import ParserException 
+from utils import get_html
 
 
 class EthnologueParser(OnlineParser):
+
+    def __init__(self):
+
+        self.base_url = 'http://www.ethnologue.com/language'
 
     def strip_nonstring(self, string):
 
@@ -26,7 +30,7 @@ class EthnologueParser(OnlineParser):
                     inner_dictionary[key] = value
             return inner_dictionary
         except Exception as e:
-            raise LangdeathException(
+            raise ParserException(
             '{0} in EthnologueParser.parse_attachement_block()' +
                 ' sil:{1}'.format(type(e), self.sil))
 
@@ -43,7 +47,7 @@ class EthnologueParser(OnlineParser):
             value = self.strip_nonstring(value_extras).strip()
             return key, value
         except Exception as e:
-            raise LangdeathException(
+            raise ParserException(
                 '{0} in EthnologueParser.parse_row(), at row\n{1} ' +
                     'sil:{2}'.format(type(e), row, self.sil))
 
@@ -52,7 +56,7 @@ class EthnologueParser(OnlineParser):
             return string.split('<h1 class="title" id="page-title">')[1]\
                 .split('</h1>')[0]
         except Exception as e:
-            raise LangdeathException(
+            raise ParserException(
             '{0} in EthnologueParser.get_title() sil:{1}'
                     .format(type(e), self.sil))
 
@@ -60,7 +64,7 @@ class EthnologueParser(OnlineParser):
         try:
             return string.split('<h2>')[1].split('>')[1].split('</a')[0]
         except Exception as e:
-            raise LangdeathException(
+            raise ParserException(
             '{0} in EthnologueParser.get_country(), sil:{1}'
                 .format(type(e), self.sil))
 
@@ -74,7 +78,7 @@ class EthnologueParser(OnlineParser):
                 res.append(self.parse_row(row))
             return res
         except Exception as e:
-            raise LangdeathException(
+            raise ParserException(
             '{0} in EthnologueParser.process_main_table_rows()' +
                 ' sil:{1}'.format(type(e), self.sil))
 
@@ -87,7 +91,7 @@ class EthnologueParser(OnlineParser):
                         .split('</h3>')[0]
                 return attachement_title
         except Exception as e:
-            raise LangdeathException(
+            raise ParserException(
             '{0} in EthnologueParser.get_attachement_title()' +
                 ' sil:{1}'.format(type(e), self.sil))
 
@@ -99,7 +103,7 @@ class EthnologueParser(OnlineParser):
                                           'region-sidebar-second">')[0]
             return attachement
         except Exception as e:
-            raise LangdeathException(
+            raise ParserException(
             '{0} in EthnologueParser.get_attachement(), sil:{1}'
                 .format(type(e), self.sil))
 
@@ -111,7 +115,7 @@ class EthnologueParser(OnlineParser):
                                  block in attachement_blocks]
             return attachement_blocks, attachment_titles
         except Exception as e:
-            raise LangdeathException(
+            raise ParserException(
             '{0} in EthnologueParser.get_attachement_blocks_titles(),sil:{1}'
                 .format(type(e), self.sil))
 
@@ -135,7 +139,8 @@ class EthnologueParser(OnlineParser):
     def parse(self, sil_codes):
         for sil_code in sil_codes:
             self.sil = sil_code
-            html = self.get_html(sil_code)
+            url = '{0}/{1}'.format(self.base_url, self.sil)
+            html = get_html(url)
             dictionary = {}
             dictionary['Name'] = self.get_title(html)
             dictionary['Country'] = self.get_country(html)
@@ -150,16 +155,6 @@ class EthnologueParser(OnlineParser):
                 dictionary[t] = dict_
             yield dictionary
 
-    def get_html(self, sil_code):
-        try:
-            url = 'http://www.ethnologue.com/language/{0}'.format(sil_code)
-            response = urllib2.urlopen(url)
-            html = response.read()
-            return html
-        except Exception as e:
-            raise LangdeathException(
-            'Error {0} while downloading {1}\n'
-            .format(e, url))
 
 def main():
 
