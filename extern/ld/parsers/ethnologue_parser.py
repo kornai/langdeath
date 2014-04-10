@@ -147,7 +147,7 @@ class EthnologueParser(OnlineParser):
             html = get_html(url)
             dictionary = {'sil': sil_code}
             dictionary['name'] = self.get_title(html)
-            dictionary['Country'] = self.get_country(html)
+            dictionary['country'] = self.get_country(html)
             main_items = self.process_main_table_rows(html)
             if main_items is not None:
                 for key, value in main_items:
