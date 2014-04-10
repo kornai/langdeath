@@ -1,6 +1,7 @@
 import logging
 
-from dld.models import Language, Code, Country, LanguageCountry
+from dld.models import Language, Code, Country, LanguageCountry, \
+    AlternativeName
 
 
 class LanguageUpdate(object):
@@ -10,7 +11,7 @@ class LanguageUpdate(object):
 class LanguageDB(object):
     def __init__(self):
         self.languages = []
-        self.spec_fields = set(["other_codes", "country"])
+        self.spec_fields = set(["other_codes", "country", "name"])
 
     def add_attr(self, name, data, lang):
         if name in self.spec_fields:
@@ -23,6 +24,15 @@ class LanguageDB(object):
             self.add_codes(data, lang)
         elif name == "country":
             self.add_country(data, lang)
+        elif name == "name":
+            self.add_name(data, lang)
+
+    def add_name(self, data, lang):
+        if data == lang.name:
+            return
+
+        # add alternative name
+        AlternativeName(language=lang, name=data).save()
 
     def add_codes(self, data, lang):
         for src, code in data.iteritems():
