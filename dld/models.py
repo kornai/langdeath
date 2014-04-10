@@ -1,6 +1,5 @@
 from django.db import models
 from django.utils import timezone
-from jsonfield import JSONField
 
 
 class Language(models.Model):
@@ -10,6 +9,8 @@ class Language(models.Model):
     last_updated = models.DateTimeField('last updated', default=timezone.now())
     iso_scope = models.CharField(max_length=20, blank=True)
     iso_type = models.CharField(max_length=100, blank=True)
+    eth_status = models.CharField(max_length=100, blank=True)
+    eth_population = models.CharField(max_length=100, blank=True)
 
     def __unicode__(self):
         return u"{0} ({1})".format(self.name, self.sil)
