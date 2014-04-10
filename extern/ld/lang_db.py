@@ -3,6 +3,8 @@ import logging
 from dld.models import Language, Code, Country, LanguageCountry, \
     AlternativeName
 
+from ld.langdeath_exceptions import LangdeathException
+
 
 class LanguageUpdate(object):
     pass
@@ -47,8 +49,10 @@ class LanguageDB(object):
             c.save()
 
     def add_country(self, data, lang):
-        c = Country.objects.filter(name=data)
-        LanguageCountry(language=lang, country=c).save()
+        cs = Country.objects.filter(name=data)
+        if len(cs) == 0:
+            raise LangdeathException("unknown country: {0}".format(data))
+        LanguageCountry(language=lang, country=cs[0]).save()
 
     def add_new_language(self, lang):
         """Inserts new language to db"""
@@ -87,6 +91,10 @@ class LanguageDB(object):
         if not isinstance(lang, LanguageUpdate):
             raise TypeError("LanguageDB.get_closest " +
                             "got non-LanguageUpdate instance as @lang")
+
+        if "sil" in lang.__dict__:
+            languages = Language.objects.filter(sil=lang.sil)
+            return languages
 
         if "name" in lang.__dict__:
             languages = Language.objects.filter(name=lang.name)
