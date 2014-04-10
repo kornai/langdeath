@@ -28,6 +28,10 @@ class LanguageDB(object):
             self.add_name(data, lang)
 
     def add_name(self, data, lang):
+        if lang.name == "":
+            lang.name = data
+            return
+
         if data == lang.name:
             return
 
