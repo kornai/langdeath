@@ -11,6 +11,13 @@ class EthnologueParser(OnlineParser):
     def __init__(self):
 
         self.base_url = 'http://www.ethnologue.com/language'
+        self.needed_keys = {
+            'ISO 639-3': 'sil',
+            'Name': 'name',
+            'Country': 'country',
+            'Language Status': 'eth_status',
+            'Population': 'eth_population'
+        }
 
     def strip_nonstring(self, string):
 
@@ -143,27 +150,15 @@ class EthnologueParser(OnlineParser):
             dictionary['Country'] = self.get_country(html)
             main_items = self.process_main_table_rows(html)
             if main_items is not None:
-                for i in main_items:
-                    key, value = i
-                    dictionary[key] = value
+                for key, value in main_items:
+                    if key in self.needed_keys():
+                        dictionary[self.needed_keys[key]] = value
             attachment_info = self.get_attachment_dict(html)
             if attachment_info is not None:
                 t, dict_ = attachment_info
-                dictionary[t] = dict_
+                if key in self.needed_keys():
+                    dictionary[self.needed_keys[t]] = dict_
             yield dictionary
-
-{
-    u'ISO 639-3': u'aaa',
-    'Name': u'Ghotuo',
-    u'Classification': u'Niger-Congo, Atlantic-Congo, Volta-Congo, Benue-Congo, Edoid, North-Central, Ghotuo-Uneme-Yekhee',  # nopep8
-    'Country': u'Nigeria',
-    None: {},
-    u'Location': u'Edo State, Owan East LGA, Ogbodo.',
-    u'Language Maps': u'Nigeria, Map  6',
-    u'Language Resources': u'OLAC resources in and about Ghotuo',
-    u'Language Status': u'6a (Vigorous).',
-    u'Population': u'9,000 (1994).'
-}
 
 
 def main():
