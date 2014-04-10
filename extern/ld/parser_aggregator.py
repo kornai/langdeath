@@ -5,7 +5,7 @@ from django.db import transaction
 from dld.models import Language
 
 from ld.lang_db import LanguageDB
-from ld.langdeath_exceptions import UnknownLanguageException
+from ld.langdeath_exceptions import UnknownLanguageException, ParserException
 
 # parsers
 from ld.parsers.iso_639_3_parser import ParseISO639_3
