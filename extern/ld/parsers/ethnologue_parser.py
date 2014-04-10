@@ -142,26 +142,35 @@ class EthnologueParser(OnlineParser):
         return attachment_title, attachment_dict
 
     def parse(self, sil_codes):
+        errors = set()
         for sil_code in sil_codes:
-            self.sil = sil_code
-            url = '{0}/{1}'.format(self.base_url, self.sil)
-            html = get_html(url)
-            dictionary = LanguageUpdate()
-            dictionary.sil = sil_code
-            dictionary.name = self.get_title(html)
-            dictionary.country = self.get_country(html)
-            main_items = self.process_main_table_rows(html)
-            if main_items is not None:
-                for key, value in main_items:
+            try:
+                self.sil = sil_code
+                if sil_code == "aes":
+                    continue
+                url = '{0}/{1}'.format(self.base_url, self.sil)
+                html = get_html(url)
+                dictionary = LanguageUpdate()
+                dictionary.sil = sil_code
+                dictionary.name = self.get_title(html)
+                dictionary.country = self.get_country(html)
+                main_items = self.process_main_table_rows(html)
+                if main_items is not None:
+                    for key, value in main_items:
+                        if key in self.needed_keys:
+                            setattr(dictionary, self.needed_keys[key], value)
+                attachment_info = self.get_attachment_dict(html)
+                if attachment_info is not None:
+                    t, dict_ = attachment_info
                     if key in self.needed_keys:
-                        setattr(dictionary, self.needed_keys[key], value)
-            attachment_info = self.get_attachment_dict(html)
-            if attachment_info is not None:
-                t, dict_ = attachment_info
-                if key in self.needed_keys:
-                    setattr(dictionary, self.needed_keys[t], dict_)
-            print dictionary.__dict__
-            yield dictionary
+                        setattr(dictionary, self.needed_keys[t], dict_)
+                print dictionary.__dict__
+                yield dictionary
+            except ParserException:
+                errors.add(sil_code)
+
+        if len(errors) > 0:
+            raise ParserException("error with sils: {0}".format(errors))
 
 
 def main():
