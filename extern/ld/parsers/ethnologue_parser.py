@@ -151,13 +151,14 @@ class EthnologueParser(OnlineParser):
             main_items = self.process_main_table_rows(html)
             if main_items is not None:
                 for key, value in main_items:
-                    if key in self.needed_keys():
+                    if key in self.needed_keys:
                         dictionary[self.needed_keys[key]] = value
             attachment_info = self.get_attachment_dict(html)
             if attachment_info is not None:
                 t, dict_ = attachment_info
-                if key in self.needed_keys():
+                if key in self.needed_keys:
                     dictionary[self.needed_keys[t]] = dict_
+            print dictionary
             yield dictionary
 
 
