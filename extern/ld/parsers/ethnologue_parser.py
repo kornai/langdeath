@@ -164,7 +164,6 @@ class EthnologueParser(OnlineParser):
                     t, dict_ = attachment_info
                     if key in self.needed_keys:
                         setattr(dictionary, self.needed_keys[t], dict_)
-                print dictionary.__dict__
                 yield dictionary
             except ParserException:
                 errors.add(sil_code)
