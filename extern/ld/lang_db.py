@@ -42,32 +42,31 @@ class LanguageDB(object):
             raise TypeError("LanguageDB.add_new_language " +
                             "got non-LanguageUpdate instance")
 
-        # TODO add language to db
         # new Language instance from LanguageUpdate instance
         logging.debug("adding lang {0}".format(lang.sil))
         l = Language()
-        for key in lang.__dict__.iterkeys():
-            if key.startswith("_"):
-                continue
-            try:
-                self.add_attr(key, lang.__dict__[key], l)
-            except Exception as e:
-                logging.exception(e)
-
+        self.update_lang_data(l, lang)
         self.languages.append(l)
-        l.save()
 
-    def update_lang_data(self, tgt, update):
+    def update_lang_data(self, l, update):
         """Updates data for @tgt language"""
         if not isinstance(update, LanguageUpdate):
             raise TypeError("LanguageDB.update_lang_data " +
                             "got non-LanguageUpdate instance as @update")
 
-        if not isinstance(tgt, Language):
+        if not isinstance(l, Language):
             raise TypeError("LanguageDB.update_lang_data " +
                             "got non-Language instance as @tgt")
 
-        # TODO update tgt's data with @update
+        for key in update.__dict__.iterkeys():
+            if key.startswith("_"):
+                continue
+            try:
+                self.add_attr(key, update.__dict__[key], l)
+            except Exception as e:
+                logging.exception(e)
+
+        l.save()
 
     def get_closest(self, lang):
         """Looks for language that is most similar to lang"""
