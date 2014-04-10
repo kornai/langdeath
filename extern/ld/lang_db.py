@@ -14,6 +14,11 @@ class LanguageDB(object):
     def __init__(self):
         self.languages = []
         self.spec_fields = set(["other_codes", "country", "name"])
+        self.country_alternatives = {
+            u'C\xf4te d\u2019Ivoire': 'Ivory Coast',
+            u'Russian Federation': 'Russia',
+            u'Viet Nam': 'Vietnam'
+        }
 
     def add_attr(self, name, data, lang):
         if name in self.spec_fields:
@@ -49,9 +54,12 @@ class LanguageDB(object):
             c.save()
 
     def add_country(self, data, lang):
+        if data in self.country_alternatives:
+            data = self.country_alternatives[data]
         cs = Country.objects.filter(name=data)
         if len(cs) == 0:
-            raise LangdeathException("unknown country: {0}".format(data))
+            raise LangdeathException(u"unknown country: {0}".format(
+                data).encode("utf-8"))
         LanguageCountry(language=lang, country=cs[0]).save()
 
     def add_new_language(self, lang):
