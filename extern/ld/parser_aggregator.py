@@ -5,7 +5,7 @@ from django.db import transaction
 from dld.models import Language
 
 from ld.lang_db import LanguageDB
-from ld.langdeath_exceptions import UnknownLanguageException, ParserException
+from ld.langdeath_exceptions import UnknownLanguageException
 
 # parsers
 from ld.parsers.iso_639_3_parser import ParseISO639_3
@@ -37,7 +37,7 @@ class ParserAggregator(object):
             parse_call = lambda: parser.parse()
         return parse_call
 
-    #@transaction.commit_manually
+    @transaction.commit_manually
     def call_parser(self, parser):
         c = 0
         for lang in self.choose_parse_call(parser)():
@@ -62,7 +62,7 @@ class ParserAggregator(object):
                         "this parser is not a trusted parser"
                     raise UnknownLanguageException(msg.format(
                         type(parser), lang.__dict__))
-        #transaction.commit()
+        transaction.commit()
 
 
 def main():
