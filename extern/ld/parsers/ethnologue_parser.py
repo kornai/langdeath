@@ -11,12 +11,67 @@ class EthnologueParser(OnlineParser):
     def __init__(self):
 
         self.base_url = 'http://www.ethnologue.com/language'
+        self.compile_patterns()
 
     def strip_nonstring(self, string):
 
         while len(string) > 0 and string[0] == '<':
             string = string.split('>')[1].split('<')[0]
         return string
+   
+  
+    def normalize_numstring(self, num_str):
+        return int(num_str.replace(',', '').replace('.', ''))
+   
+    def normalize_lang_status(self, l):
+        lang_status_res = self.matchers['language_status'].search(l)
+        if lang_status_res is not None:
+            return lang_status_res.groups()[0]
+        else:
+            raise ParserException(
+                'error in EthnologueParser.normalize_lang_status')
+
+    def normalize_population(self, orig_l):
+        
+        l = orig_l
+        population_all_res = self.matchers['population_all'].search(l)
+        if population_all_res is not None:
+            num_str = population_all_res.groups()[0] 
+            return self.normalize_numstring(num_str)
+        if self.matchers['nospeaker'].search(l) is not None:
+            return 0
+        l = re.sub(self.matchers['bracket'], '', l)
+        l = re.sub(self.matchers['ethnic_population'], '', l)
+        nums = []
+        num_res = self.matchers['numstring'].search(l)
+        while num_res:
+            num_str = num_res.groups()[0]
+            rest = num_res.groups()[1]
+            num = self.normalize_numstring(num_str) 
+            if not (1990 < num < 2014 and str(num) == num_str): # year
+                nums.append(num)
+            num_res = self.matchers['numstring'].search(rest)
+        if len(nums) == 0:
+            sys.stderr.write('no num found in line {0}\n'.format(orig_l))
+            return 0
+        return sorted(nums, reverse = True)[0]   
+
+            
+    def compile_patterns(self):
+    
+        self.matchers = {}
+        self.matchers['population_all'] = re.compile(
+                r'(Population total all countries|total population):' +
+                 '([0-9]+[0-9\.,]*)')
+        self.matchers['bracket'] = re.compile('\(.*?\)')
+        self.matchers['ethnic_population'] = re.compile(
+                 'Ethnic population:.*?\.')
+        self.matchers['nospeaker'] = re.compile(
+                 '(No remaining speakers.|No known L1 speakers.)')
+        self.matchers['numstring'] = re.compile('([0-9]+[0-9\.,]*)(.*)')
+        self.matchers['language_status'] =\
+                re.compile('([0-9]{1,2}[ab]{0,1})\s')
+
 
     def parse_attachement_block(self, block):
         try:
@@ -148,7 +203,12 @@ class EthnologueParser(OnlineParser):
             if main_items is not None:
                 for i in main_items:
                     key, value = i
-                    dictionary[key] = value
+                    if key == 'Population':
+                        dictionary[key] = self.normalize_population(value)
+                    elif key == 'Language Status':
+                        dictionary[key] = self.normalize_lang_status(value)
+                    else:    
+                        dictionary[key] = value
             attachement_info = self.get_attachement_dict(html)
             if attachement_info is not None:
                 t, dict_ = attachement_info
@@ -161,7 +221,7 @@ def main():
     sil_codes = sys.argv[1:]
     parser = EthnologueParser()
     for d in parser.parse(sil_codes):
-        print d
+        print d 
 
 if __name__ == "__main__":
     main()
