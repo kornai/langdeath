@@ -17,7 +17,10 @@ class LanguageDB(object):
         self.country_alternatives = {
             u'C\xf4te d\u2019Ivoire': 'Ivory Coast',
             u'Russian Federation': 'Russia',
-            u'Viet Nam': 'Vietnam'
+            u'Viet Nam': 'Vietnam',
+            u'S\xe3o Tom\xe9 e Princ\xedpe': 'Sao Tome e Principe',
+            u'Congo': ['Democratic Republic of the Congo',
+                       'Republic of the Congo'],
         }
 
     def add_attr(self, name, data, lang):
@@ -55,12 +58,18 @@ class LanguageDB(object):
 
     def add_country(self, data, lang):
         if data in self.country_alternatives:
-            data = self.country_alternatives[data]
-        cs = Country.objects.filter(name=data)
-        if len(cs) == 0:
-            raise LangdeathException(u"unknown country: {0}".format(
-                data).encode("utf-8"))
-        LanguageCountry(language=lang, country=cs[0]).save()
+            if type(self.country_alternatives[data]) is list:
+                for d in self.country_alternatives[data]:
+                    self.add_country(d, lang)
+                return
+
+            else:
+                data = self.country_alternatives[data]
+                cs = Country.objects.filter(name=data)
+                if len(cs) == 0:
+                    raise LangdeathException(u"unknown country: {0}".format(
+                        data).encode("utf-8"))
+                LanguageCountry(language=lang, country=cs[0]).save()
 
     def add_new_language(self, lang):
         """Inserts new language to db"""
