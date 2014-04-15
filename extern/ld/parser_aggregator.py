@@ -1,11 +1,12 @@
 import logging
 
-from django.db import transaction
+#from django.db import transaction
 
 from dld.models import Language
 
 from ld.lang_db import LanguageDB
-from ld.langdeath_exceptions import UnknownLanguageException
+from ld.langdeath_exceptions import UnknownLanguageException, \
+    ParserException
 
 # parsers
 from ld.parsers.iso_639_3_parser import ParseISO639_3
@@ -37,7 +38,7 @@ class ParserAggregator(object):
             parse_call = lambda: parser.parse()
         return parse_call
 
-    @transaction.commit_manually
+    #@transaction.commit_manually
     def call_parser(self, parser):
         c = 0
         for lang in self.choose_parse_call(parser)():
@@ -46,23 +47,27 @@ class ParserAggregator(object):
                 logging.info("Added {0} langs from parser {1}".format(
                     c, type(parser)))
 
-            candidates = self.lang_db.get_closest(lang)
-            if len(candidates) > 1:
-                best = self.lang_db.choose_candidate(candidates)
-                self.lang_db.update_lang_data(best, lang)
-            elif len(candidates) == 1:
-                best = candidates[0]
-                self.lang_db.update_lang_data(best, lang)
-            elif len(candidates) == 0:
-                if type(parser) in self.trusted_parsers:
-                    self.lang_db.add_new_language(lang)
-                else:
-                    msg = "{0} parser produced a language with data " + \
-                        "{1} that seems to be a new language, but" + \
-                        "this parser is not a trusted parser"
-                    raise UnknownLanguageException(msg.format(
-                        type(parser), lang.__dict__))
-        transaction.commit()
+            try:
+                candidates = self.lang_db.get_closest(lang)
+                if len(candidates) > 1:
+                    best = self.lang_db.choose_candidate(candidates)
+                    self.lang_db.update_lang_data(best, lang)
+                elif len(candidates) == 1:
+                    best = candidates[0]
+                    self.lang_db.update_lang_data(best, lang)
+                elif len(candidates) == 0:
+                    if type(parser) in self.trusted_parsers:
+                        self.lang_db.add_new_language(lang)
+                    else:
+                        msg = "{0} parser produced a language with data " + \
+                            "{1} that seems to be a new language, but" + \
+                            "this parser is not a trusted parser"
+                        raise UnknownLanguageException(msg.format(
+                            type(parser), lang.__dict__))
+            except ParserException as e:
+                logging.exception(e)
+                continue
+        #transaction.commit()
 
 
 def main():
