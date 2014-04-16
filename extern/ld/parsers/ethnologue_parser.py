@@ -26,60 +26,93 @@ class EthnologueParser(OnlineParser):
         while len(string) > 0 and string[0] == '<':
             string = string.split('>')[1].split('<')[0]
         return string
-   
-  
+
     def normalize_numstring(self, num_str):
         return int(num_str.replace(',', '').replace('.', ''))
-   
+
     def normalize_lang_status(self, l):
         lang_status_res = self.matchers['language_status'].search(l)
         if lang_status_res is not None:
             return lang_status_res.groups()[0]
         else:
-            raise ParserException(
-                'error in EthnologueParser.normalize_lang_status')
+            return None
 
-    def normalize_population(self, orig_l):
-        
-        l = orig_l
-        population_all_res = self.matchers['population_all'].search(l)
-        if population_all_res is not None:
-            num_str = population_all_res.groups()[0] 
-            return self.normalize_numstring(num_str)
-        if self.matchers['nospeaker'].search(l) is not None:
-            return 0
-        l = re.sub(self.matchers['bracket'], '', l)
-        l = re.sub(self.matchers['ethnic_population'], '', l)
+    def get_ethnic(self, l):
+
+        matcher = self.matchers['ethnic_population'].search(l)
+        if matcher is None:
+            return None, l
+        l1, ep, l2 = matcher.groups()
+        return self.normalize_numstring(ep), l1 + l2
+
+    def get_numerals(self, l):
+
         nums = []
+        possible_dates = []
         num_res = self.matchers['numstring'].search(l)
         while num_res:
             num_str = num_res.groups()[0]
             rest = num_res.groups()[1]
-            num = self.normalize_numstring(num_str) 
-            if not (1990 < num < 2014 and str(num) == num_str): # year
+            num = self.normalize_numstring(num_str)
+            if not (1990 < num < 2014 and str(num) == num_str):
                 nums.append(num)
+            else:
+                possible_dates.append(num)
             num_res = self.matchers['numstring'].search(rest)
-        if len(nums) == 0:
-            sys.stderr.write('no num found in line {0}\n'.format(orig_l))
-            return 0
-        return sorted(nums, reverse = True)[0]   
+        return nums, possible_dates
 
-            
+    def get_max_numeral_described(self, l):
+
+        if self.matchers['thousand'].search(l) is not None:
+            return 3000
+        if self.matchers['hundred'].search(l) is not None:
+            return 300
+        if self.matchers['few'].search(l) is not None:
+            return 10
+
+    def get_population(self, l):
+
+        population_all_res = self.matchers['population_all'].search(l)
+        if population_all_res is not None:
+            num_str = population_all_res.groups()[1]
+            return self.normalize_numstring(num_str)
+        if self.matchers['nospeaker'].search(l) is not None:
+            return 0
+        l = re.sub(self.matchers['bracket'], '', l)
+        nums, possible_dates = self.get_numerals(l)
+        if len(nums) > 0:
+            return max(nums)
+        if len(possible_dates) > 0:
+            return max(possible_dates)
+        max_numeral_described = self.get_max_numeral_described(l)
+        return max_numeral_described
+
+    def normalize_population(self, l):
+
+        ethnic_population, l = self.get_ethnic(l)
+        population = self.get_population(l)
+        return population, ethnic_population
+
     def compile_patterns(self):
-    
+
         self.matchers = {}
         self.matchers['population_all'] = re.compile(
-                r'(Population total all countries|total population):' +
-                 '([0-9]+[0-9\.,]*)')
+                r'(Population total all countries|total population):[\s]{0,1}'
+                '([0-9]+[0-9\.,]*)')
         self.matchers['bracket'] = re.compile('\(.*?\)')
         self.matchers['ethnic_population'] = re.compile(
-                 'Ethnic population:.*?\.')
+                '(.*?)Ethnic population:[\s]{0,1}([0-9]+[0-9\.,]*)(.*)')
         self.matchers['nospeaker'] = re.compile(
-                 '(No remaining speakers.|No known L1 speakers.)')
+                '(No remaining speakers.|No known L1 speakers.'
+                + '|No remaining users.)')
         self.matchers['numstring'] = re.compile('([0-9]+[0-9\.,]*)(.*)')
         self.matchers['language_status'] =\
                 re.compile('([0-9]{1,2}[ab]{0,1})\s')
-
+        self.matchers['thousand'] =\
+                re.compile('thousand')
+        self.matchers['hundred'] =\
+                re.compile('hundred')
+        self.matchers['few'] = re.compile('(few|Few)')
 
     def parse_attachment_block(self, block):
         try:
@@ -94,7 +127,7 @@ class EthnologueParser(OnlineParser):
             return inner_dictionary
         except Exception as e:
             raise ParserException(
-                '{0} in EthnologueParser.parse_attachment_block()' +
+                '{0} in EthnologueParser.parse_attachment_block()'
                 ' sil:{1}'.format(type(e), self.sil))
 
     def parse_row(self, row):
@@ -142,7 +175,7 @@ class EthnologueParser(OnlineParser):
             return res
         except Exception as e:
             raise ParserException(
-                '{0} in EthnologueParser.process_main_table_rows()' +
+                '{0} in EthnologueParser.process_main_table_rows()'
                 ' sil:{1}'.format(type(e), self.sil))
 
     def get_attachment_title(self, attachment):
@@ -155,14 +188,14 @@ class EthnologueParser(OnlineParser):
                 return attachment_title
         except Exception as e:
             raise ParserException(
-                '{0} in EthnologueParser.get_attachment_title()' +
+                '{0} in EthnologueParser.get_attachment_title()'
                 ' sil:{1}'.format(type(e), self.sil))
 
     def get_attachment(self, string):
         try:
             attachment = string.split(
                 '<div class="attachment attachment-after">')[1].split(
-                '<aside class="grid-6 region region-sidebar-second "id="' +
+                '<aside class="grid-6 region region-sidebar-second "id="'
                 'region-sidebar-second">')[0]
             return attachment
         except Exception as e:
@@ -215,9 +248,13 @@ class EthnologueParser(OnlineParser):
                         # TODO
                         # put this into needed keys when done
                         if key == 'Population':
-                            dictionary.population = self.normalize_population(value)
+                            population, ethnic_population\
+                                    = self.normalize_population(value)
+                            dictionary.population = population
+                            dictionary.ethnic_population = ethnic_population
                         elif key == 'Language Status':
-                            dictionary.status = self.normalize_lang_status(value)
+                            dictionary.status = \
+                                    self.normalize_lang_status(value)
                 yield dictionary
             except ParserException:
                 errors.add(sil_code)
@@ -228,10 +265,11 @@ class EthnologueParser(OnlineParser):
 
 def main():
 
-    sil_codes = sys.argv[1:]
+    sil_codes = [l.strip('\n').split('\t')[0] for l in sys.stdin]
     parser = EthnologueParser()
     for d in parser.parse(sil_codes):
-        print d 
+        print '{0}\t{1}'.format(d.__dict__['population'],
+                                d.__dict__['ethnic_population'])
 
 if __name__ == "__main__":
     main()
