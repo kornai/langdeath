@@ -233,26 +233,25 @@ class EthnologueParser(OnlineParser):
                 self.sil = sil_code
                 url = '{0}/{1}'.format(self.base_url, self.sil)
                 html = get_html(url)
-                dictionary = {}
-                dictionary['sil'] = sil_code
-                dictionary['name'] = self.get_title(html)
-                dictionary['country'] = self.get_country(html)
+                d = {}
+                d['sil'] = sil_code
+                d['name'] = self.get_title(html)
+                d['country'] = self.get_country(html)
                 main_items = self.process_main_table_rows(html)
                 if main_items is not None:
                     for key, value in main_items:
                         if key in self.needed_keys:
-                            dictionary[self.needed_keys[key]] = value
-                        # TODO
-                        # put this into needed keys when done
-                        if key == 'Population':
-                            population, ethnic_population = \
-                                self.normalize_population(value)
-                            dictionary['population'] = population
-                            dictionary['ethnic_population'] = ethnic_population
-                        elif key == 'Language Status':
-                            dictionary['status'] = \
-                                self.normalize_lang_status(value)
-                yield dictionary
+                            if key == 'Population':
+                                population, ethnic_population = \
+                                    self.normalize_population(value)
+                                d['eth_population'] = population
+                                d['eth_ethnic_population'] = ethnic_population
+                            elif key == 'Language Status':
+                                d['eth_status'] = \
+                                    self.normalize_lang_status(value)
+                            else:
+                                d[self.needed_keys[key]] = value
+                yield d
             except ParserException:
                 errors.add(sil_code)
 
