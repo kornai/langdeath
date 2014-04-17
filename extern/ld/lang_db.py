@@ -23,7 +23,8 @@ class LanguageDB(object):
         if name in self.spec_fields:
             self.add_spec_attr(name, data, lang)
         else:
-            lang.__dict__[name] = data
+            if data is not None:
+                lang.__dict__[name] = data
 
     def add_spec_attr(self, name, data, lang):
         if name == "other_codes":
