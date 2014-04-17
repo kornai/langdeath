@@ -84,13 +84,25 @@ class EndangeredParser(OfflineParser):
     def parse_lang_page(self, url):
         page = urllib2.urlopen(url)
         text = page.read().decode('utf8')
+        try:
+            lang_name = self.get_lang_name(text)
+        except ValueError as e:
+            logging.exception('While parsing language name on site {0}, {1}'.format(
+                url, e))
+            lang_name = None
         lang_sect = filter(lambda x: 'Language metadata' in x,
                            text.split('<section>'))
         if len(lang_sect) != 1:
             logging.warning('Invalid language page: {0}'.format(url))
             return
         lang_info = self.get_lang_info(lang_sect[0])
+        lang_info['name'] = lang_name
         return lang_info
+
+    def get_lang_name(self, text):
+        title_text = text.split('<title>')[1].split('</title>')[0]
+        langname = title_text.split('Endangered Languages Project -')[1].strip()
+        return langname
 
     def get_lang_info(self, text):
         parts = text.split('<label>')
