@@ -32,7 +32,7 @@ class EndangeredParser(OfflineParser):
         self.field_map = {
             'ALSO KNOWN AS': 'alternative name',
             'LANGUAGE CODE': 'sil',
-            'CODE AUTHORITY': 'iso_type',
+            #'CODE AUTHORITY': 'iso_type',
         }
 
     def setup_handlers(self):
