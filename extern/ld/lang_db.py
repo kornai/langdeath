@@ -6,10 +6,6 @@ from dld.models import Language, Code, Country, LanguageCountry, \
 from ld.langdeath_exceptions import LangdeathException
 
 
-class LanguageUpdate(object):
-    pass
-
-
 class LanguageDB(object):
     def __init__(self):
         self.languages = []
@@ -73,11 +69,10 @@ class LanguageDB(object):
 
     def add_new_language(self, lang):
         """Inserts new language to db"""
-        if not isinstance(lang, LanguageUpdate):
+        if not isinstance(lang, dict):
             raise TypeError("LanguageDB.add_new_language " +
-                            "got non-LanguageUpdate instance")
+                            "got non-dict instance")
 
-        # new Language instance from LanguageUpdate instance
         logging.debug("adding lang {0}".format(lang.sil))
         l = Language()
         self.update_lang_data(l, lang)
@@ -85,19 +80,19 @@ class LanguageDB(object):
 
     def update_lang_data(self, l, update):
         """Updates data for @tgt language"""
-        if not isinstance(update, LanguageUpdate):
+        if not isinstance(update, dict):
             raise TypeError("LanguageDB.update_lang_data " +
-                            "got non-LanguageUpdate instance as @update")
+                            "got non-dict instance as @update")
 
         if not isinstance(l, Language):
             raise TypeError("LanguageDB.update_lang_data " +
                             "got non-Language instance as @tgt")
 
-        for key in update.__dict__.iterkeys():
+        for key in update.iterkeys():
             if key.startswith("_"):
                 continue
             try:
-                self.add_attr(key, update.__dict__[key], l)
+                self.add_attr(key, update[key], l)
             except Exception as e:
                 logging.exception(e)
 
@@ -105,9 +100,9 @@ class LanguageDB(object):
 
     def get_closest(self, lang):
         """Looks for language that is most similar to lang"""
-        if not isinstance(lang, LanguageUpdate):
+        if not isinstance(lang, dict):
             raise TypeError("LanguageDB.get_closest " +
-                            "got non-LanguageUpdate instance as @lang")
+                            "got non-dict instance as @lang")
 
         if "sil" in lang.__dict__:
             languages = Language.objects.filter(sil=lang.sil)
