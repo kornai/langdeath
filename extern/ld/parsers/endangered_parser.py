@@ -26,6 +26,14 @@ class EndangeredParser(OfflineParser):
             self.category_pages_basedir = category_pages
         self.lang_url_re = re.compile("a href=\"/lang/(.+)\"", re.UNICODE)
         self.setup_handlers()
+        self.create_field_map()
+
+    def create_field_map(self):
+        self.field_map = {
+            'ALSO KNOWN AS': 'alternative name',
+            'LANGUAGE CODE': 'sil',
+            'CODE AUTHORITY': 'iso_type',
+        }
 
     def setup_handlers(self):
         url_fields = [
@@ -94,7 +102,8 @@ class EndangeredParser(OfflineParser):
             if not label in self.field_handlers:
                 logging.warning('Invalid field: {0}'.format(label))
                 continue
-            lang_info[label] = self.field_handlers[label](part)
+            if label in self.field_map:
+                lang_info[self.field_map[label]] = self.field_handlers[label](part)
         return lang_info
 
     def url_field_handler(self, field):
