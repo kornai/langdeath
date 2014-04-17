@@ -4,7 +4,6 @@ from utils import get_html
 
 from base_parsers import OnlineParser
 from ld.langdeath_exceptions import ParserException
-from ld.lang_db import LanguageUpdate
 
 
 class EthnologueParser(OnlineParser):
@@ -97,21 +96,19 @@ class EthnologueParser(OnlineParser):
 
         self.matchers = {}
         self.matchers['population_all'] = re.compile(
-                r'(Population total all countries|total population):[\s]{0,1}'
-                '([0-9]+[0-9\.,]*)')
+            r'(Population total all countries|total population):[\s]{0,1}'
+            + '([0-9]+[0-9\.,]*)')
         self.matchers['bracket'] = re.compile('\(.*?\)')
         self.matchers['ethnic_population'] = re.compile(
-                '(.*?)Ethnic population:[\s]{0,1}([0-9]+[0-9\.,]*)(.*)')
+            '(.*?)Ethnic population:[\s]{0,1}([0-9]+[0-9\.,]*)(.*)')
         self.matchers['nospeaker'] = re.compile(
-                '(No remaining speakers.|No known L1 speakers.'
-                + '|No remaining users.)')
+            '(No remaining speakers.|No known L1 speakers.'
+            + '|No remaining users.)')
         self.matchers['numstring'] = re.compile('([0-9]+[0-9\.,]*)(.*)')
         self.matchers['language_status'] =\
-                re.compile('([0-9]{1,2}[ab]{0,1})\s')
-        self.matchers['thousand'] =\
-                re.compile('thousand')
-        self.matchers['hundred'] =\
-                re.compile('hundred')
+            re.compile('([0-9]{1,2}[ab]{0,1})\s')
+        self.matchers['thousand'] = re.compile('thousand')
+        self.matchers['hundred'] = re.compile('hundred')
         self.matchers['few'] = re.compile('(few|Few)')
 
     def parse_attachment_block(self, block):
@@ -236,26 +233,25 @@ class EthnologueParser(OnlineParser):
                 self.sil = sil_code
                 url = '{0}/{1}'.format(self.base_url, self.sil)
                 html = get_html(url)
-                dictionary = LanguageUpdate()
-                dictionary.sil = sil_code
-                dictionary.name = self.get_title(html)
-                dictionary.country = self.get_country(html)
+                d = {}
+                d['sil'] = sil_code
+                d['name'] = self.get_title(html)
+                d['country'] = self.get_country(html)
                 main_items = self.process_main_table_rows(html)
                 if main_items is not None:
                     for key, value in main_items:
                         if key in self.needed_keys:
-                            setattr(dictionary, self.needed_keys[key], value)
-                        # TODO
-                        # put this into needed keys when done
-                        if key == 'Population':
-                            population, ethnic_population\
-                                    = self.normalize_population(value)
-                            dictionary.population = population
-                            dictionary.ethnic_population = ethnic_population
-                        elif key == 'Language Status':
-                            dictionary.status = \
+                            if key == 'Population':
+                                population, ethnic_population = \
+                                    self.normalize_population(value)
+                                d['eth_population'] = population
+                                d['eth_ethnic_population'] = ethnic_population
+                            elif key == 'Language Status':
+                                d['eth_status'] = \
                                     self.normalize_lang_status(value)
-                yield dictionary
+                            else:
+                                d[self.needed_keys[key]] = value
+                yield d
             except ParserException:
                 errors.add(sil_code)
 
