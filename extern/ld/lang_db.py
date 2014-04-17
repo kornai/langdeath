@@ -104,12 +104,12 @@ class LanguageDB(object):
             raise TypeError("LanguageDB.get_closest " +
                             "got non-dict instance as @lang")
 
-        if "sil" in lang.__dict__:
-            languages = Language.objects.filter(sil=lang.sil)
+        if "sil" in lang:
+            languages = Language.objects.filter(sil=lang['sil'])
             return languages
 
-        if "name" in lang.__dict__:
-            languages = Language.objects.filter(name=lang.name)
+        if "name" in lang:
+            languages = Language.objects.filter(name=lang['name'])
             return languages
 
         return []
