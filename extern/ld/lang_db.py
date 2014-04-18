@@ -33,6 +33,8 @@ class LanguageDB(object):
             self.add_country(data, lang)
         elif name == "name":
             self.add_name(data, lang)
+        elif name == "alt_names":
+            self.add_name(data, lang)
 
     def add_name(self, data, lang):
         if lang.name == "":
@@ -42,8 +44,16 @@ class LanguageDB(object):
         if data == lang.name:
             return
 
-        # add alternative name
-        AlternativeName(language=lang, name=data).save()
+        self.add_alt_name(data, lang)
+
+    def add_alt_name(self, data, lang):
+        if type(data) == str or type(data) == unicode:
+            AlternativeName(language=lang, name=data).save()
+        elif type(data) == list:
+            for d in data:
+                self.add_alt_name(d, lang)
+        else:
+            raise LangdeathException("LangDB.add_alt_name got unknown type")
 
     def add_codes(self, data, lang):
         for src, code in data.iteritems():
@@ -62,11 +72,11 @@ class LanguageDB(object):
 
             else:
                 data = self.country_alternatives[data]
-                cs = Country.objects.filter(name=data)
-                if len(cs) == 0:
-                    raise LangdeathException(u"unknown country: {0}".format(
-                        data).encode("utf-8"))
-                LanguageCountry(language=lang, country=cs[0]).save()
+        cs = Country.objects.filter(name=data)
+        if len(cs) == 0:
+            raise LangdeathException(u"unknown country: {0}".format(
+                data).encode("utf-8"))
+        LanguageCountry(language=lang, country=cs[0]).save()
 
     def add_new_language(self, lang):
         """Inserts new language to db"""
