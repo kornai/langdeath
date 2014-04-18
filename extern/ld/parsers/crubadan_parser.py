@@ -4,8 +4,9 @@ from base_parsers import OnlineParser
 from ld.langdeath_exceptions import ParserException
 from utils import get_html, replace_html_formatting
 
+
 class CrubadanParser(OnlineParser):
-    
+
     def __init__(self):
 
         self.url = 'http://borel.slu.edu/crubadan/stadas.html'
@@ -32,8 +33,7 @@ class CrubadanParser(OnlineParser):
             return m.groups()[0]
         except Exception as e:
             raise ParserException(
-                '{0} in CrubadanParser.get_tabular'
-                    .format(type(e)))
+                '{0} in CrubadanParser.get_tabular'.format(type(e)))
 
     def split_row(self, row):
 
@@ -84,11 +84,13 @@ class CrubadanParser(OnlineParser):
 
         html = get_html(self.url)
         for dict_ in self.generate_dictionaries(html):
+            print dict_
+            quit()
             yield dict_
 
 
 def main():
-    
+
     parser = CrubadanParser()
     for d in parser.parse():
         print repr(d)
