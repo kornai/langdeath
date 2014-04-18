@@ -79,7 +79,7 @@ class CrubadanParser(OnlineParser):
                     value = cells[i]
                 d[key] = value
                 return d
-                    
+
         except Exception as e:
             raise ParserException(
                 '{0} in CrubadanParser.get_row_dict'
