@@ -1,6 +1,6 @@
 import logging
 
-#from django.db import transaction
+from django.db import transaction
 
 from dld.models import Language
 
