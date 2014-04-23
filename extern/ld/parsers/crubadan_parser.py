@@ -40,7 +40,7 @@ class CrubadanParser(OnlineParser):
         try:
             row = row.replace('\n', '')
             row = replace_html_formatting(row)
-            return [item.strip('</td> ')
+            return [item.replace('</td> ', '')
                     for item in re.split('<td.*?>', row)[1:]]
         except Exception as e:
             raise ParserException(
