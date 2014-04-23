@@ -26,15 +26,17 @@ class Code(models.Model):
     language = models.ForeignKey("Language")
     code_name = models.CharField(max_length=100)
     code = models.CharField(max_length=100)
+
     class Meta:
-        unique_together = ["language", "code_name", "code"]
+        unique_together = (("language", "code_name", "code"), )
 
 
 class AlternativeName(models.Model):
     language = models.ForeignKey("Language")
     name = models.CharField(max_length=100)
+
     class Meta:
-        unique_together = ["language", "name"]
+        unique_together = (("language", "name"), )
 
 
 class Speaker(models.Model):
@@ -60,8 +62,9 @@ class Country(models.Model):
 class LanguageCountry(models.Model):
     language = models.ForeignKey("Language")
     country = models.ForeignKey("Country")
+
     class Meta:
-        unique_together = ["language", "country"]
+        unique_together = (("language", "country"), )
 
 
 class CountryName(models.Model):
