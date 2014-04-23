@@ -14,7 +14,7 @@ class LanguageDB(object):
             u'C\xf4te d\u2019Ivoire': 'Ivory Coast',
             u'Russian Federation': 'Russia',
             u'Viet Nam': 'Vietnam',
-            u'S\xe3o Tom\xe9 e Princ\xedpe': 'Sao Tome e Principe',
+            u'S\xe3o Tom\xe9 e Pr\xedncipe': 'Sao Tome and Principe',
             u'Congo': ['Democratic Republic of the Congo',
                        'Republic of the Congo'],
             u'Palestine': 'Palestinian Territory',
