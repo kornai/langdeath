@@ -1,6 +1,6 @@
 import logging
 
-#from django.db import transaction
+from django.db import transaction
 
 from dld.models import Language
 
@@ -11,6 +11,7 @@ from ld.langdeath_exceptions import UnknownLanguageException, \
 # parsers
 from ld.parsers.iso_639_3_parser import ParseISO639_3
 from ld.parsers.ethnologue_parser import EthnologueParser
+from ld.parsers.crubadan_parser import CrubadanParser
 
 
 class ParserAggregator(object):
@@ -20,6 +21,7 @@ class ParserAggregator(object):
     """
     def __init__(self):
         self.parsers = [ParseISO639_3(), EthnologueParser()]
+        #self.parsers = [CrubadanParser()]
         self.lang_db = LanguageDB()
         self.trusted_parsers = set([ParseISO639_3])
         self.parsers_needs_sil = set([EthnologueParser])
@@ -62,7 +64,7 @@ class ParserAggregator(object):
                             "{1} that seems to be a new language, but" + \
                             "this parser is not a trusted parser"
                         raise UnknownLanguageException(msg.format(
-                            type(parser), lang.__dict__))
+                            type(parser), lang))
             except ParserException as e:
                 logging.exception(e)
                 continue
