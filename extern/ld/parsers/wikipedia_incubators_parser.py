@@ -6,7 +6,7 @@ from utils import get_html, replace_html_formatting
 
 
 class WikipediaIncubatorsParser(OnlineParser):
-    
+
     def __init__(self):
 
         self.url = 'http://incubator.wikimedia.org/wiki/Incubator:Wikis'
@@ -34,14 +34,14 @@ class WikipediaIncubatorsParser(OnlineParser):
         except Exception as e:
             raise ParserException(
                 '{0} in WikipediaIncubatorsParser.get_tabular'
-                    .format(type(e)))
+                .format(type(e)))
 
     def split_row(self, row):
 
         try:
             row = row.replace('\n', '')
             row = replace_html_formatting(row)
-            return [item.strip('</td> ')
+            return [item.replace('</td> ', '')
                     for item in re.split('<td.*?>', row)[1:]]
         except Exception as e:
             raise ParserException(
