@@ -73,12 +73,19 @@ class CrubadanParser(OnlineParser):
                         value = int(cells[i])
                     except ValueError:
                         value = None
-                elif key == "Alternative names":
+                elif key == "Alternate names":
                     value = [s.strip() for s in cells[i].split(",")]
+                elif key in ["FLOSS SplChk", "WT", "UDHR"]:
+                    v = cells[i]
+                    if v == "-" or v == "no":
+                        value = False
+                    else:
+                        value = True
                 else:
                     value = cells[i]
-                d[key] = value
-                return d
+                if key in self.needed_keys:
+                    d[self.needed_keys[key]] = value
+            return d
 
         except Exception as e:
             raise ParserException(
@@ -113,7 +120,6 @@ class CrubadanParser(OnlineParser):
         html = get_html(self.url)
         for dict_ in self.generate_dictionaries(html):
             print dict_
-            quit()
             yield dict_
 
 
