@@ -38,7 +38,7 @@ variant.
 microsoft_if_pack contains data about Office Language Interface Packs. The
 file has the following tab-separated fileds:
     language name in English
-    native name	of the language
+    native name of the language
     Office 2003
     Office 2007
     Office 2010	
