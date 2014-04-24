@@ -1,0 +1,6 @@
+Files mac_input and mac_input_partial_support list input methods in Mac 10.9
+by the English names of the languages.
+In some cases, additional information is specified in parens: 
+    script (Cyrillic, Latin, or Arabic), 
+    country, or, 
+    in case of Chinese, Traditional or Simplified.
