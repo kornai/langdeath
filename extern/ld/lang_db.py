@@ -1,7 +1,6 @@
 import logging
 
-from dld.models import Language, Code, Country, LanguageCountry, \
-    AlternativeName
+from dld.models import Language, Code, Country, AlternativeName
 
 from ld.langdeath_exceptions import LangdeathException
 
@@ -53,7 +52,11 @@ class LanguageDB(object):
 
     def add_alt_name(self, data, lang):
         if type(data) == str or type(data) == unicode:
-            AlternativeName(language=lang, name=data).save()
+            a = AlternativeName(name=data)
+            a.save()
+            lang.save()
+            lang.alt_name.add(a)
+            lang.save()
         elif type(data) == list:
             for d in data:
                 self.add_alt_name(d, lang)
@@ -65,8 +68,10 @@ class LanguageDB(object):
             c = Code()
             c.code_name = src
             c.code = code
-            c.language_id = lang
             c.save()
+            lang.save()
+            lang.code.add(c)
+            lang.save()
 
     def add_country(self, data, lang):
         if data in self.country_alternatives:
@@ -81,7 +86,11 @@ class LanguageDB(object):
         if len(cs) == 0:
             raise LangdeathException("unknown country for sil {0}: {1}".format(
                 lang.sil, repr(data)))
-        LanguageCountry(language=lang, country=cs[0]).save()
+        c = cs[0]
+        lang.save()
+        c.save()
+        lang.country.add(c)
+        lang.save()
 
     def add_new_language(self, lang):
         """Inserts new language to db"""
