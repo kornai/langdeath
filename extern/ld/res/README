@@ -1,22 +1,32 @@
-Files in this directory contain information in connected withc Mac.
+Files in this directory contain information in connection operating
+systems support of languages.
 
-INPUT METHODS
+1. MAC
 
-Files mac_input and mac_input_partial_support list input methods in Mac 10.9
-by the English names of the languages.
+1.1 INPUT METHODS
+
+mac_input and mac_input_partial_support list input methods in Mac 10.9 by
+the English names of the languages.
 In some cases, additional information is specified in parens: 
     script (Cyrillic, Latin, or Arabic), 
     country, or, 
     in case of Chinese, Traditional or Simplified.
 
-SUPPORT
+1.2 SUPPORT
 
-The file mac_support lists countries with Mac support, copied from
+mac_support lists countries with Mac support, copied from
 https://www.apple.com/support/country/ on 24 April 2014. 
 
-Notes:
   * For some countries, there are more languages available. In this case,
     the language is specified in parens like "Luxembourg (English)".
-  * Cover terms like "Other Asia" were dropped. These appear ar the ends of
-    the lists for coninents, and are preceeded by an Apple logo instead of
+  * Cover terms like "Other Asia" were dropped. These appear at the ends of
+    the lists for continents, and are preceded by an Apple logo instead of
     the flag of the country.
+
+2. WINDOWS 7 LANGUAGE PACKS 
+
+microsoft_pack lists languages with a Windows 7 language pack. The first
+filed contains the name of the language in English, and the second one,
+separated by tab, contains the inner (local) name. There are parens, similar
+to those with Mac input methods: country, script variant, or language
+variant.
