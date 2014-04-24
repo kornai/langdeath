@@ -1,7 +1,7 @@
 Files in this directory contain information in connection operating
 systems support of languages.
 
-1. MAC
+1 MAC
 
 1.1 INPUT METHODS
 
@@ -23,10 +23,24 @@ https://www.apple.com/support/country/ on 24 April 2014.
     the lists for continents, and are preceded by an Apple logo instead of
     the flag of the country.
 
-2. WINDOWS 7 LANGUAGE PACKS 
+2 MICROSOFT
+
+2.1 WINDOWS 7 LANGUAGE PACKS 
 
 microsoft_pack lists languages with a Windows 7 language pack. The first
 filed contains the name of the language in English, and the second one,
 separated by tab, contains the inner (local) name. There are parens, similar
 to those with Mac input methods: country, script variant, or language
 variant.
+
+2.2 OFFICE LANGUAGE INTERFACE PACK
+
+microsoft_if_pack contains data about Office Language Interface Packs. The
+file has the following tab-separated fileds:
+    language name in English
+    native name	of the language
+    Office 2003
+    Office 2007
+    Office 2010	
+    Office 2013
+Filed values are download, buy, or none.
