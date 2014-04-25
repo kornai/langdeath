@@ -21,7 +21,6 @@ class ParserAggregator(object):
     """
     def __init__(self):
         self.parsers = [ParseISO639_3(), EthnologueParser()]
-        #self.parsers = [CrubadanParser()]
         self.lang_db = LanguageDB()
         self.trusted_parsers = set([ParseISO639_3])
         self.parsers_needs_sil = set([EthnologueParser])
@@ -39,36 +38,49 @@ class ParserAggregator(object):
             parse_call = lambda: parser.parse()
         return parse_call
 
-    #@transaction.commit_manually
+    @transaction.commit_manually
     def call_parser(self, parser):
         c = 0
-        for lang in self.choose_parse_call(parser)():
-            c += 1
-            if c % 100 == 0:
-                logging.info("Added {0} langs from parser {1}".format(
-                    c, type(parser)))
+        unknown_langs = set()
+        try:
+            for lang in self.choose_parse_call(parser)():
+                c += 1
+                if c % 100 == 0:
+                    logging.info("Added {0} langs from parser {1}".format(
+                        c, type(parser)))
 
-            try:
-                candidates = self.lang_db.get_closest(lang)
-                if len(candidates) > 1:
-                    best = self.lang_db.choose_candidate(candidates)
-                    self.lang_db.update_lang_data(best, lang)
-                elif len(candidates) == 1:
-                    best = candidates[0]
-                    self.lang_db.update_lang_data(best, lang)
-                elif len(candidates) == 0:
-                    if type(parser) in self.trusted_parsers:
-                        self.lang_db.add_new_language(lang)
-                    else:
-                        msg = "{0} parser produced a language with data " + \
-                            "{1} that seems to be a new language, but" + \
-                            "this parser is not a trusted parser"
-                        raise UnknownLanguageException(msg.format(
-                            type(parser), lang))
-            except ParserException as e:
-                logging.exception(e)
-                continue
-        #transaction.commit()
+                try:
+                    candidates = self.lang_db.get_closest(lang)
+                    if len(candidates) > 1:
+                        best = self.lang_db.choose_candidate(candidates)
+                        self.lang_db.update_lang_data(best, lang)
+                    elif len(candidates) == 1:
+                        best = candidates[0]
+                        self.lang_db.update_lang_data(best, lang)
+                    elif len(candidates) == 0:
+                        if type(parser) in self.trusted_parsers:
+                            self.lang_db.add_new_language(lang)
+                        else:
+                            unknown_langs.add(lang['sil'] if 'sil' in lang
+                                              else lang)
+                            msg = "{0} parser produced a language with data" \
+                                + " {1} that seems to be a new language, but" \
+                                + " this parser is not a trusted parser"
+                            raise UnknownLanguageException(msg.format(
+                                type(parser), lang))
+                except ParserException as e:
+                    logging.exception(e)
+                    continue
+                except UnknownLanguageException as e:
+                    continue
+
+        except ParserException as e:
+            logging.exception(e)
+        if len(unknown_langs) > 0:
+            logging.error("Unknown_langs: {0}".format(unknown_langs))
+
+
+        transaction.commit()
 
 
 def main():
