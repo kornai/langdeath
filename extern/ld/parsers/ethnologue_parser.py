@@ -264,8 +264,10 @@ def main():
     sil_codes = [l.strip('\n').split('\t')[0] for l in sys.stdin]
     parser = EthnologueParser()
     for d in parser.parse(sil_codes):
-        print '{0}\t{1}'.format(d.__dict__['population'],
-                                d.__dict__['ethnic_population'])
+        print '{0}\t{1}\t{2}'.format(d['sil'], d['name'],
+                                d['eth_population'])
 
 if __name__ == "__main__":
-    main()
+    import cProfile
+    cProfile.run('main()')
+    #main()

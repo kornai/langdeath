@@ -10,6 +10,21 @@ class CrubadanParser(OnlineParser):
     def __init__(self):
 
         self.url = 'http://borel.slu.edu/crubadan/stadas.html'
+        # keys that we didn't use yet:
+        # Classification, Polluters, Contact(s), Update, Close to
+        self.needed_keys = {
+            'ISO 639-3': "sil",
+            'Name (English)': 'name',
+            'Name (Native)': 'native_name',
+            'Alternate names': 'alt_names',
+            'Docs': 'cru_docs',
+            'Words': 'cru_words',
+            'Characters': 'cru_characters',
+            'Country': 'country',
+            'FLOSS SplChk': 'cru_floss_splchk',
+            'WT': 'cru_watchtower',
+            'UDHR': 'cru_udhr',
+        }
 
     def generate_rows(self, tabular):
 
@@ -33,8 +48,7 @@ class CrubadanParser(OnlineParser):
             return m.groups()[0]
         except Exception as e:
             raise ParserException(
-                '{0} in CrubadanParser.get_tabular'
-                .format(type(e)))
+                '{0} in CrubadanParser.get_tabular'.format(type(e)))
 
     def split_row(self, row):
 
@@ -51,8 +65,31 @@ class CrubadanParser(OnlineParser):
     def get_row_dict(self, column_titles, cells):
 
         try:
-            return dict([(column_titles[i], cells[i])
-                         for i in xrange(len(column_titles))])
+            d = {}
+            for i in xrange(len(column_titles)):
+                key = column_titles[i]
+                if key in ["Docs", "Words", "Characters"]:
+                    try:
+                        value = int(cells[i])
+                    except ValueError:
+                        value = None
+                elif key == "Alternate names":
+                    if cells[i] == "-":
+                        value = []
+                    else:
+                        value = [s.strip() for s in cells[i].split(",")]
+                elif key in ["FLOSS SplChk", "WT", "UDHR"]:
+                    v = cells[i]
+                    if v == "-" or v == "no":
+                        value = False
+                    else:
+                        value = True
+                else:
+                    value = (cells[i] if cells[i] != "-" else None)
+                if key in self.needed_keys:
+                    d[self.needed_keys[key]] = value
+            return d
+
         except Exception as e:
             raise ParserException(
                 '{0} in CrubadanParser.get_row_dict'

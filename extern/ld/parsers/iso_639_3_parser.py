@@ -56,7 +56,7 @@ class ParseISO639_3(OnlineParser):
                 d['name'] = ref_name.decode("utf-8")
                 d['sil'] = sil_code
                 if part1:
-                    d['other_codes'] = {'iso-639-1': [part1]}
+                    d['other_codes'] = {'iso-639-1': part1}
 
                 d['iso_scope'] = scope
                 d['iso_type'] = language_type
