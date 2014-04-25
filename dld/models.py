@@ -1,16 +1,63 @@
 from django.db import models
 from django.utils import timezone
-from jsonfield import JSONField
 
 
 class Language(models.Model):
-
-    english_name = models.CharField(max_length=100)
-    sil = models.CharField(max_length=10, primary_key=True)
-    local_name = models.CharField(max_length=100, blank=True)
+    name = models.CharField(max_length=100)
+    native_name = models.CharField(max_length=100)
+    sil = models.CharField(max_length=10, unique=True)
     last_updated = models.DateTimeField('last updated', default=timezone.now())
-    l1_speakers = JSONField()
-    other_codes = JSONField()
+    iso_scope = models.CharField(max_length=20, blank=True)
+    iso_type = models.CharField(max_length=100, blank=True)
+    eth_status = models.CharField(max_length=100, blank=True)
+    eth_population = models.IntegerField(blank=True, null=True)
+    cru_docs = models.IntegerField(blank=True, null=True)
+    cru_words = models.IntegerField(blank=True, null=True)
+    cru_characters = models.IntegerField(blank=True, null=True)
+    cru_floss_splchk = models.BooleanField(default=False)
+    cru_watchtower = models.BooleanField(default=False)
+    cru_udhr = models.BooleanField(default=False)
+
+    # many to many fields
+    code = models.ManyToManyField('Code', related_name='codes')
+    alt_name = models.ManyToManyField('AlternativeName',
+                                      related_name='alt_names')
+    country = models.ManyToManyField('Country', related_name='countries')
+    speaker = models.ManyToManyField('Speaker', related_name='speakers')
 
     def __unicode__(self):
-        return u"{0} ({1})".format(self.english_name, self.sil)
+        return u"{0} ({1})".format(self.name, self.sil)
+
+
+class Code(models.Model):
+    code_name = models.CharField(max_length=100)
+    code = models.CharField(max_length=100)
+
+
+class AlternativeName(models.Model):
+    name = models.CharField(max_length=100)
+
+
+class Speaker(models.Model):
+    l_type = models.CharField(max_length=2,
+                              choices=[("L1", "L1"), ("L2", "L2")])
+    source = models.CharField(max_length=100)
+
+
+class Country(models.Model):
+    """iso3611"""
+    iso = models.CharField(max_length=2)
+    iso3 = models.CharField(max_length=3)
+    name = models.CharField(max_length=100)
+    capital = models.CharField(max_length=100)
+    area = models.FloatField(default=0, blank=True)
+    population = models.IntegerField()
+    continent = models.CharField(max_length=100)
+    tld = models.CharField(max_length=10)
+    native_name = models.CharField(max_length=100, blank=True)
+
+
+class CountryName(models.Model):
+    """Alternative country names"""
+    country = models.ForeignKey("Country")
+    name = models.CharField(max_length=100)

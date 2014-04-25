@@ -2,7 +2,6 @@ import urllib
 from HTMLParser import HTMLParser
 
 from base_parsers import OnlineParser
-from iso_639_3_parser import LanguageUpdate
 
 
 class OmniglotHTMLParser(HTMLParser):
@@ -17,9 +16,9 @@ class OmniglotHTMLParser(HTMLParser):
             self.in_list = True
         elif self.in_list and tag == 'a':
             self.in_name = True
-            self.lang_ud = LanguageUpdate()
-            self.lang_ud.name = ''
-            self.lang_ud.in_omniglot = True
+            self.lang_ud = {}
+            self.lang_ud['name'] = ''
+            self.lang_ud['in_omniglot'] = True
         elif tag == 'p':
             self.in_name = False
 
@@ -28,12 +27,12 @@ class OmniglotHTMLParser(HTMLParser):
             self.in_list = False
         elif tag == 'a':
             self.in_name = False
-            if self.in_list and self.lang_ud.name not in ['', 'top']:
+            if self.in_list and self.lang_ud['name'] not in ['', 'top']:
                 self.lang_updates.append(self.lang_ud)
 
     def handle_text(self, text):
         if self.in_name:
-            self.lang_ud.name += self.unescape(text)
+            self.lang_ud['name'] += self.unescape(text)
 
     def handle_data(self, data):
         self.handle_text(data)
@@ -49,7 +48,7 @@ class OmniglotParser(OnlineParser):
 
     def __init__(self):
         self.url = 'http://www.omniglot.com/writing/languages.htm'
-        
+
     def parse(self):
         """
         yields LanguageUpdates of languages listed by Omniglot with in_omniglot
