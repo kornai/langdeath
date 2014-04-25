@@ -21,7 +21,6 @@ class ParserAggregator(object):
     """
     def __init__(self):
         self.parsers = [ParseISO639_3(), EthnologueParser()]
-        #self.parsers = [CrubadanParser()]
         self.lang_db = LanguageDB()
         self.trusted_parsers = set([ParseISO639_3])
         self.parsers_needs_sil = set([EthnologueParser])
@@ -42,6 +41,7 @@ class ParserAggregator(object):
     @transaction.commit_manually
     def call_parser(self, parser):
         c = 0
+        unknown_langs = set()
         try:
             for lang in self.choose_parse_call(parser)():
                 c += 1
@@ -61,6 +61,8 @@ class ParserAggregator(object):
                         if type(parser) in self.trusted_parsers:
                             self.lang_db.add_new_language(lang)
                         else:
+                            unknown_langs.add(lang['sil'] if 'sil' in lang
+                                              else lang)
                             msg = "{0} parser produced a language with data" \
                                 + " {1} that seems to be a new language, but" \
                                 + " this parser is not a trusted parser"
@@ -69,9 +71,14 @@ class ParserAggregator(object):
                 except ParserException as e:
                     logging.exception(e)
                     continue
+                except UnknownLanguageException as e:
+                    continue
 
         except ParserException as e:
             logging.exception(e)
+        if len(unknown_langs) > 0:
+            logging.error("Unknown_langs: {0}".format(unknown_langs))
+
 
         transaction.commit()
 
