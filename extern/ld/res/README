@@ -1,9 +1,7 @@
 Files in this directory contain information in connection operating
-systems support of languages.
+system support of languages.
 
-1 MAC
-
-1.1 INPUT METHODS
+1 MAC INPUT METHODS
 
 mac_input and mac_input_partial_support list input methods in Mac 10.9 by
 the English names of the languages.
@@ -11,17 +9,6 @@ In some cases, additional information is specified in parens:
     script (Cyrillic, Latin, or Arabic), 
     country, or, 
     in case of Chinese, Traditional or Simplified.
-
-1.2 SUPPORT
-
-mac_support lists countries with Mac support, copied from
-https://www.apple.com/support/country/ on 24 April 2014. 
-
-  * For some countries, there are more languages available. In this case,
-    the language is specified in parens like "Luxembourg (English)".
-  * Cover terms like "Other Asia" were dropped. These appear at the ends of
-    the lists for continents, and are preceded by an Apple logo instead of
-    the flag of the country.
 
 2 MICROSOFT
 
