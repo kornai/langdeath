@@ -21,7 +21,8 @@ class ParserAggregator(object):
     two langauges (or any other data) that are possibly the same
     """
     def __init__(self):
-        self.parsers = [ParseISO639_3(), EthnologueParser()]
+        self.parsers = [ParseISO639_3(), EthnologueParser(), CrubadanParser()]
+        self.parsers = [OmniglotParser()]
         self.lang_db = LanguageDB()
         self.trusted_parsers = set([ParseISO639_3])
         self.parsers_needs_sil = set([EthnologueParser])
@@ -39,7 +40,7 @@ class ParserAggregator(object):
             parse_call = lambda: parser.parse()
         return parse_call
 
-    @transaction.commit_manually
+    #@transaction.commit_manually
     def call_parser(self, parser):
         c = 0
         unknown_langs = set()
@@ -63,7 +64,7 @@ class ParserAggregator(object):
                             self.lang_db.add_new_language(lang)
                         else:
                             unknown_langs.add(lang['sil'] if 'sil' in lang
-                                              else lang)
+                                              else repr(lang))
                             msg = "{0} parser produced a language with data" \
                                 + " {1} that seems to be a new language, but" \
                                 + " this parser is not a trusted parser"
@@ -80,8 +81,7 @@ class ParserAggregator(object):
         if len(unknown_langs) > 0:
             logging.error("Unknown_langs: {0}".format(unknown_langs))
 
-
-        transaction.commit()
+        #transaction.commit()
 
 
 def main():
