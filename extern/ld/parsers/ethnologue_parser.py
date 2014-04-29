@@ -17,7 +17,8 @@ class EthnologueParser(OnlineParser):
             'Name': 'name',
             'Country': 'country',
             'Language Status': 'eth_status',
-            'Population': 'eth_population'
+            'Population': 'eth_population',
+            'Alternate Names': 'alt_names'
         }
 
     def strip_nonstring(self, string):
@@ -244,11 +245,15 @@ class EthnologueParser(OnlineParser):
                             if key == 'Population':
                                 population, ethnic_population = \
                                     self.normalize_population(value)
-                                d['eth_population'] = population
+                                d[self.needed_keys[key]] = population
                                 d['eth_ethnic_population'] = ethnic_population
                             elif key == 'Language Status':
-                                d['eth_status'] = \
+                                d[self.needed_keys[key]] = \
                                     self.normalize_lang_status(value)
+                            elif key == "Alternate Names":
+                                value = [s.strip() for s in value.split(",")]
+                                d[self.needed_keys[key]] = value
+
                             else:
                                 d[self.needed_keys[key]] = value
                 yield d
@@ -264,8 +269,7 @@ def main():
     sil_codes = [l.strip('\n').split('\t')[0] for l in sys.stdin]
     parser = EthnologueParser()
     for d in parser.parse(sil_codes):
-        print '{0}\t{1}\t{2}'.format(d['sil'], d['name'],
-                                d['eth_population'])
+        print '{0}\t{1}\t{2}'.format(d['sil'], d['name'], d['eth_population'])
 
 if __name__ == "__main__":
     import cProfile
