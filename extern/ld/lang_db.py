@@ -73,21 +73,19 @@ class LanguageDB(object):
         if len(cs) == 0:
             altnames = CountryName.objects.filter(name=data)
             if len(altnames) > 0:
-                if len(altnames) == 1:
-                    c = altnames[0].country
-                else:
-                    raise LangdeathException("more countries for this name: " +
-                                             u"{0}".format(data))
+                for altname in altnames:
+                    cname = altname.country.name
+                    self.add_country(cname, lang)
             else:
                 raise LangdeathException(
                     "unknown country for sil {0}: {1}".format(
                         lang.sil, repr(data)))
         else:
             c = cs[0]
-        lang.save()
-        c.save()
-        lang.country.add(c)
-        lang.save()
+            lang.save()
+            c.save()
+            lang.country.add(c)
+            lang.save()
 
     def add_new_language(self, lang):
         """Inserts new language to db"""
