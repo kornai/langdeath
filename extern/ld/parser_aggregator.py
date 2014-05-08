@@ -22,7 +22,7 @@ class ParserAggregator(object):
     def __init__(self):
         self.parsers = [ParseISO639_3(), EthnologueParser()]
         self.lang_db = LanguageDB()
-        self.trusted_parsers = set([ParseISO639_3])
+        self.trusted_parsers = set([ParseISO639_3, EthnologueParser])
         self.parsers_needs_sil = set([EthnologueParser])
 
     def run(self):
