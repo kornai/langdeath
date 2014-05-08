@@ -1,4 +1,5 @@
 import logging
+import sys
 
 from django.db import transaction
 
@@ -10,8 +11,9 @@ from ld.langdeath_exceptions import UnknownLanguageException, \
 
 # parsers
 from ld.parsers.iso_639_3_parser import ParseISO639_3
-from ld.parsers.ethnologue_parser import EthnologueParser
-from ld.parsers.crubadan_parser import CrubadanParser
+from ld.parsers.ethnologue_parser import EthnologueOfflineParser, \
+    EthnologueOnlineParser
+#from ld.parsers.crubadan_parser import CrubadanParser
 
 
 class ParserAggregator(object):
@@ -19,11 +21,14 @@ class ParserAggregator(object):
     the results, call any extra methods that will be required to merge
     two langauges (or any other data) that are possibly the same
     """
-    def __init__(self):
-        self.parsers = [ParseISO639_3(), EthnologueParser()]
+    def __init__(self, eth_dump_dir=''):
+        eth_parser = (EthnologueOnlineParser() if eth_dump_dir
+                      else EthnologueOfflineParser(eth_dump_dir))
+        self.parsers = [ParseISO639_3(), eth_parser()]
         self.lang_db = LanguageDB()
-        self.trusted_parsers = set([ParseISO639_3, EthnologueParser])
-        self.parsers_needs_sil = set([EthnologueParser])
+        self.trusted_parsers = set([ParseISO639_3, EthnologueOnlineParser,
+                                   EthnologueOfflineParser])
+        self.parsers_needs_sil = set([EthnologueOfflineParser])
 
     def run(self):
         for parser in self.parsers:
@@ -79,13 +84,12 @@ class ParserAggregator(object):
         if len(unknown_langs) > 0:
             logging.error("Unknown_langs: {0}".format(unknown_langs))
 
-
         transaction.commit()
 
 
 def main():
     logging.basicConfig(level=logging.INFO)
-    pa = ParserAggregator()
+    pa = ParserAggregator(sys.argv[1])
     pa.run()
 
 if __name__ == "__main__":
