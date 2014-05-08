@@ -1,6 +1,6 @@
 import logging
 
-from dld.models import Language, Code, Country, AlternativeName
+from dld.models import Language, Code, Country, AlternativeName, CountryName
 
 from ld.langdeath_exceptions import LangdeathException
 
@@ -9,19 +9,6 @@ class LanguageDB(object):
     def __init__(self):
         self.languages = []
         self.spec_fields = set(["other_codes", "country", "name"])
-        self.country_alternatives = {
-            u'C\xf4te d\u2019Ivoire': 'Ivory Coast',
-            u'Russian Federation': 'Russia',
-            u'Viet Nam': 'Vietnam',
-            u'S\xe3o Tom\xe9 e Pr\xedncipe': 'Sao Tome and Principe',
-            u'Congo': ['Democratic Republic of the Congo',
-                       'Republic of the Congo'],
-            u'Palestine': 'Palestinian Territory',
-            u'Vatican State': 'Vatican',
-            u'Korea, South': 'South Korea',
-            u'Cape Verde Islands': 'Cape Verde',
-            u'R\xe9union': 'Reunion',
-        }
 
     def add_attr(self, name, data, lang):
         if name in self.spec_fields:
@@ -84,13 +71,21 @@ class LanguageDB(object):
                 data = self.country_alternatives[data]
         cs = Country.objects.filter(name=data)
         if len(cs) == 0:
-            raise LangdeathException("unknown country for sil {0}: {1}".format(
-                lang.sil, repr(data)))
-        c = cs[0]
-        lang.save()
-        c.save()
-        lang.country.add(c)
-        lang.save()
+            altnames = CountryName.objects.filter(name=data)
+            if len(altnames) > 0:
+                for altname in altnames:
+                    cname = altname.country.name
+                    self.add_country(cname, lang)
+            else:
+                raise LangdeathException(
+                    "unknown country for sil {0}: {1}".format(
+                        lang.sil, repr(data)))
+        else:
+            c = cs[0]
+            lang.save()
+            c.save()
+            lang.country.add(c)
+            lang.save()
 
     def add_new_language(self, lang):
         """Inserts new language to db"""
