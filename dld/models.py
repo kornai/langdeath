@@ -48,7 +48,7 @@ class Country(models.Model):
     """iso3611"""
     iso = models.CharField(max_length=2)
     iso3 = models.CharField(max_length=3)
-    name = models.CharField(max_length=100)
+    name = models.CharField(max_length=100, unique=True)
     capital = models.CharField(max_length=100)
     area = models.FloatField(default=0, blank=True)
     population = models.IntegerField()
