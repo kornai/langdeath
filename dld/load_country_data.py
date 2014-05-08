@@ -1,6 +1,7 @@
 import sys
 import urllib2
 import contextlib
+from collections import defaultdict
 
 from dld.models import Country, CountryName
 
@@ -29,11 +30,11 @@ def download_data():
 
 
 def read_alternative_names(istream):
-    d = {}
+    d = defaultdict(list)
     for l in istream:
         le = l.strip().decode("utf-8").split("\t")
         alt_name, orig_name = le
-        d[alt_name] = orig_name
+        d[alt_name].append(orig_name)
     return d
 
 
@@ -54,16 +55,18 @@ def fill_countries(names):
 
 
 def fill_alt_names(alt_names):
-    for a, c in alt_names.iteritems():
-        countries = Country.objects.filter(name=c)
-        if len(countries) != 1:
-            msg = "Alternative name data contains invalid country name"
-            raise Exception(msg)
-        country = countries[0]
-        country.save()
-        cn = CountryName(country=country, name=a)
-        cn.save()
-        country.save()
+    for a, cs in alt_names.iteritems():
+        for c in cs:
+            countries = Country.objects.filter(name=c)
+            if len(countries) != 1:
+                msg = "Alternative name data contains invalid country name"
+                msg += ": {0} {1}".format(a, c)
+                raise Exception(msg)
+            country = countries[0]
+            country.save()
+            cn = CountryName(country=country, name=a)
+            cn.save()
+            country.save()
 
 
 def fill_data(names, alt_names):
