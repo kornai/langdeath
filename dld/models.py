@@ -59,6 +59,9 @@ class Country(models.Model):
     tld = models.CharField(max_length=10, null=True)
     native_name = models.CharField(max_length=100, blank=True, null=True)
 
+    def __unicode__(self):
+        return self.name
+
 
 class CountryName(models.Model):
     """Alternative country names"""

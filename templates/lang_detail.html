@@ -3,14 +3,21 @@
 
 {% block content %}
 <h2>{{ object }}</h2>
-English name: {{ object.name }}
+<b>English name:</b> {{ object.name }}
 <br />
-Native name: {{ object.native_name }}
+<b>Native name:</b> {{ object.native_name }}
 <br />
 SIL code: {{ object.sil }}
 <br />
-Alternative names:
+<b>Alternative names:</b>
 {% for a in object.alt_name.all|dictsort:"name" %}
-{{ a }} {% if not forloop.last %}, {% endif %}
+{{ a }}{% if not forloop.last %}, {% endif %}
+{% endfor %}
+<br />
+<b>Population (Ethnologue):</b> {{ object.eth_population }}
+<br />
+<b>Country:</b>
+{% for c in object.country.all|dictsort:"name" %}
+{{ c }}{% if not forloop.last %}, {% endif %}
 {% endfor %}
 {% endblock content %}
