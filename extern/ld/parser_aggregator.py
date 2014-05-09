@@ -1,4 +1,5 @@
 import logging
+import sys
 
 from django.db import transaction
 
@@ -11,7 +12,8 @@ from ld.langdeath_exceptions import UnknownLanguageException, \
 # parsers
 from ld.parsers.iso_639_3_parser import ParseISO639_3
 from ld.parsers.omniglot_parser import OmniglotParser
-from ld.parsers.ethnologue_parser import EthnologueParser
+from ld.parsers.ethnologue_parser import EthnologueOfflineParser, \
+    EthnologueOnlineParser
 from ld.parsers.crubadan_parser import CrubadanParser
 
 
@@ -20,12 +22,16 @@ class ParserAggregator(object):
     the results, call any extra methods that will be required to merge
     two langauges (or any other data) that are possibly the same
     """
-    def __init__(self):
-        self.parsers = [ParseISO639_3(), EthnologueParser(), CrubadanParser()]
+    def __init__(self, eth_dump_dir=''):
+        eth_parser = (EthnologueOnlineParser() if not eth_dump_dir
+                      else EthnologueOfflineParser(eth_dump_dir))
+        self.parsers = [ParseISO639_3(), eth_parser, CrubadanParser()]
         self.parsers = [OmniglotParser()]
         self.lang_db = LanguageDB()
-        self.trusted_parsers = set([ParseISO639_3, EthnologueParser])
-        self.parsers_needs_sil = set([EthnologueParser])
+        self.trusted_parsers = set([ParseISO639_3, EthnologueOnlineParser,
+                                   EthnologueOfflineParser])
+        self.parsers_needs_sil = set([EthnologueOfflineParser,
+                                      EthnologueOnlineParser])
 
     def run(self):
         for parser in self.parsers:
@@ -40,7 +46,7 @@ class ParserAggregator(object):
             parse_call = lambda: parser.parse()
         return parse_call
 
-    #@transaction.commit_manually
+    @transaction.commit_manually
     def call_parser(self, parser):
         c = 0
         unknown_langs = set()
@@ -81,12 +87,12 @@ class ParserAggregator(object):
         if len(unknown_langs) > 0:
             logging.error("Unknown_langs: {0}".format(unknown_langs))
 
-        #transaction.commit()
+        transaction.commit()
 
 
 def main():
     logging.basicConfig(level=logging.INFO)
-    pa = ParserAggregator()
+    pa = ParserAggregator(sys.argv[1])
     pa.run()
 
 if __name__ == "__main__":

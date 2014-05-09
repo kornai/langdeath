@@ -1,16 +1,16 @@
 import sys
+import os
 import re
 from utils import get_html
 
-from base_parsers import OnlineParser
+from base_parsers import OnlineParser, OfflineParser
 from ld.langdeath_exceptions import ParserException
 
 
-class EthnologueParser(OnlineParser):
+class EthnologueBaseParser(object):
 
     def __init__(self):
 
-        self.base_url = 'http://www.ethnologue.com/language'
         self.compile_patterns()
         self.needed_keys = {
             'ISO 639-3': 'sil',
@@ -227,13 +227,15 @@ class EthnologueParser(OnlineParser):
                 attachment_dict[block_title][key] = inner_dictionary[key]
         return attachment_title, attachment_dict
 
+    def get_html(self, sil):
+        raise NotImplementedError()
+
     def parse(self, sil_codes):
         errors = set()
         for sil_code in sil_codes:
             try:
                 self.sil = sil_code
-                url = '{0}/{1}'.format(self.base_url, self.sil)
-                html = get_html(url)
+                html = self.get_html(self.sil).decode('utf-8')
                 d = {}
                 d['sil'] = sil_code
                 d['name'] = self.get_title(html)
@@ -264,14 +266,46 @@ class EthnologueParser(OnlineParser):
             raise ParserException("error with sils: {0}".format(errors))
 
 
-def main():
+class EthnologueOnlineParser(OnlineParser, EthnologueBaseParser):
+
+    def __init__(self):
+        super(EthnologueOnlineParser, self).__init__()
+        self.base_url = 'http://www.ethnologue.com/language'
+
+    def get_html(self, sil):
+        url = '{0}/{1}'.format(self.base_url, self.sil)
+        return get_html(url)
+
+
+class EthnologueOfflineParser(OfflineParser, EthnologueBaseParser):
+
+    def __init__(self, basedir):
+        super(EthnologueOfflineParser, self).__init__()
+        self.basedir = basedir
+
+    def get_html(self, sil):
+        fn = '{0}/{1}'.format(self.basedir, self.sil)
+        if os.path.exists(fn):
+            return open(fn).read()
+        else:
+            raise ParserException()
+
+
+def test_online_parser():
 
     sil_codes = [l.strip('\n').split('\t')[0] for l in sys.stdin]
-    parser = EthnologueParser()
+    parser = EthnologueOnlineParser()
     for d in parser.parse(sil_codes):
         print '{0}\t{1}\t{2}'.format(d['sil'], d['name'], d['eth_population'])
 
+
+def test_offline_parser():
+
+    sil_codes = [l.strip('\n').split('\t')[0] for l in sys.stdin]
+    parser = EthnologueOfflineParser(sys.argv[1])
+    for d in parser.parse(sil_codes):
+        print '{0}\t{1}\t{2}'.format(d['sil'], d['name'], repr(d))
+
+
 if __name__ == "__main__":
-    import cProfile
-    cProfile.run('main()')
-    #main()
+    test_offline_parser()

@@ -50,12 +50,12 @@ class Country(models.Model):
     iso = models.CharField(max_length=2)
     iso3 = models.CharField(max_length=3)
     name = models.CharField(max_length=100, unique=True)
-    capital = models.CharField(max_length=100)
-    area = models.FloatField(default=0, blank=True)
-    population = models.IntegerField()
-    continent = models.CharField(max_length=100)
-    tld = models.CharField(max_length=10)
-    native_name = models.CharField(max_length=100, blank=True)
+    capital = models.CharField(max_length=100, blank=True)
+    area = models.FloatField(default=0, blank=True, null=True)
+    population = models.IntegerField(blank=True, null=True)
+    continent = models.CharField(max_length=100, null=True)
+    tld = models.CharField(max_length=10, null=True)
+    native_name = models.CharField(max_length=100, blank=True, null=True)
 
 
 class CountryName(models.Model):
