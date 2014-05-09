@@ -16,11 +16,11 @@
             <td>{{ lang.native_name }}</td>
             <td>
                 {% for a in lang.alt_name.all|dictsort:"name" %}
-                {{ a }} {% if not forloop.last %}, {% endif %}
+                {% if forloop.first %} {{ a }} </td><td>{{ lang.sil }}
+                {% else %}</td></tr><tr><td></td><td></td><td> {{ a }}{% endif %}
                 {% endfor %}
             </td>
 
-            <td>{{ lang.sil }}</td>
         </tr>
         {% endfor %}
     </table>
