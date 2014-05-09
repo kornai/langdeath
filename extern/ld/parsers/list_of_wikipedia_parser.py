@@ -6,7 +6,7 @@ from utils import get_html, replace_html_formatting
 
 
 class WikipediaListOfLanguagesParser(OnlineParser):
-    
+
     def __init__(self):
 
         self.url = 'http://meta.wikimedia.org/wiki/List_of_Wikipedias'
@@ -38,13 +38,13 @@ class WikipediaListOfLanguagesParser(OnlineParser):
         except Exception as e:
             raise ParserException(
                 '{0} in WikipediaListOfLanguagesParser.generate_tabulars'
-                    .format(type(e)))
+                .format(type(e)))
 
     def split_headline(self, headline):
 
         try:
             return headline.replace('\n', '').replace('</th>', '')\
-                    .split('<th>')
+                .split('<th>')
         except Exception as e:
             raise ParserException(
                 '{0} in WikipediaListOfLanguagesParser.split_headline'
@@ -55,7 +55,8 @@ class WikipediaListOfLanguagesParser(OnlineParser):
         try:
             row = row.replace('\n', '')
             row = replace_html_formatting(row)
-            return [item.strip('</td>') for item in re.split('<td.*?>', row)]
+            return [item.replace('</td>', '')
+                    for item in re.split('<td.*?>', row)]
         except Exception as e:
             raise ParserException(
                 '{0} in WikipediaListOfLanguagesParser.split_row'

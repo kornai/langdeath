@@ -1,6 +1,7 @@
 import logging
+import sys
 
-#from django.db import transaction
+from django.db import transaction
 
 from dld.models import Language
 
@@ -10,7 +11,9 @@ from ld.langdeath_exceptions import UnknownLanguageException, \
 
 # parsers
 from ld.parsers.iso_639_3_parser import ParseISO639_3
-from ld.parsers.ethnologue_parser import EthnologueParser
+from ld.parsers.ethnologue_parser import EthnologueOfflineParser, \
+    EthnologueOnlineParser
+from ld.parsers.crubadan_parser import CrubadanParser
 
 
 class ParserAggregator(object):
@@ -18,12 +21,15 @@ class ParserAggregator(object):
     the results, call any extra methods that will be required to merge
     two langauges (or any other data) that are possibly the same
     """
-    def __init__(self):
-        self.parsers = [ParseISO639_3(), EthnologueParser()]
-        self.parsers = [EthnologueParser()]
+    def __init__(self, eth_dump_dir=''):
+        eth_parser = (EthnologueOnlineParser() if not eth_dump_dir
+                      else EthnologueOfflineParser(eth_dump_dir))
+        self.parsers = [ParseISO639_3(), eth_parser, CrubadanParser()]
         self.lang_db = LanguageDB()
-        self.trusted_parsers = set([ParseISO639_3])
-        self.parsers_needs_sil = set([EthnologueParser])
+        self.trusted_parsers = set([ParseISO639_3, EthnologueOnlineParser,
+                                   EthnologueOfflineParser])
+        self.parsers_needs_sil = set([EthnologueOfflineParser,
+                                      EthnologueOnlineParser])
 
     def run(self):
         for parser in self.parsers:
@@ -38,41 +44,53 @@ class ParserAggregator(object):
             parse_call = lambda: parser.parse()
         return parse_call
 
-    #@transaction.commit_manually
+    @transaction.commit_manually
     def call_parser(self, parser):
         c = 0
-        for lang in self.choose_parse_call(parser)():
-            c += 1
-            if c % 100 == 0:
-                logging.info("Added {0} langs from parser {1}".format(
-                    c, type(parser)))
+        unknown_langs = set()
+        try:
+            for lang in self.choose_parse_call(parser)():
+                c += 1
+                if c % 100 == 0:
+                    logging.info("Added {0} langs from parser {1}".format(
+                        c, type(parser)))
 
-            try:
-                candidates = self.lang_db.get_closest(lang)
-                if len(candidates) > 1:
-                    best = self.lang_db.choose_candidate(candidates)
-                    self.lang_db.update_lang_data(best, lang)
-                elif len(candidates) == 1:
-                    best = candidates[0]
-                    self.lang_db.update_lang_data(best, lang)
-                elif len(candidates) == 0:
-                    if type(parser) in self.trusted_parsers:
-                        self.lang_db.add_new_language(lang)
-                    else:
-                        msg = "{0} parser produced a language with data " + \
-                            "{1} that seems to be a new language, but" + \
-                            "this parser is not a trusted parser"
-                        raise UnknownLanguageException(msg.format(
-                            type(parser), lang.__dict__))
-            except ParserException as e:
-                logging.exception(e)
-                continue
-        #transaction.commit()
+                try:
+                    candidates = self.lang_db.get_closest(lang)
+                    if len(candidates) > 1:
+                        best = self.lang_db.choose_candidate(candidates)
+                        self.lang_db.update_lang_data(best, lang)
+                    elif len(candidates) == 1:
+                        best = candidates[0]
+                        self.lang_db.update_lang_data(best, lang)
+                    elif len(candidates) == 0:
+                        if type(parser) in self.trusted_parsers:
+                            self.lang_db.add_new_language(lang)
+                        else:
+                            unknown_langs.add(lang['sil'] if 'sil' in lang
+                                              else lang)
+                            msg = "{0} parser produced a language with data" \
+                                + " {1} that seems to be a new language, but" \
+                                + " this parser is not a trusted parser"
+                            raise UnknownLanguageException(msg.format(
+                                type(parser), lang))
+                except ParserException as e:
+                    logging.exception(e)
+                    continue
+                except UnknownLanguageException as e:
+                    continue
+
+        except ParserException as e:
+            logging.exception(e)
+        if len(unknown_langs) > 0:
+            logging.error("Unknown_langs: {0}".format(unknown_langs))
+
+        transaction.commit()
 
 
 def main():
     logging.basicConfig(level=logging.INFO)
-    pa = ParserAggregator()
+    pa = ParserAggregator(sys.argv[1])
     pa.run()
 
 if __name__ == "__main__":
