@@ -38,6 +38,14 @@ def read_alternative_names(istream):
     return d
 
 
+def add_kurdistan():
+    k = Country()
+    k.iso = "xk"
+    k.iso3 = "xku"
+    k.name = "Kurdistan"
+    k.save()
+
+
 def fill_countries(names):
     for d in names:
         c = Country()
@@ -52,6 +60,7 @@ def fill_countries(names):
         c.continent = d["Continent"]
         c.tld = d["tld"]
         c.save()
+    add_kurdistan()
 
 
 def fill_alt_names(alt_names):
