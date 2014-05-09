@@ -1,12 +1,16 @@
-{% extends "base.html" %}
+{% extends "dld_base.html" %}
 {% load staticfiles %}
 
 {% block content %}
+<h2>{{ object }}</h2>
 English name: {{ object.name }}
 <br />
-alternative names: {{ object.name2 }}
+Native name: {{ object.native_name }}
 <br />
 SIL code: {{ object.sil }}
 <br />
-L1: {{ object.l1_speakers.eth.0 }}
+Alternative names:
+{% for a in object.alt_name.all|dictsort:"name" %}
+{{ a }} {% if not forloop.last %}, {% endif %}
+{% endfor %}
 {% endblock content %}
