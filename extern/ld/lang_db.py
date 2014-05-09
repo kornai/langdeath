@@ -61,6 +61,9 @@ class LanguageDB(object):
             lang.save()
 
     def add_country(self, data, lang):
+        if data is None:
+            return
+
         cs = Country.objects.filter(name=data)
         if len(cs) == 0:
             altnames = CountryName.objects.filter(name=data)
