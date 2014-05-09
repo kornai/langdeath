@@ -8,7 +8,7 @@ from ld.langdeath_exceptions import LangdeathException
 class LanguageDB(object):
     def __init__(self):
         self.languages = []
-        self.spec_fields = set(["other_codes", "country", "name"])
+        self.spec_fields = set(["other_codes", "country", "name", "alt_names"])
 
     def add_attr(self, name, data, lang):
         if name in self.spec_fields:
@@ -25,7 +25,7 @@ class LanguageDB(object):
         elif name == "name":
             self.add_name(data, lang)
         elif name == "alt_names":
-            self.add_name(data, lang)
+            self.add_alt_name(data, lang)
 
     def add_name(self, data, lang):
         if lang.name == "":
@@ -39,6 +39,11 @@ class LanguageDB(object):
 
     def add_alt_name(self, data, lang):
         if type(data) == str or type(data) == unicode:
+            data = data.lower().strip()
+            if len(lang.alt_name.filter(name=data)) > 0:
+                # duplication, don't do anything
+                return
+
             a = AlternativeName(name=data)
             a.save()
             lang.save()
