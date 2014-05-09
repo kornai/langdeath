@@ -5,8 +5,8 @@
     <h2>List of languages</h2>
     {% if languages %}
         <ul>
-        {% for lang in languages %}
-            <li><a href="/lang/{{ lang.sil }}">{{ lang.name }}</a></li>
+        {% for lang in languages|dictsort:"name" %}
+            <li><a href="/lang/{{ lang.pk }}">{{ lang.name }}</a></li>
         {% endfor %}
         </ul>
     {% else %}
