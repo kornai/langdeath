@@ -13,7 +13,7 @@ from ld.langdeath_exceptions import UnknownLanguageException, \
 from ld.parsers.iso_639_3_parser import ParseISO639_3
 from ld.parsers.ethnologue_parser import EthnologueOfflineParser, \
     EthnologueOnlineParser
-#from ld.parsers.crubadan_parser import CrubadanParser
+from ld.parsers.crubadan_parser import CrubadanParser
 
 
 class ParserAggregator(object):
@@ -22,13 +22,14 @@ class ParserAggregator(object):
     two langauges (or any other data) that are possibly the same
     """
     def __init__(self, eth_dump_dir=''):
-        eth_parser = (EthnologueOnlineParser() if eth_dump_dir
+        eth_parser = (EthnologueOnlineParser() if not eth_dump_dir
                       else EthnologueOfflineParser(eth_dump_dir))
-        self.parsers = [ParseISO639_3(), eth_parser()]
+        self.parsers = [ParseISO639_3(), eth_parser, CrubadanParser()]
         self.lang_db = LanguageDB()
         self.trusted_parsers = set([ParseISO639_3, EthnologueOnlineParser,
                                    EthnologueOfflineParser])
-        self.parsers_needs_sil = set([EthnologueOfflineParser])
+        self.parsers_needs_sil = set([EthnologueOfflineParser,
+                                      EthnologueOnlineParser])
 
     def run(self):
         for parser in self.parsers:
