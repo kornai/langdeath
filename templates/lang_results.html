@@ -6,13 +6,20 @@
     {% if languages %}
     <table>
         <tr><td>English name</td>
+            <td>Native name</td>
             <td>Alternative name(s)</td>
             <td>SIL code</td>
         </tr>
-        {% for lang in languages %}
+        {% for lang in languages|dictsort:"name" %}
         <tr>
-            <td><a href="/lang/{{ lang.sil }}">{{ lang.name }}</a></td>
-            <td>{{ lang.name2 }}</td>
+            <td><a href="/lang/{{ lang.pk }}">{{ lang.name }}</a></td>
+            <td>{{ lang.native_name }}</td>
+            <td>
+                {% for a in lang.alt_name.all|dictsort:"name" %}
+                {{ a }} {% if not forloop.last %}, {% endif %}
+                {% endfor %}
+            </td>
+
             <td>{{ lang.sil }}</td>
         </tr>
         {% endfor %}

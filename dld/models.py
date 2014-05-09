@@ -37,6 +37,9 @@ class Code(models.Model):
 class AlternativeName(models.Model):
     name = models.CharField(max_length=100)
 
+    def __unicode__(self):
+        return self.name
+
 
 class Speaker(models.Model):
     l_type = models.CharField(max_length=2,
