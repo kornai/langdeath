@@ -235,7 +235,7 @@ class EthnologueBaseParser(object):
         for sil_code in sil_codes:
             try:
                 self.sil = sil_code
-                html = self.get_html(self.sil)
+                html = self.get_html(self.sil).decode('utf-8')
                 d = {}
                 d['sil'] = sil_code
                 d['name'] = self.get_title(html)
