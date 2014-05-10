@@ -26,6 +26,8 @@ class LanguageDB(object):
             self.add_name(data, lang)
         elif name == "alt_names":
             self.add_alt_name(data, lang)
+        elif name == "champion":
+            self.add_champion(data, lang)
 
     def add_name(self, data, lang):
         if lang.name == "":
