@@ -40,6 +40,7 @@ class LanguageDB(object):
         self.add_alt_name(data, lang)
 
     def add_alt_name(self, data, lang):
+        lang.save()
         if type(data) == str or type(data) == unicode:
             data = data.lower().strip()
             if len(lang.alt_name.filter(name=data)) > 0:
@@ -48,9 +49,8 @@ class LanguageDB(object):
 
             a = AlternativeName(name=data)
             a.save()
-            lang.save()
             lang.alt_name.add(a)
-            lang.save()
+            a.save(), lang.save()
         elif type(data) == list:
             for d in data:
                 self.add_alt_name(d, lang)
@@ -95,9 +95,9 @@ class LanguageDB(object):
             msg = "champion field {0} is not deterministic".format(chs)
             raise LangdeathException(msg)
         ch = chs[0]
-        chs.save(), lang.save()
+        ch.save(), lang.save()
         lang.champion = ch
-        chs.save(), lang.save()
+        ch.save(), lang.save()
 
     def add_new_language(self, lang):
         """Inserts new language to db"""
