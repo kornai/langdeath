@@ -1,15 +1,12 @@
 import sys
-import logging
+import os
 
-from base_parsers import OnlineParser
+from base_parsers import OnlineParser, OfflineParser
 from ld.langdeath_exceptions import ParserException
 from utils import get_html
 
-class LanguageArchivesParser(OnlineParser):
 
-    def __init__(self):
-
-        self.base_url = 'http://www.language-archives.org/language' 
+class LanguageArchivesBaseParser(object):
 
     def parse_table(self, item):
 
@@ -23,8 +20,8 @@ class LanguageArchivesParser(OnlineParser):
             return len(rows), online_count
         except Exception as e:
             raise ParserException(
-                '{0} in LanguageArchivesParser.parse_table'
-                    .format(type(e)))
+                '{0} in LanguageArchivesBaseParser.parse_table'
+                .format(type(e)))
 
     def get_tabular_data(self, html):
 
@@ -38,8 +35,11 @@ class LanguageArchivesParser(OnlineParser):
             return d
         except Exception as e:
             raise ParserException(
-                '{0} in LanguageArchivesParser.get_tabular_data'
-                    .format(type(e)))
+                '{0} in LanguageArchivesBaseParser.get_tabular_data'
+                .format(type(e)))
+
+    def get_html(self, sil):
+        raise NotImplementedError()
 
     def get_name(self, string):
 
@@ -52,15 +52,14 @@ class LanguageArchivesParser(OnlineParser):
             return name
         except Exception as e:
             raise ParserException(
-                '{0} in LanguageArchivesParser.get_name'
-                    .format(type(e)))
+                '{0} in LanguageArchivesBaseParser.get_name'
+                .format(type(e)))
 
     def parse(self, sil_codes):
 
         for sil in sil_codes:
 
-            url = '{0}/{1}'.format(self.base_url, sil)
-            html = get_html(url)
+            html = self.get_html(sil)
             dictionary = {}
             dictionary['Name'] = self.get_name(html)
             d = self.get_tabular_data(html)
@@ -73,13 +72,52 @@ class LanguageArchivesParser(OnlineParser):
             yield dictionary
 
 
+class LanguageArchivesOnlineParser(OnlineParser, LanguageArchivesBaseParser):
+
+    def __init__(self):
+
+        super(LanguageArchivesOnlineParser, self).__init__()
+        self.base_url = 'http://www.language-archives.org/language'
+
+    def get_html(self, sil):
+
+        url = '{0}/{1}'.format(self.base_url, sil)
+        return get_html(url)
+
+
+class LanguageArchivesOfflineParser(OfflineParser, LanguageArchivesBaseParser):
+
+    def __init__(self, basedir):
+        super(LanguageArchivesOfflineParser, self).__init__()
+        self.basedir = basedir
+
+    def get_html(self, sil):
+        fn = '{0}/{1}'.format(self.basedir, sil)
+        if os.path.exists(fn):
+            return open(fn).read()
+        else:
+            raise ParserException()
+
+
+def test_online_parser():
+
+    sil_codes = [l.strip('\n').split('\t')[0] for l in sys.stdin]
+    parser = LanguageArchivesOnlineParser()
+    for d in parser.parse(sil_codes):
+        print repr(d)
+
+
+def test_offline_parser():
+
+    sil_codes = [l.strip('\n').split('\t')[0] for l in sys.stdin]
+    parser = LanguageArchivesOfflineParser(sys.argv[1])
+    for d in parser.parse(sil_codes):
+        print repr(d)
+
+
 def main():
 
-    sil_codes = sys.argv[1:]
-    logging.basicConfig(level=logging.DEBUG)
-    parser = LanguageArchivesParser()
-    for d in parser.parse(sil_codes):
-        print d
+    test_offline_parser()
 
 if __name__ == "__main__":
     main()

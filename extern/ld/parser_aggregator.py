@@ -29,7 +29,7 @@ class ParserAggregator(object):
         self.parsers = [OmniglotParser()]
         self.lang_db = LanguageDB()
         self.trusted_parsers = set([ParseISO639_3, EthnologueOnlineParser,
-                                   EthnologueOfflineParser])
+                                   EthnologueOfflineParser, CrubadanParser])
         self.parsers_needs_sil = set([EthnologueOfflineParser,
                                       EthnologueOnlineParser])
 

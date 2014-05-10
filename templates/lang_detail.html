@@ -1,12 +1,26 @@
-{% extends "base.html" %}
+{% extends "dld_base.html" %}
 {% load staticfiles %}
 
 {% block content %}
-English name: {{ object.name }}
+<h2>{{ object }}</h2>
+<b>English name:</b> {{ object.name }}
 <br />
-alternative names: {{ object.name2 }}
+<b>Native name:</b> {{ object.native_name }}
 <br />
 SIL code: {{ object.sil }}
 <br />
-L1: {{ object.l1_speakers.eth.0 }}
+<b>Alternative names:</b>
+{% for a in object.alt_name.all|dictsort:"name" %}
+{{ a }}{% if not forloop.last %}, {% endif %}
+{% endfor %}
+<br />
+<b>Population (Ethnologue):</b> {{ object.eth_population }}
+<br />
+<b>Country:</b>
+{% for c in object.country.all|dictsort:"name" %}
+{{ c }}{% if not forloop.last %}, {% endif %}
+{% endfor %}
+<br />
+<b>Champion:</b><a href="/lang/{{ object.champion.pk }}">{{ object.champion }}</a>
+<br />
 {% endblock content %}
