@@ -21,6 +21,6 @@ SIL code: {{ object.sil }}
 {{ c }}{% if not forloop.last %}, {% endif %}
 {% endfor %}
 <br />
-<b>Champion:</b> {{ object.champion }}
+<b>Champion:</b><a href="/lang/{{ object.champion.pk }}">{{ object.champion }}</a>
 <br />
 {% endblock content %}
