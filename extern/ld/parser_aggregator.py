@@ -78,7 +78,7 @@ class ParserAggregator(object):
                             self.lang_db.add_new_language(lang)
                         else:
                             unknown_langs.add(lang['sil'] if 'sil' in lang
-                                              else lang)
+                                              else repr(lang))
                             msg = "{0} parser produced a language with data" \
                                 + " {1} that seems to be a new language, but" \
                                 + " this parser is not a trusted parser"
