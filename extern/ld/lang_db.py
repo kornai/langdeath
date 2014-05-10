@@ -144,10 +144,18 @@ class LanguageDB(object):
 
         if "name" in lang:
             languages = Language.objects.filter(name=lang['name'])
-            return languages
+            if len(languages) > 0:
+                return languages
 
-        if "name" in lang.__dict__:
-            languages = Language.objects.filter(name=lang.name)
+            # try with alternative names
+            languages = Language.objects.filter(
+                alt_name__name__contains=lang['name'].lower())
+            logging.info(u'Altname match: {0}: {1}'.format(
+                lang['name'], languages))
             return languages
 
         return []
+
+    def choose_candidates(self, lang, l):
+        """TODO later proper candidate selection"""
+        return l
