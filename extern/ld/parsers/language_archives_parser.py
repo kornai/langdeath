@@ -72,6 +72,7 @@ class LanguageArchivesBaseParser(object):
             try:
                 html = self.get_html(sil).decode("utf-8")
                 dictionary = {}
+                dictionary['sil'] = sil
                 dictionary['name'] = self.get_name(html)
                 d = self.get_tabular_data(html)
                 if d is not None:
