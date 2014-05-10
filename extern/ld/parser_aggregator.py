@@ -94,6 +94,7 @@ class ParserAggregator(object):
                 if c % 100 == 0:
                     logging.info("Added {0} langs from parser {1}".format(
                         c, type(parser)))
+                self.add_lang(lang)
 
         except ParserException as e:
             logging.exception(e)
