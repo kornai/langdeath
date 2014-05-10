@@ -13,12 +13,28 @@ class Language(models.Model):
                                  related_name='sublang')
     eth_status = models.CharField(max_length=100, blank=True)
     eth_population = models.IntegerField(blank=True, null=True)
+
     cru_docs = models.IntegerField(blank=True, null=True)
     cru_words = models.IntegerField(blank=True, null=True)
     cru_characters = models.IntegerField(blank=True, null=True)
     cru_floss_splchk = models.BooleanField(default=False)
     cru_watchtower = models.BooleanField(default=False)
     cru_udhr = models.BooleanField(default=False)
+
+    la_primary_texts_online = models.IntegerField(blank=True, null=True)
+    la_primary_texts_all = models.IntegerField(blank=True, null=True)
+    la_lang_descr_online = models.IntegerField(blank=True, null=True)
+    la_lang_descr_all = models.IntegerField(blank=True, null=True)
+    la_lex_res_online = models.IntegerField(blank=True, null=True)
+    la_lex_res_all = models.IntegerField(blank=True, null=True)
+    la_res_in_online = models.IntegerField(blank=True, null=True)
+    la_res_in_all = models.IntegerField(blank=True, null=True)
+    la_res_about_online = models.IntegerField(blank=True, null=True)
+    la_res_about_all = models.IntegerField(blank=True, null=True)
+    la_oth_res_in_online = models.IntegerField(blank=True, null=True)
+    la_oth_res_in_all = models.IntegerField(blank=True, null=True)
+    la_oth_res_about_online = models.IntegerField(blank=True, null=True)
+    la_oth_res_about_all = models.IntegerField(blank=True, null=True)
 
     # many to many fields
     code = models.ManyToManyField('Code', related_name='codes')
