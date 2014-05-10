@@ -87,6 +87,16 @@ class LanguageDB(object):
             lang.country.add(c)
             lang.save()
 
+    def add_champion(self, data, lang):
+        chs = Language.objects.filter(sil=data)
+        if len(chs) != 1:
+            msg = "champion field {0} is not deterministic".format(chs)
+            raise LangdeathException(msg)
+        ch = chs[0]
+        chs.save(), lang.save()
+        lang.champion = ch
+        chs.save(), lang.save()
+
     def add_new_language(self, lang):
         """Inserts new language to db"""
         if not isinstance(lang, dict):
