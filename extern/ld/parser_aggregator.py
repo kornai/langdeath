@@ -46,7 +46,9 @@ class ParserAggregator(object):
     def choose_parse_call(self, parser):
         parse_call = None
         if type(parser) in self.parsers_needs_sil:
-            sils = Language.objects.values_list("sil", flat=True)
+            # keep only real sils, not the artificial ones coming from cru
+            sils = filter(lambda x: len(x) == 3,
+                          Language.objects.values_list("sil", flat=True))
             parse_call = lambda: parser.parse(sils)
         else:
             parse_call = lambda: parser.parse()
