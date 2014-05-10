@@ -56,20 +56,28 @@ class LanguageArchivesBaseParser(object):
                 .format(type(e)))
 
     def parse(self, sil_codes):
-
+        errors = []
         for sil in sil_codes:
+            try:
+                html = self.get_html(sil)
+                dictionary = {}
+                dictionary['Name'] = self.get_name(html)
+                d = self.get_tabular_data(html)
+                if d is not None:
+                    for key in d:
+                        dictionary[key] = {}
+                        all_, online = d[key]
+                        dictionary[key]['All'] = all_
+                        dictionary[key]['Online'] = online
+                yield dictionary
+            except ParserException:
+                errors.append(sil)
+                continue
 
-            html = self.get_html(sil)
-            dictionary = {}
-            dictionary['Name'] = self.get_name(html)
-            d = self.get_tabular_data(html)
-            if d is not None:
-                for key in d:
-                    dictionary[key] = {}
-                    all_, online = d[key]
-                    dictionary[key]['All'] = all_
-                    dictionary[key]['Online'] = online
-            yield dictionary
+        if len(errors) > 0:
+            msg = "Error in LanguageArchiveParser for following sils: "
+            msg += repr(errors)
+            raise ParserException(msg)
 
 
 class LanguageArchivesOnlineParser(OnlineParser, LanguageArchivesBaseParser):
@@ -96,6 +104,7 @@ class LanguageArchivesOfflineParser(OfflineParser, LanguageArchivesBaseParser):
         if os.path.exists(fn):
             return open(fn).read()
         else:
+            return ''
             raise ParserException()
 
 
