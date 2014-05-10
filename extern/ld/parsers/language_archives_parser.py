@@ -81,8 +81,8 @@ class LanguageArchivesBaseParser(object):
                             continue
 
                         all_, online = d[key]
-                        dictionary[key + '_all'] = all_
-                        dictionary[key + '_online'] = online
+                        dictionary[self.needed_keys[key] + '_all'] = all_
+                        dictionary[self.needed_keys[key] + '_online'] = online
                 yield dictionary
             except ParserException:
                 errors.append(sil)
