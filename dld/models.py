@@ -9,6 +9,7 @@ class Language(models.Model):
     last_updated = models.DateTimeField('last updated', default=timezone.now())
     iso_scope = models.CharField(max_length=20, blank=True)
     iso_type = models.CharField(max_length=100, blank=True)
+    champion = models.ForeignKey('Language', blank=True, null=True)
     eth_status = models.CharField(max_length=100, blank=True)
     eth_population = models.IntegerField(blank=True, null=True)
     cru_docs = models.IntegerField(blank=True, null=True)
