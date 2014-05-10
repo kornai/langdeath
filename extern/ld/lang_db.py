@@ -8,7 +8,8 @@ from ld.langdeath_exceptions import LangdeathException
 class LanguageDB(object):
     def __init__(self):
         self.languages = []
-        self.spec_fields = set(["other_codes", "country", "name", "alt_names"])
+        self.spec_fields = set(["other_codes", "country", "name", "alt_names",
+                                "champion"])
 
     def add_attr(self, name, data, lang):
         if name in self.spec_fields:
