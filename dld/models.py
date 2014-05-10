@@ -9,6 +9,8 @@ class Language(models.Model):
     last_updated = models.DateTimeField('last updated', default=timezone.now())
     iso_scope = models.CharField(max_length=20, blank=True)
     iso_type = models.CharField(max_length=100, blank=True)
+    champion = models.ForeignKey('Language', blank=True, null=True,
+                                 related_name='sublang')
     eth_status = models.CharField(max_length=100, blank=True)
     eth_population = models.IntegerField(blank=True, null=True)
     cru_docs = models.IntegerField(blank=True, null=True)
@@ -21,9 +23,9 @@ class Language(models.Model):
     # many to many fields
     code = models.ManyToManyField('Code', related_name='codes')
     alt_name = models.ManyToManyField('AlternativeName',
-                                      related_name='alt_names')
-    country = models.ManyToManyField('Country', related_name='countries')
-    speaker = models.ManyToManyField('Speaker', related_name='speakers')
+                                      related_name='lang')
+    country = models.ManyToManyField('Country', related_name='lang')
+    speaker = models.ManyToManyField('Speaker', related_name='lang')
 
     def __unicode__(self):
         return u"{0} ({1})".format(self.name, self.sil)

@@ -20,4 +20,7 @@ SIL code: {{ object.sil }}
 {% for c in object.country.all|dictsort:"name" %}
 {{ c }}{% if not forloop.last %}, {% endif %}
 {% endfor %}
+<br />
+<b>Champion:</b><a href="/lang/{{ object.champion.pk }}">{{ object.champion }}</a>
+<br />
 {% endblock content %}

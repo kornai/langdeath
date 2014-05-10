@@ -8,7 +8,8 @@ from ld.langdeath_exceptions import LangdeathException
 class LanguageDB(object):
     def __init__(self):
         self.languages = []
-        self.spec_fields = set(["other_codes", "country", "name", "alt_names"])
+        self.spec_fields = set(["other_codes", "country", "name", "alt_names",
+                                "champion"])
 
     def add_attr(self, name, data, lang):
         if name in self.spec_fields:
@@ -26,6 +27,8 @@ class LanguageDB(object):
             self.add_name(data, lang)
         elif name == "alt_names":
             self.add_alt_name(data, lang)
+        elif name == "champion":
+            self.add_champion(data, lang)
 
     def add_name(self, data, lang):
         if lang.name == "":
@@ -38,6 +41,7 @@ class LanguageDB(object):
         self.add_alt_name(data, lang)
 
     def add_alt_name(self, data, lang):
+        lang.save()
         if type(data) == str or type(data) == unicode:
             data = data.lower().strip()
             if len(lang.alt_name.filter(name=data)) > 0:
@@ -46,9 +50,8 @@ class LanguageDB(object):
 
             a = AlternativeName(name=data)
             a.save()
-            lang.save()
             lang.alt_name.add(a)
-            lang.save()
+            a.save(), lang.save()
         elif type(data) == list:
             for d in data:
                 self.add_alt_name(d, lang)
@@ -86,6 +89,17 @@ class LanguageDB(object):
             c.save()
             lang.country.add(c)
             lang.save()
+
+    def add_champion(self, data, lang):
+        chs = Language.objects.filter(sil=data)
+        if len(chs) != 1:
+            msg = "champion field {0} is not deterministic".format(chs)
+            msg += " for lang {0} with sil {1}".format(lang.sil, data)
+            raise LangdeathException(msg)
+        ch = chs[0]
+        ch.save(), lang.save()
+        lang.champion = ch
+        ch.save(), lang.save()
 
     def add_new_language(self, lang):
         """Inserts new language to db"""
