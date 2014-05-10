@@ -118,7 +118,6 @@ class LanguageArchivesOfflineParser(OfflineParser, LanguageArchivesBaseParser):
         if os.path.exists(fn):
             return open(fn).read()
         else:
-            return ''
             raise ParserException()
 
 
