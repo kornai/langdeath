@@ -79,9 +79,9 @@ class ParserAggregator(object):
                         type(self.parser), lang))
         except ParserException as e:
             logging.exception(e)
-            continue
+            return
         except UnknownLanguageException as e:
-            continue
+            return
 
     @transaction.commit_manually
     def call_parser(self, parser):
