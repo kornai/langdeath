@@ -94,6 +94,7 @@ class LanguageDB(object):
         chs = Language.objects.filter(sil=data)
         if len(chs) != 1:
             msg = "champion field {0} is not deterministic".format(chs)
+            msg += " for lang {0} with sil {1}".format(lang.sil, data)
             raise LangdeathException(msg)
         ch = chs[0]
         ch.save(), lang.save()
