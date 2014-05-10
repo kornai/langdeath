@@ -8,6 +8,17 @@ from utils import get_html
 
 class LanguageArchivesBaseParser(object):
 
+    def __init__(self):
+        self.needed_keys = {
+            'Primary texts': 'la_primary_texts',
+            'Language descriptions': 'la_lang_descr',
+            'Lexical resources': 'la_lex_res',
+            'Resources in the language': 'la_res_in',
+            'Resources about the language': 'la_res_about',
+            'Other resources in the language': 'la_oth_res_in',
+            'Other resources about the language': 'la_oth_res_about',
+        }
+
     def parse_table(self, item):
 
         try:
@@ -56,20 +67,31 @@ class LanguageArchivesBaseParser(object):
                 .format(type(e)))
 
     def parse(self, sil_codes):
-
+        errors = []
         for sil in sil_codes:
+            try:
+                html = self.get_html(sil).decode("utf-8")
+                dictionary = {}
+                dictionary['sil'] = sil
+                dictionary['name'] = self.get_name(html)
+                d = self.get_tabular_data(html)
+                if d is not None:
+                    for key in d:
+                        if key not in self.needed_keys:
+                            continue
 
-            html = self.get_html(sil)
-            dictionary = {}
-            dictionary['Name'] = self.get_name(html)
-            d = self.get_tabular_data(html)
-            if d is not None:
-                for key in d:
-                    dictionary[key] = {}
-                    all_, online = d[key]
-                    dictionary[key]['All'] = all_
-                    dictionary[key]['Online'] = online
-            yield dictionary
+                        all_, online = d[key]
+                        dictionary[self.needed_keys[key] + '_all'] = all_
+                        dictionary[self.needed_keys[key] + '_online'] = online
+                yield dictionary
+            except ParserException:
+                errors.append(sil)
+                continue
+
+        if len(errors) > 0:
+            msg = "Error in LanguageArchiveParser for following sils: "
+            msg += repr(errors)
+            raise ParserException(msg)
 
 
 class LanguageArchivesOnlineParser(OnlineParser, LanguageArchivesBaseParser):

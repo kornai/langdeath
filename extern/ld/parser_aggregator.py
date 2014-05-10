@@ -15,6 +15,8 @@ from ld.parsers.omniglot_parser import OmniglotParser
 from ld.parsers.ethnologue_parser import EthnologueOfflineParser, \
     EthnologueOnlineParser
 from ld.parsers.crubadan_parser import CrubadanParser
+from ld.parsers.language_archives_parser import \
+    LanguageArchivesOfflineParser, LanguageArchivesOnlineParser
 
 
 class ParserAggregator(object):
@@ -22,16 +24,22 @@ class ParserAggregator(object):
     the results, call any extra methods that will be required to merge
     two langauges (or any other data) that are possibly the same
     """
-    def __init__(self, eth_dump_dir=''):
+    def __init__(self, eth_dump_dir='', la_dump_dir=''):
         eth_parser = (EthnologueOnlineParser() if not eth_dump_dir
                       else EthnologueOfflineParser(eth_dump_dir))
-        self.parsers = [ParseISO639_3(), eth_parser, CrubadanParser()]
+        la_parser = (LanguageArchivesOnlineParser() if not la_dump_dir
+                     else LanguageArchivesOfflineParser(la_dump_dir))
+
+        self.parsers = [ParseISO639_3(), eth_parser, CrubadanParser(),
+                        la_parser]
         self.parsers = [OmniglotParser()]
         self.lang_db = LanguageDB()
         self.trusted_parsers = set([ParseISO639_3, EthnologueOnlineParser,
                                    EthnologueOfflineParser, CrubadanParser])
         self.parsers_needs_sil = set([EthnologueOfflineParser,
-                                      EthnologueOnlineParser])
+                                      EthnologueOnlineParser,
+                                      LanguageArchivesOfflineParser,
+                                      LanguageArchivesOnlineParser])
 
     def run(self):
         for parser in self.parsers:
@@ -40,7 +48,9 @@ class ParserAggregator(object):
     def choose_parse_call(self, parser):
         parse_call = None
         if type(parser) in self.parsers_needs_sil:
-            sils = Language.objects.values_list("sil", flat=True)
+            # keep only real sils, not the artificial ones coming from cru
+            sils = filter(lambda x: len(x) == 3,
+                          Language.objects.values_list("sil", flat=True))
             parse_call = lambda: parser.parse(sils)
         else:
             parse_call = lambda: parser.parse()
@@ -92,7 +102,7 @@ class ParserAggregator(object):
 
 def main():
     logging.basicConfig(level=logging.INFO)
-    pa = ParserAggregator(sys.argv[1])
+    pa = ParserAggregator(*sys.argv[1:])
     pa.run()
 
 if __name__ == "__main__":
