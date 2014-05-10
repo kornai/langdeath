@@ -70,7 +70,7 @@ class LanguageArchivesBaseParser(object):
         errors = []
         for sil in sil_codes:
             try:
-                html = self.get_html(sil)
+                html = self.get_html(sil).decode("utf-8")
                 dictionary = {}
                 dictionary['name'] = self.get_name(html)
                 d = self.get_tabular_data(html)
