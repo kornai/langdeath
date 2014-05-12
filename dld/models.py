@@ -40,6 +40,7 @@ class Language(models.Model):
     # many to many fields
     code = models.ManyToManyField('Code', related_name='codes')
     alt_name = models.ManyToManyField('AlternativeName',
+                                      through='LanguageAltName',
                                       related_name='lang')
     country = models.ManyToManyField('Country', related_name='lang')
     speaker = models.ManyToManyField('Speaker', related_name='lang')
@@ -58,6 +59,18 @@ class AlternativeName(models.Model):
 
     def __unicode__(self):
         return self.name
+
+    def save(self, force_insert=False, force_update=False):
+        self.name = self.name.lower()
+        super(AlternativeName, self).save(force_insert, force_update)
+
+
+class LanguageAltName(models.Model):
+    lang = models.ForeignKey(Language)
+    name = models.ForeignKey(AlternativeName)
+
+    class Meta:
+        unique_together = (("lang", "name"), )
 
 
 class Speaker(models.Model):
