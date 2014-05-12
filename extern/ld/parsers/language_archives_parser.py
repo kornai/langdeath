@@ -70,7 +70,7 @@ class LanguageArchivesBaseParser(object):
         errors = []
         for sil in sil_codes:
             try:
-                html = self.get_html(sil).decode("utf-8")
+                html = self.get_html(sil)
                 dictionary = {}
                 dictionary['sil'] = sil
                 dictionary['name'] = self.get_name(html)
@@ -113,10 +113,10 @@ class LanguageArchivesOfflineParser(OfflineParser, LanguageArchivesBaseParser):
         super(LanguageArchivesOfflineParser, self).__init__()
         self.basedir = basedir
 
-    def get_html(self, sil):
+    def get_html(self, sil, encoding='utf-8'):
         fn = '{0}/{1}'.format(self.basedir, sil)
         if os.path.exists(fn):
-            return open(fn).read()
+            return open(fn).read().decode(encoding)
         else:
             raise ParserException()
 
