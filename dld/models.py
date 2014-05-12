@@ -20,6 +20,7 @@ class Language(models.Model):
     cru_floss_splchk = models.BooleanField(default=False)
     cru_watchtower = models.BooleanField(default=False)
     cru_udhr = models.BooleanField(default=False)
+    in_omniglot = models.BooleanField(default=False)
 
     la_primary_texts_online = models.IntegerField(blank=True, null=True)
     la_primary_texts_all = models.IntegerField(blank=True, null=True)
@@ -39,6 +40,7 @@ class Language(models.Model):
     # many to many fields
     code = models.ManyToManyField('Code', related_name='codes')
     alt_name = models.ManyToManyField('AlternativeName',
+                                      through='LanguageAltName',
                                       related_name='lang')
     country = models.ManyToManyField('Country', related_name='lang')
     speaker = models.ManyToManyField('Speaker', related_name='lang')
@@ -57,6 +59,18 @@ class AlternativeName(models.Model):
 
     def __unicode__(self):
         return self.name
+
+    def save(self, force_insert=False, force_update=False):
+        self.name = self.name.lower()
+        super(AlternativeName, self).save(force_insert, force_update)
+
+
+class LanguageAltName(models.Model):
+    lang = models.ForeignKey(Language)
+    name = models.ForeignKey(AlternativeName)
+
+    class Meta:
+        unique_together = (("lang", "name"), )
 
 
 class Speaker(models.Model):
