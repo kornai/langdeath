@@ -1,6 +1,7 @@
 import logging
 
-from dld.models import Language, Code, Country, AlternativeName, CountryName
+from dld.models import Language, Code, Country, AlternativeName, CountryName,\
+    LanguageAltName
 
 from ld.langdeath_exceptions import LangdeathException
 
@@ -50,8 +51,8 @@ class LanguageDB(object):
 
             a = AlternativeName(name=data)
             a.save()
-            lang.alt_name.add(a)
-            a.save(), lang.save()
+            la = LanguageAltName(lang=lang, name=a)
+            a.save(), lang.save(), la.save()
         elif type(data) == list:
             for d in data:
                 self.add_alt_name(d, lang)
@@ -149,9 +150,9 @@ class LanguageDB(object):
 
             # try with alternative names
             languages = Language.objects.filter(
-                alt_name__name__contains=lang['name'].lower())
-            logging.info(u'Altname match: {0}: {1}'.format(
-                lang['name'], languages))
+                alt_name__name=lang['name'].lower())
+            logging.info('Altname match: {0}: {1}'.format(
+                repr(lang['name']), repr(languages)))
             return languages
 
         return []
