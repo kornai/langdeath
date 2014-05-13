@@ -1,5 +1,6 @@
 import sys
 import os
+import re
 
 from base_parsers import OnlineParser, OfflineParser
 from ld.langdeath_exceptions import ParserException
@@ -18,6 +19,9 @@ class LanguageArchivesBaseParser(object):
             'Other resources in the language': 'la_oth_res_in',
             'Other resources about the language': 'la_oth_res_about',
         }
+        self.alternative_names_pattern =\
+        re.compile('<p>Other known names and dialect names:(.*?)</p>',
+                   re.DOTALL)
 
     def parse_table(self, item):
 
@@ -66,6 +70,17 @@ class LanguageArchivesBaseParser(object):
                 '{0} in LanguageArchivesBaseParser.get_name'
                 .format(type(e)))
 
+    def get_alternative_names(self, html):
+
+        try:
+            string = self.alternative_names_pattern.search(html).groups()[0]
+            return [s.strip() for s in string.split(',')]
+        except Exception as e:
+            raise ParserException(
+                '{0} in LanguageArchivesBaseParser.get_alternative_names'
+                .format(type(e)))
+            return []
+
     def parse(self, sil_codes):
         errors = []
         for sil in sil_codes:
@@ -74,6 +89,7 @@ class LanguageArchivesBaseParser(object):
                 dictionary = {}
                 dictionary['sil'] = sil
                 dictionary['name'] = self.get_name(html)
+                dictionary['alternative_names'] = self.get_alternative_names(html)
                 d = self.get_tabular_data(html)
                 if d is not None:
                     for key in d:
