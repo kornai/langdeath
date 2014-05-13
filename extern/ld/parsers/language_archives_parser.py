@@ -85,7 +85,7 @@ class LanguageArchivesBaseParser(object):
                 dictionary = {}
                 dictionary['sil'] = sil
                 dictionary['name'] = self.get_name(html)
-                dictionary['alternative_names'] =\
+                dictionary['alt_names'] =\
                     self.get_alternative_names(html)
                 d = self.get_tabular_data(html)
                 if d is not None:
