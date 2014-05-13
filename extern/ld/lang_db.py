@@ -148,6 +148,11 @@ class LanguageDB(object):
             if len(languages) > 0:
                 return languages
 
+            # native name
+            languages = Language.objects.filter(native_name=lang['name'])
+            if len(languages) > 0:
+                return languages
+
             # try with alternative names
             languages = Language.objects.filter(
                 alt_name__name=lang['name'].lower())
