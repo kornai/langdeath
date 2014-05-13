@@ -20,8 +20,8 @@ class LanguageArchivesBaseParser(object):
             'Other resources about the language': 'la_oth_res_about',
         }
         self.alternative_names_pattern =\
-        re.compile('<p>Other known names and dialect names:(.*?)</p>',
-                   re.DOTALL)
+            re.compile('<p>Other known names and dialect names:(.*?)</p>',
+                       re.DOTALL)
 
     def parse_table(self, item):
 
@@ -72,14 +72,10 @@ class LanguageArchivesBaseParser(object):
 
     def get_alternative_names(self, html):
 
-        try:
-            string = self.alternative_names_pattern.search(html).groups()[0]
-            return [s.strip() for s in string.split(',')]
-        except Exception as e:
-            raise ParserException(
-                '{0} in LanguageArchivesBaseParser.get_alternative_names'
-                .format(type(e)))
+        res = self.alternative_names_pattern.search(html)
+        if res is None:
             return []
+        return [s.strip() for s in res.groups()[0].split(',')]
 
     def parse(self, sil_codes):
         errors = []
@@ -89,7 +85,8 @@ class LanguageArchivesBaseParser(object):
                 dictionary = {}
                 dictionary['sil'] = sil
                 dictionary['name'] = self.get_name(html)
-                dictionary['alternative_names'] = self.get_alternative_names(html)
+                dictionary['alternative_names'] =\
+                    self.get_alternative_names(html)
                 d = self.get_tabular_data(html)
                 if d is not None:
                     for key in d:
