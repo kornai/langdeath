@@ -1,8 +1,8 @@
 import logging
 import re
 
-from dld.models import Language, Code, Country, AlternativeName, CountryName,\
-    LanguageAltName
+from dld.models import normalize_alt_name, Language, Code, Country, \
+    AlternativeName, CountryName, LanguageAltName
 
 from ld.langdeath_exceptions import LangdeathException
 
@@ -57,7 +57,7 @@ class LanguageDB(object):
             la = LanguageAltName(lang=lang, name=a)
             a.save(), lang.save(), la.save()
 
-            if len(set(data.split()) & 
+            if len(set(data.split()) &
                    set(["east", "west", "north", "south"])) > 0:
                 data = card_dir_p.sub("\g<1>ern", data)
                 self.add_alt_name(data, lang)
@@ -164,7 +164,7 @@ class LanguageDB(object):
 
             # try with alternative names
             languages = Language.objects.filter(
-                alt_name__name=lang['name'].lower())
+                alt_name__name=normalize_alt_name(lang['name']))
             logging.info('Altname match: {0}: {1}'.format(
                 repr(lang['name']), repr(languages)))
             return languages
