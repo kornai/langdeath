@@ -30,8 +30,8 @@ def parse_os_support():
         'mac_input_partial' : False, 
         'microsoft_pack' : False})
     for langiter in [
-        parser.parse('../res/mac_input', true_key=set('mac_input',
-                                                      'mac_input_partial')),
+        parser.parse('../res/mac_input', true_key=set(['mac_input',
+                                                      'mac_input_partial'])),
         parser.parse('../res/mac_input_partial_support',
                      true_key=set('mac_input_partial')),
         parser.parse('../res/win8_pack',
