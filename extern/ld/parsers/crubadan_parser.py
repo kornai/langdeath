@@ -142,6 +142,9 @@ class CrubadanParser(OnlineParser):
 
         html = get_html(self.url)
         for dict_ in self.generate_dictionaries(html):
+            if dict_['sil'] == "agp":
+                # it's not real data, duplicated row with wrong sil
+                continue
             yield dict_
 
 
