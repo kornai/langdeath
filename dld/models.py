@@ -1,6 +1,11 @@
 from django.db import models
 from django.utils import timezone
 
+def normalize_alt_name(name):
+    remove_punct = name.replace(",", "").replace("(", "")
+    remove_punct = remove_punct.replace(")", "")
+    return " ".join(set(remove_punct.lower().split()))
+
 
 class Language(models.Model):
     name = models.CharField(max_length=100)
@@ -61,7 +66,7 @@ class AlternativeName(models.Model):
         return self.name
 
     def save(self, force_insert=False, force_update=False):
-        self.name = self.name.lower()
+        self.name = normalize_alt_name(self.name)
         super(AlternativeName, self).save(force_insert, force_update)
 
 
