@@ -1,27 +1,19 @@
 import logging
+import re
 
-from dld.models import Language, Code, Country, AlternativeName
+from dld.models import normalize_alt_name, Language, Code, Country, \
+    AlternativeName, CountryName, LanguageAltName
 
 from ld.langdeath_exceptions import LangdeathException
+
+card_dir_p = re.compile("((east)|(west)|(north)|(south))")
 
 
 class LanguageDB(object):
     def __init__(self):
         self.languages = []
-        self.spec_fields = set(["other_codes", "country", "name"])
-        self.country_alternatives = {
-            u'C\xf4te d\u2019Ivoire': 'Ivory Coast',
-            u'Russian Federation': 'Russia',
-            u'Viet Nam': 'Vietnam',
-            u'S\xe3o Tom\xe9 e Pr\xedncipe': 'Sao Tome and Principe',
-            u'Congo': ['Democratic Republic of the Congo',
-                       'Republic of the Congo'],
-            u'Palestine': 'Palestinian Territory',
-            u'Vatican State': 'Vatican',
-            u'Korea, South': 'South Korea',
-            u'Cape Verde Islands': 'Cape Verde',
-            u'R\xe9union': 'Reunion',
-        }
+        self.spec_fields = set(["other_codes", "country", "name", "alt_names",
+                                "champion"])
 
     def add_attr(self, name, data, lang):
         if name in self.spec_fields:
@@ -38,7 +30,9 @@ class LanguageDB(object):
         elif name == "name":
             self.add_name(data, lang)
         elif name == "alt_names":
-            self.add_name(data, lang)
+            self.add_alt_name(data, lang)
+        elif name == "champion":
+            self.add_champion(data, lang)
 
     def add_name(self, data, lang):
         if lang.name == "":
@@ -51,12 +45,23 @@ class LanguageDB(object):
         self.add_alt_name(data, lang)
 
     def add_alt_name(self, data, lang):
+        lang.save()
         if type(data) == str or type(data) == unicode:
+            data = data.lower().strip()
+            if len(lang.alt_name.filter(name=data)) > 0:
+                # duplication, don't do anything
+                return
+
             a = AlternativeName(name=data)
             a.save()
-            lang.save()
-            lang.alt_name.add(a)
-            lang.save()
+            la = LanguageAltName(lang=lang, name=a)
+            a.save(), lang.save(), la.save()
+
+            if len(set(data.split()) &
+                   set(["east", "west", "north", "south"])) > 0:
+                data = card_dir_p.sub("\g<1>ern", data)
+                self.add_alt_name(data, lang)
+
         elif type(data) == list:
             for d in data:
                 self.add_alt_name(d, lang)
@@ -74,23 +79,37 @@ class LanguageDB(object):
             lang.save()
 
     def add_country(self, data, lang):
-        if data in self.country_alternatives:
-            if type(self.country_alternatives[data]) is list:
-                for d in self.country_alternatives[data]:
-                    self.add_country(d, lang)
-                return
+        if data is None:
+            return
 
-            else:
-                data = self.country_alternatives[data]
         cs = Country.objects.filter(name=data)
         if len(cs) == 0:
-            raise LangdeathException("unknown country for sil {0}: {1}".format(
-                lang.sil, repr(data)))
-        c = cs[0]
-        lang.save()
-        c.save()
-        lang.country.add(c)
-        lang.save()
+            altnames = CountryName.objects.filter(name=data)
+            if len(altnames) > 0:
+                for altname in altnames:
+                    cname = altname.country.name
+                    self.add_country(cname, lang)
+            else:
+                raise LangdeathException(
+                    "unknown country for sil {0}: {1}".format(
+                        lang.sil, repr(data)))
+        else:
+            c = cs[0]
+            lang.save()
+            c.save()
+            lang.country.add(c)
+            lang.save()
+
+    def add_champion(self, data, lang):
+        chs = Language.objects.filter(sil=data)
+        if len(chs) != 1:
+            msg = "champion field {0} is not deterministic".format(chs)
+            msg += " for lang {0} with sil {1}".format(lang.sil, data)
+            raise LangdeathException(msg)
+        ch = chs[0]
+        ch.save(), lang.save()
+        lang.champion = ch
+        ch.save(), lang.save()
 
     def add_new_language(self, lang):
         """Inserts new language to db"""
@@ -135,6 +154,23 @@ class LanguageDB(object):
 
         if "name" in lang:
             languages = Language.objects.filter(name=lang['name'])
+            if len(languages) > 0:
+                return languages
+
+            # native name
+            languages = Language.objects.filter(native_name=lang['name'])
+            if len(languages) > 0:
+                return languages
+
+            # try with alternative names
+            languages = Language.objects.filter(
+                alt_name__name=normalize_alt_name(lang['name']))
+            logging.info('Altname match: {0}: {1}'.format(
+                repr(lang['name']), repr(languages)))
             return languages
 
         return []
+
+    def choose_candidates(self, lang, l):
+        """TODO later proper candidate selection"""
+        return l
