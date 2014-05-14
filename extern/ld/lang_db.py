@@ -1,9 +1,12 @@
 import logging
+import re
 
 from dld.models import Language, Code, Country, AlternativeName, CountryName,\
     LanguageAltName
 
 from ld.langdeath_exceptions import LangdeathException
+
+card_dir_p = re.compile("((east)|(west)|(north)|(south))")
 
 
 class LanguageDB(object):
@@ -53,6 +56,12 @@ class LanguageDB(object):
             a.save()
             la = LanguageAltName(lang=lang, name=a)
             a.save(), lang.save(), la.save()
+
+            if len(set(data.split()) & 
+                   set(["east", "west", "north", "south"])) > 0:
+                data = card_dir_p.sub("\g<1>ern", data)
+                self.add_alt_name(data, lang)
+
         elif type(data) == list:
             for d in data:
                 self.add_alt_name(d, lang)
