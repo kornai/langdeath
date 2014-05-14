@@ -30,14 +30,14 @@ def parse_os_support():
         'mac_input_partial' : False, 
         'microsoft_pack' : False})
     for langiter in [
-        parser.parse('../res/mac_input', true_key=set(['mac_input',
-                                                      'mac_input_partial'])),
+        parser.parse('../res/mac_input', true_key=['mac_input',
+                                                      'mac_input_partial']),
         parser.parse('../res/mac_input_partial_support',
-                     true_key=set('mac_input_partial')),
+                     true_key=['mac_input_partial']),
         parser.parse('../res/win8_pack',
-                     true_key=set('microsoft_pack')),
+                     true_key=['microsoft_pack']),
         parser.parse('../res/win8_input_method',
-                     true_key=set('win8_input_method')),
+                     true_key=['win8_input_method']),
         parser.parse('../res/office_if_pack', 
                      field_target={0 : 'name', 5 : 'office_if_2013'})]:
         for lang in langiter:
