@@ -4,7 +4,7 @@ from django.utils import timezone
 def normalize_alt_name(name):
     remove_punct = name.replace(",", "").replace("(", "")
     remove_punct = remove_punct.replace(")", "")
-    return " ".join(set(remove_punct.lower().split()))
+    return " ".join(sorted(remove_punct.lower().split()))
 
 
 class Language(models.Model):

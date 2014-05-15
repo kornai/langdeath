@@ -37,7 +37,6 @@ class LanguageDB(object):
     def add_name(self, data, lang):
         if lang.name == "":
             lang.name = data
-            return
 
         if data == lang.name:
             return
@@ -47,13 +46,22 @@ class LanguageDB(object):
     def add_alt_name(self, data, lang):
         lang.save()
         if type(data) == str or type(data) == unicode:
-            data = data.lower().strip()
+            data = normalize_alt_name(data)
             if len(lang.alt_name.filter(name=data)) > 0:
                 # duplication, don't do anything
                 return
 
-            a = AlternativeName(name=data)
-            a.save()
+            alts = AlternativeName.objects.filter(name=data).all()
+            if len(alts) == 0:
+                a = AlternativeName(name=data)
+                a.save()
+            elif len(alts) == 1:
+                a = alts[0]
+                a.save()
+            else:
+                logging.error(u"There are 2+ altnames with data {0}".format(
+                    data))
+
             la = LanguageAltName(lang=lang, name=a)
             a.save(), lang.save(), la.save()
 
