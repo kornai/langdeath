@@ -21,12 +21,12 @@ one, separated by tab, contains the inner (local) name. There are parens,
 similar to those with Mac input methods: country, script variant, or
 language variant.
 
-2.2 WINDOWS INPUT METHODS
+2.2 WINDOWS INPUT OPTIONS
 
-win8_input_method lists Windows 8 input methods translated from a Hungarian
+win8_input_option lists Windows 8 input options translated from a Hungarian
 Windows 8. There are parens, similar to those with Mac input methods.
 
-2.2 OFFICE LANGUAGE INTERFACE PACK
+2.3 OFFICE LANGUAGE INTERFACE PACK
 
 office_if_pack contains data about Office Language Interface Packs from
 http://office.microsoft.com/en-001/downloads/office-language-interface-pack-lip-downloads-HA001113350.aspx.
