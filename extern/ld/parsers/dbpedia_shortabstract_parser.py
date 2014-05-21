@@ -62,6 +62,7 @@ class DbpediaShortAbstractsParser(OfflineParser):
             l = self.multiple_replacement(l, self.patterns['words_to_remove'])
             l = re.sub('[0-9]*', '', l)
             l = l.strip()
+            l = l.strip('"')
             if l != language and l != '' and \
                self.patterns['post_filter'].match(l) is None\
                and len(l.split()) < 4:
@@ -112,13 +113,13 @@ class DbpediaShortAbstractsParser(OfflineParser):
                     continue
                 alternatives = self.parse_alternatives(language, abstract)
                 if len(alternatives) > 0:
-                    yield u'{0}\t{1}'.format(language, ';'.join(alternatives))
+                    yield {u'name': language, u'altnames': alternatives}
            
 def main():
 
     parser = DbpediaShortAbstractsParser()
-    for i in parser.parse():
-        print i.encode('utf-8')
+    for d in parser.parse():
+        print repr(d)
 
 if __name__ == '__main__':
     main()
