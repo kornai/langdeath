@@ -58,7 +58,6 @@ def parse_detailed_list(html):
     for h4 in html.split("<h4>")[1:]:
         code = h4.split('<span class="mw-headline"')[1].split(
             "</span>")[0].split(">")[1]
-        print repr(code)
         children_list = h4.split("<ol>")[1].split("</ol>")[0]
         children = []
         for child in children_list.split("<li>")[1:]:
