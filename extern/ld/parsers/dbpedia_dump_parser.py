@@ -1,3 +1,8 @@
+"""This parser needs dbpedia dump to be downloaded from
+http://wiki.dbpedia.org/Downloads39
+The file needed is Raw Infobox Properties, nt
+file has to be put into @basedir, see constructor"""
+
 from base_parsers import OfflineParser
 import re
 
