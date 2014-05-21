@@ -17,7 +17,12 @@ class TSV_parser(OfflineParser):
                 lang = {}
                 fields = line.strip().split('\t')
                 for field_index, target in field_target.iteritems():
-                    lang[target] = fields[field_index]
+                    v = fields[field_index]
+                    if v == "none":
+                        v = False
+                    elif v == "download":
+                        v = True
+                    lang[target] = v
                 if true_key:
                     for key in true_key:
                         lang[key] = True
