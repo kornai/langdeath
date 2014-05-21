@@ -17,6 +17,7 @@ from ld.parsers.ethnologue_parser import EthnologueOfflineParser, \
 from ld.parsers.crubadan_parser import CrubadanParser
 from ld.parsers.language_archives_parser import \
     LanguageArchivesOfflineParser, LanguageArchivesOnlineParser
+from ld.parsers.macro_wp_parser import MacroWPParser
 
 
 class ParserAggregator(object):
@@ -30,12 +31,13 @@ class ParserAggregator(object):
         la_parser = (LanguageArchivesOnlineParser() if not la_dump_dir
                      else LanguageArchivesOfflineParser(la_dump_dir))
 
-        self.parsers = [ParseISO639_3(), eth_parser, CrubadanParser(),
-                        la_parser]
-        self.parsers = [OmniglotParser()]
+        self.parsers = [ParseISO639_3(), MacroWPParser(), eth_parser,
+                        CrubadanParser(), la_parser]
+        #self.parsers = [OmniglotParser()]
         self.lang_db = LanguageDB()
         self.trusted_parsers = set([ParseISO639_3, EthnologueOnlineParser,
-                                   EthnologueOfflineParser, CrubadanParser])
+                                   EthnologueOfflineParser, CrubadanParser,
+                                   MacroWPParser])
         self.parsers_needs_sil = set([EthnologueOfflineParser,
                                       EthnologueOnlineParser,
                                       LanguageArchivesOfflineParser,
