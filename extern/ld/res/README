@@ -12,18 +12,23 @@ In some cases, additional information is specified in parens:
 
 2 MICROSOFT
 
-2.1 WINDOWS 7 LANGUAGE PACKS 
+2.1 WINDOWS 8 LANGUAGE PACKS 
 
-microsoft_pack lists languages with a Windows 7 language pack, copied from
-http://windows.microsoft.com/en-us/windows7/products/features/language-packs.
+microsoft_pack lists languages with a Windows 8 language pack, copied from
+http://windows.microsoft.com/en-us/windows/language-packs#lptabs=win8
 The first filed contains the name of the language in English, and the second
 one, separated by tab, contains the inner (local) name. There are parens,
 similar to those with Mac input methods: country, script variant, or
 language variant.
 
-2.2 OFFICE LANGUAGE INTERFACE PACK
+2.2 WINDOWS INPUT OPTIONS
 
-microsoft_if_pack contains data about Office Language Interface Packs from
+win8_input_option lists Windows 8 input options translated from a Hungarian
+Windows 8. There are parens, similar to those with Mac input methods.
+
+2.3 OFFICE LANGUAGE INTERFACE PACK
+
+office_if_pack contains data about Office Language Interface Packs from
 http://office.microsoft.com/en-001/downloads/office-language-interface-pack-lip-downloads-HA001113350.aspx.
 The file has the following tab-separated fileds:
     language name in English

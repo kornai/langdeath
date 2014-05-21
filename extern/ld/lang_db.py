@@ -1,9 +1,12 @@
 import logging
+import re
 
-from dld.models import Language, Code, Country, AlternativeName, CountryName,\
-    LanguageAltName
+from dld.models import normalize_alt_name, Language, Code, Country, \
+    AlternativeName, CountryName, LanguageAltName
 
 from ld.langdeath_exceptions import LangdeathException
+
+card_dir_p = re.compile("((east)|(west)|(north)|(south))")
 
 
 class LanguageDB(object):
@@ -34,7 +37,6 @@ class LanguageDB(object):
     def add_name(self, data, lang):
         if lang.name == "":
             lang.name = data
-            return
 
         if data == lang.name:
             return
@@ -44,15 +46,30 @@ class LanguageDB(object):
     def add_alt_name(self, data, lang):
         lang.save()
         if type(data) == str or type(data) == unicode:
-            data = data.lower().strip()
+            data = normalize_alt_name(data)
             if len(lang.alt_name.filter(name=data)) > 0:
                 # duplication, don't do anything
                 return
 
-            a = AlternativeName(name=data)
-            a.save()
+            alts = AlternativeName.objects.filter(name=data).all()
+            if len(alts) == 0:
+                a = AlternativeName(name=data)
+                a.save()
+            elif len(alts) == 1:
+                a = alts[0]
+                a.save()
+            else:
+                logging.error(u"There are 2+ altnames with data {0}".format(
+                    data))
+
             la = LanguageAltName(lang=lang, name=a)
             a.save(), lang.save(), la.save()
+
+            if len(set(data.split()) &
+                   set(["east", "west", "north", "south"])) > 0:
+                data = card_dir_p.sub("\g<1>ern", data)
+                self.add_alt_name(data, lang)
+
         elif type(data) == list:
             for d in data:
                 self.add_alt_name(d, lang)
@@ -148,9 +165,14 @@ class LanguageDB(object):
             if len(languages) > 0:
                 return languages
 
+            # native name
+            languages = Language.objects.filter(native_name=lang['name'])
+            if len(languages) > 0:
+                return languages
+
             # try with alternative names
             languages = Language.objects.filter(
-                alt_name__name=lang['name'].lower())
+                alt_name__name=normalize_alt_name(lang['name']))
             logging.info('Altname match: {0}: {1}'.format(
                 repr(lang['name']), repr(languages)))
             return languages
