@@ -42,6 +42,12 @@ class Language(models.Model):
     la_oth_res_about_online = models.IntegerField(blank=True, null=True)
     la_oth_res_about_all = models.IntegerField(blank=True, null=True)
 
+    mac_input = models.BooleanField(default=False)
+    mac_input_partial = models.BooleanField(default=False)
+    microsoft_pack = models.BooleanField(default=False)
+    win8_input_method = models.BooleanField(default=False)
+    office_if_pack = models.BooleanField(default=False)
+
     # many to many fields
     code = models.ManyToManyField('Code', related_name='codes')
     alt_name = models.ManyToManyField('AlternativeName',
