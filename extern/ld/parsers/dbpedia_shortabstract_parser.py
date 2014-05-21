@@ -29,21 +29,27 @@ class DbpediaShortAbstractsParser(OfflineParser):
         patterns['splitters'] =\
                 re.compile('|'.join([w for w in splitter_phrases]))
 
-        words_to_remove_from_pattern = \
-                ['also', 'known', 'as', 'and', 'in', 'less', 'preciseley',
+        words_to_remove_from_pattern1 = \
+                ['also', 'known', 'as', 'and', 'in', 'less', 'preceisely',
                  'called', 'formerly', 'literally', 'spelled', 'often',
                  'abbreviated', 'script', 'transliterated',
                  'rarely', 'sometimes', 'common', 'form', 'autonym',
-                 'after', 'a', 'particular', 'speakers',
-                 'dialect', 'precisely', 'alternatively', 'plural',
-                 'archaically', 'many', 'other', 'spellings', 'see', 'below',
-                 'proper', 'disambiguation', 'with', 'full', 'diactritics',
-                 'written', 'names', 'former', 'ruling', 'clan', 'by',
-                 'linguistics', 'etc.', 'to', 'be', 'exact']
+                 'after', 'a', 'particular', 'speakers']
 
-        patterns['words_to_remove'] = \
+        words_to_remove_from_pattern2 = \
+                ['dialect', 'precisely', 'alternatively', 'plural',
+                'archaically', 'many', 'other', 'spellings', 'see', 'below',
+                'proper', 'disambiguation', 'with', 'full', 'diactritics',
+                'written', 'names', 'former', 'ruling', 'clan', 'by',
+                'linguistics', 'etc.', 'to', 'be', 'exact']
+
+        patterns['words_to_remove1'] = \
                 re.compile('|'.join(['([^A-Za-z]|^)' + w + '([^A-Za-z]|$)'
-                          for w in words_to_remove_from_pattern]))
+                          for w in words_to_remove_from_pattern1]))
+
+        patterns['words_to_remove2'] = \
+                re.compile('|'.join(['([^A-Za-z]|^)' + w + '([^A-Za-z]|$)'
+                          for w in words_to_remove_from_pattern2]))
 
         patterns['alt_name'] = re.compile(
             u'(^[\u03df-\u09FF\u0A01-\uffff]+)\s([\u0000-\u03DE]+)$|' +
@@ -58,7 +64,8 @@ class DbpediaShortAbstractsParser(OfflineParser):
         for l in found_langs:
             if l[:3] == 'or ':
                 l = l[3:]
-            l = self.multiple_replacement(l, self.patterns['words_to_remove'])
+            l = self.multiple_replacement(l, self.patterns['words_to_remove1'])
+            l = self.multiple_replacement(l, self.patterns['words_to_remove2'])
             l = re.sub('[0-9]*', '', l)
             l = l.strip()
             l = l.strip('"')
