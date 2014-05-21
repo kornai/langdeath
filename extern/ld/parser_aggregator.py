@@ -18,6 +18,7 @@ from ld.parsers.crubadan_parser import CrubadanParser
 from ld.parsers.language_archives_parser import \
     LanguageArchivesOfflineParser, LanguageArchivesOnlineParser
 from ld.parsers.macro_wp_parser import MacroWPParser
+from ld.parsers.software_support_parser import SoftwareSupportParser
 
 
 class ParserAggregator(object):
@@ -25,15 +26,16 @@ class ParserAggregator(object):
     the results, call any extra methods that will be required to merge
     two langauges (or any other data) that are possibly the same
     """
-    def __init__(self, eth_dump_dir='', la_dump_dir=''):
+    def __init__(self, eth_dump_dir='', la_dump_dir='',
+                 res_dir='extern/ld/res'):
         eth_parser = (EthnologueOnlineParser() if not eth_dump_dir
                       else EthnologueOfflineParser(eth_dump_dir))
         la_parser = (LanguageArchivesOnlineParser() if not la_dump_dir
                      else LanguageArchivesOfflineParser(la_dump_dir))
 
         self.parsers = [ParseISO639_3(), MacroWPParser(), eth_parser,
-                        CrubadanParser(), la_parser]
-        #self.parsers = [OmniglotParser()]
+                        CrubadanParser(), la_parser, OmniglotParser(),
+                        SoftwareSupportParser(res_dir)]
         self.lang_db = LanguageDB()
         self.trusted_parsers = set([ParseISO639_3, EthnologueOnlineParser,
                                    EthnologueOfflineParser, CrubadanParser,
