@@ -2,7 +2,7 @@ from base_parsers import OfflineParser
 
 
 class TSV_parser(OfflineParser):
-    def parse(self, filen, field_target=None, true_key=None):
+    def parse(self, filen, field_target=None, true_key=None, encoding="utf-8"):
         if field_target is None:
             field_target = {0: 'name'}
         """
@@ -15,7 +15,7 @@ class TSV_parser(OfflineParser):
         with open(filen) as file_:
             for line in file_:
                 lang = {}
-                fields = line.strip().split('\t')
+                fields = line.strip().decode(encoding).split('\t')
                 for field_index, target in field_target.iteritems():
                     v = fields[field_index]
                     if v == "none":
