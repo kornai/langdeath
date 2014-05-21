@@ -71,7 +71,7 @@ def parse_detailed_list(html):
         yield code, children
 
 class MacroWPParser(OnlineParser):
-    def parse():
+    def parse(self):
         html = get_html(url)
         detailed_list = get_detailed_list(html)
         for res in parse_detailed_list(detailed_list):
