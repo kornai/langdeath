@@ -18,6 +18,7 @@ def add_champion(d):
             d['sil'] = d['code']
         else:
             logging.error("There was an unknown type of code: {0}".format(c))
+            d['sil'] = d['code']
     del d['code']
 
 
