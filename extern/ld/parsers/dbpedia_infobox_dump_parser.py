@@ -36,7 +36,8 @@ class DbpediaInfoboxParser(OfflineParser):
         old_lang_name = ''
         for l in self.fh:
             if l[0] == '#':
-                yield block
+                # last line
+                yield old_lang_name, block
                 break
             url = l.split(' ')[0]
             url = url.split('/')[4][:-1]
