@@ -1,5 +1,4 @@
 import re
-import logging
 
 from base_parsers import OnlineParser
 from ld.langdeath_exceptions import ParserException
@@ -17,7 +16,7 @@ def add_champion(d):
             d['champion'] = d['sil']
             d['sil'] = d['code']
         else:
-            logging.error("There was an unknown type of code: {0}".format(c))
+            d['sil'] = d['code']
     del d['code']
 
 
