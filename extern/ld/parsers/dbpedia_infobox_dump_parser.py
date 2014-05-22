@@ -3,15 +3,18 @@ http://wiki.dbpedia.org/Downloads39
 The file needed is Raw Infobox Properties, nt
 file has to be put into @basedir, see constructor"""
 
-from base_parsers import OfflineParser
+import sys
 import re
+import cPickle
 
+from base_parsers import OfflineParser
 
 class DbpediaDumpParser(OfflineParser):
 
     def __init__(self, basedir='dbpedia_dumps'):
 
         self.basedir = basedir
+        self.def_result_fn = "saved_infobox_results.pickle"
         self.fh = open('{0}/raw_infobox_properties_en.nt'
                        .format(self.basedir))
         self.needed_properties = set(['spokenIn', 'altname', 'iso',
@@ -62,7 +65,24 @@ class DbpediaDumpParser(OfflineParser):
                 d[property_] = value_
         return d
 
+    def parse_and_save(self, ofn=None):
+        if ofn is None:
+            ofn = self.basedir + "/" + self.def_result_fn
+        of = open(ofn, "wb")
+        res = list(self.parse_dump())
+        cPickle.dump(res, of, -1)
+
+    def read_results(self, ifn=None):
+        if ifn is None:
+            ifn = self.basedir + "/" + self.def_result_fn
+        ifile = open(ifn)
+        return cPickle.load(ifile)
+
     def parse(self):
+        # this is just an alias to work the same way as other parsers
+        return self.read_results()
+
+    def parse_dump(self):
 
         for language, block in self.generate_language_blocks():
 
