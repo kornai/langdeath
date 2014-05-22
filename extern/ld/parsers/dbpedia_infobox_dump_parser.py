@@ -1,12 +1,26 @@
-from base_parsers import OfflineParser
+"""This parser needs dbpedia dump to be downloaded from
+http://wiki.dbpedia.org/Downloads39
+The file needed is Raw Infobox Properties, nt
+file has to be put into @basedir, see constructor
+Since dump is quite big, parsing is a little slow, so there is a
+parse_and_save() method, that will pickle results to a file, and
+read_results() method, that will read results from that file and return
+in the same format as parse() does.
+"""
+
+import sys
 import re
+import cPickle
+
+from base_parsers import OfflineParser
 
 
-class DbpediaDumpParser(OfflineParser):
+class DbpediaInfoboxParser(OfflineParser):
 
     def __init__(self, basedir='dbpedia_dumps'):
 
         self.basedir = basedir
+        self.def_result_fn = "saved_infobox_results.pickle"
         self.fh = open('{0}/raw_infobox_properties_en.nt'
                        .format(self.basedir))
         self.needed_properties = set(['spokenIn', 'altname', 'iso',
@@ -22,7 +36,8 @@ class DbpediaDumpParser(OfflineParser):
         old_lang_name = ''
         for l in self.fh:
             if l[0] == '#':
-                yield block
+                # last line
+                yield old_lang_name, block
                 break
             url = l.split(' ')[0]
             url = url.split('/')[4][:-1]
@@ -57,7 +72,24 @@ class DbpediaDumpParser(OfflineParser):
                 d[property_] = value_
         return d
 
+    def parse_and_save(self, ofn=None):
+        if ofn is None:
+            ofn = self.basedir + "/" + self.def_result_fn
+        of = open(ofn, "wb")
+        res = list(self.parse_dump())
+        cPickle.dump(res, of, -1)
+
+    def read_results(self, ifn=None):
+        if ifn is None:
+            ifn = self.basedir + "/" + self.def_result_fn
+        ifile = open(ifn)
+        return cPickle.load(ifile)
+
     def parse(self):
+        # this is just an alias to work the same way as other parsers
+        return self.read_results()
+
+    def parse_dump(self):
 
         for language, block in self.generate_language_blocks():
 
@@ -68,9 +100,8 @@ class DbpediaDumpParser(OfflineParser):
 
 def main():
 
-    parser = DbpediaDumpParser()
-    for d in parser.parse():
-        print repr(d)
+    parser = DbpediaInfoboxParser(sys.argv[1])
+    parser.parse_and_save()
 
 
 if __name__ == '__main__':
