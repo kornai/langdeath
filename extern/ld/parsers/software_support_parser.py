@@ -23,8 +23,10 @@ class SoftwareSupportParser(TSV_parser):
              {"true_key": ['microsoft_pack']}),
             ('{0}/win8_input_option'.format(self.resdir),
              {"true_key": ['win8_input_method']}),
+            ('{0}/office13_lp'.format(self.resdir),
+             {"true_key": ['office13_lp']}),
             ('{0}/office_if_pack'.format(self.resdir),
-             {"field_target": {0: 'name', 5: 'office_if_2013'}})
+             {"field_target": {0: 'name', 5: 'office13_if_pack'}})
         ]
         for args in parameters:
             for lang in parser.parse(args[0], **args[1]):
