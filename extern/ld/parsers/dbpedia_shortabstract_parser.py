@@ -1,5 +1,18 @@
-from base_parsers import OfflineParser
+"""This parser needs dbpedia short abstract dump (nt) to be downloaded from
+http://wiki.dbpedia.org/Downloads39
+file has to be put into @basedir, see constructor
+Since dump is quite big, parsing is a little slow, so there is a
+parse_and_save() method, that will pickle results to a file, and
+read_results() method, that will read results from that file and return
+in the same format as parse() does.
+"""
+
+import sys
 import re
+import cPickle
+
+from base_parsers import OfflineParser
+
 
 class DbpediaShortAbstractsParser(OfflineParser):
 
@@ -9,6 +22,7 @@ class DbpediaShortAbstractsParser(OfflineParser):
         self.fh = open('{0}/short_abstracts_en.nt'
                        .format(self.basedir))
         self.patterns = self.compile_patterns()
+        self.def_result_fn = "saved_shortabstract_results.pickle"
 
     def language_from_title(self, url):
 
@@ -106,7 +120,24 @@ class DbpediaShortAbstractsParser(OfflineParser):
         else:
             return []
 
+    def parse_and_save(self, ofn=None):
+        if ofn is None:
+            ofn = self.basedir + "/" + self.def_result_fn
+        of = open(ofn, "wb")
+        res = list(self.parse_dump())
+        cPickle.dump(res, of, -1)
+
+    def read_results(self, ifn=None):
+        if ifn is None:
+            ifn = self.basedir + "/" + self.def_result_fn
+        ifile = open(ifn)
+        return cPickle.load(ifile)
+
     def parse(self):
+        # this is just an alias to work the same way as other parsers
+        return self.read_results()
+
+    def parse_dump(self):
 
         for l in self.fh:
 
@@ -122,9 +153,8 @@ class DbpediaShortAbstractsParser(OfflineParser):
 
 def main():
 
-    parser = DbpediaShortAbstractsParser()
-    for d in parser.parse():
-        print repr(d)
+    parser = DbpediaShortAbstractsParser(sys.argv[1])
+    parser.parse_and_save()
 
 if __name__ == '__main__':
     main()

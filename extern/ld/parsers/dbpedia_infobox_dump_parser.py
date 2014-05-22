@@ -1,7 +1,12 @@
 """This parser needs dbpedia dump to be downloaded from
 http://wiki.dbpedia.org/Downloads39
 The file needed is Raw Infobox Properties, nt
-file has to be put into @basedir, see constructor"""
+file has to be put into @basedir, see constructor
+Since dump is quite big, parsing is a little slow, so there is a
+parse_and_save() method, that will pickle results to a file, and
+read_results() method, that will read results from that file and return
+in the same format as parse() does.
+"""
 
 import sys
 import re
@@ -9,7 +14,8 @@ import cPickle
 
 from base_parsers import OfflineParser
 
-class DbpediaDumpParser(OfflineParser):
+
+class DbpediaInfoboxParser(OfflineParser):
 
     def __init__(self, basedir='dbpedia_dumps'):
 
@@ -93,9 +99,8 @@ class DbpediaDumpParser(OfflineParser):
 
 def main():
 
-    parser = DbpediaDumpParser()
-    for d in parser.parse():
-        print repr(d)
+    parser = DbpediaInfoboxParser(sys.argv[1])
+    parser.parse_and_save()
 
 
 if __name__ == '__main__':
