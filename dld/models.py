@@ -16,6 +16,10 @@ class Language(models.Model):
     iso_type = models.CharField(max_length=100, blank=True)
     champion = models.ForeignKey('Language', blank=True, null=True,
                                  related_name='sublang')
+
+    longitude = models.FloatField(blank=True, null=True)
+    latitude = models.FloatField(blank=True, null=True)
+
     eth_status = models.CharField(max_length=100, blank=True)
     eth_population = models.IntegerField(blank=True, null=True)
 
@@ -47,6 +51,9 @@ class Language(models.Model):
     microsoft_pack = models.BooleanField(default=False)
     win8_input_method = models.BooleanField(default=False)
     office_if_pack = models.BooleanField(default=False)
+
+    wals_samples_100 = models.BooleanField(default=False)
+    wals_samples_200 = models.BooleanField(default=False)
 
     # many to many fields
     code = models.ManyToManyField('Code', related_name='codes')
