@@ -1,52 +1,46 @@
 import logging
+import json
 
 from base_parsers import OnlineParser
-from ld.langdeath_exceptions import ParserException
 from utils import get_html
 
 
 class WalsInfoParser(OnlineParser):
 
     def __init__(self):
+        self.url = "http://wals.info/languoid.geojson?sEcho=1&iSortingCols=1&iSortCol_0=0&sSortDir_0=asc"  # nopep8
+        self.needed_keys = {
+            "longitude": "longitude",
+            "latitude": "latitude",
+            "iso_codes": "sil",
+            "name": "name",
+            "ascii_name": "alt_name",
+            "samples_100": "wals_samples_100",
+            "samples_200": "wals_samples_200"
+        }
 
-        self.url = "http://wals.info/languoid.tab?sEcho=1&iSortingCols=1&iSortCol_0=0&sSortDir_0=asc"  # nopep8
+    def clean_dict(self, d):
+        cd = {}
+        for k in self.needed_keys:
+            cd[self.needed_keys[k]] = d[k]
+        cd[u'longitude'] = float(d[u'longitude'])
+        cd[u'latitude'] = float(d[u'latitude'])
 
-    def get_header(self, html):
-        try:
-            lines = html.split('\n')
-            header_line = lines[0]
-            header = header_line.strip('\n').split('\t')
-            return header, lines[1:]
-        except Exception as e:
-            raise ParserException(
-                'Error in WalsInfoParser.get_header(): {0}'.format(e))
+        return cd
 
-    def format_dict(self, d):
-
-        d[u'longitude'] = float(d[u'longitude'])
-        d[u'latitude'] = float(d[u'latitude'])
-        return d
-
-    def generate_dictionaries(self, html):
-
-        header, data = self.get_header(html)
-        for l in data:
-            try:
-                d = {}
-                cells = l.strip('\n').split('\t')
-                for i in xrange(len(header)):
-                    d[header[i]] = cells[i]
-                d = self.format_dict(d)
-                yield d
-            except Exception as e:
-                raise ParserException(
-                    'Error in WalsInfoParser.generate_dictionaries():' +
-                    '{0} at line {1}'.format(e, l))
+    def generate_dictionaries(self, data):
+        for d in data["features"]:
+            cd = self.clean_dict(d["properties"]["language"])
+            sils = [s.strip() for s in cd["sil"].split(",")]
+            for sil in sils:
+                new_d = dict(cd)
+                new_d["sil"] = sil
+                yield new_d
 
     def parse(self):
-
-        html = get_html(self.url)
-        for d in self.generate_dictionaries(html):
+        json_data = get_html(self.url)
+        data = json.loads(json_data)
+        for d in self.generate_dictionaries(data):
             yield d
 
 
@@ -55,7 +49,7 @@ def main():
     logging.basicConfig(level=logging.DEBUG)
     parser = WalsInfoParser()
     for d in parser.parse():
-        print d
+        print "\t".join(d.keys())
 
 if __name__ == "__main__":
     main()
