@@ -48,6 +48,9 @@ class Language(models.Model):
     win8_input_method = models.BooleanField(default=False)
     office_if_pack = models.BooleanField(default=False)
 
+    wals_samples_100 = models.BooleanField(default=False)
+    wals_samples_200 = models.BooleanField(default=False)
+
     # many to many fields
     code = models.ManyToManyField('Code', related_name='codes')
     alt_name = models.ManyToManyField('AlternativeName',
