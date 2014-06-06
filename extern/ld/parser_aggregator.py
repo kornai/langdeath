@@ -21,6 +21,7 @@ from ld.parsers.macro_wp_parser import MacroWPParser
 from ld.parsers.software_support_parser import SoftwareSupportParser
 from ld.parsers.wals_info_parser import WalsInfoParser
 from ld.parsers.indigenous_parser import IndigenousParser
+from ld.parsers.dbpedia_dumps_parser import DbpediaDumpsParser
 
 
 class ParserAggregator(object):
@@ -28,22 +29,26 @@ class ParserAggregator(object):
     the results, call any extra methods that will be required to merge
     two langauges (or any other data) that are possibly the same
     """
-    def __init__(self, eth_dump_dir='', la_dump_dir='',
+    def __init__(self, eth_dump_dir='', la_dump_dir='', dbpedia_res_dir='',
                  res_dir='extern/ld/res'):
         eth_parser = (EthnologueOnlineParser() if not eth_dump_dir
                       else EthnologueOfflineParser(eth_dump_dir))
         la_parser = (LanguageArchivesOnlineParser() if not la_dump_dir
                      else LanguageArchivesOfflineParser(la_dump_dir))
+        dbpedia_parser = DbpediaDumpsParser(infobox_basedir=dbpedia_res_dir,
+            shortabstract_basedir=dbpedia_res_dir)
 
         self.parsers = [ParseISO639_3(), MacroWPParser(), eth_parser,
                         CrubadanParser(), la_parser, WalsInfoParser(),
                         IndigenousParser()]
 
+        self.parsers = [dbpedia_parser]
+
         self.parsers_todo = [OmniglotParser(), SoftwareSupportParser(res_dir)]
         self.lang_db = LanguageDB()
         self.trusted_parsers = set([ParseISO639_3, EthnologueOnlineParser,
                                    EthnologueOfflineParser, CrubadanParser,
-                                   MacroWPParser])
+                                   MacroWPParser, DbpediaDumpsParser])
         self.parsers_needs_sil = set([EthnologueOfflineParser,
                                       EthnologueOnlineParser,
                                       LanguageArchivesOfflineParser,
@@ -91,7 +96,7 @@ class ParserAggregator(object):
         except UnknownLanguageException as e:
             return
 
-    @transaction.commit_manually
+    #@transaction.commit_manually
     def call_parser(self, parser):
         c = 0
         self.parser = parser
@@ -109,7 +114,7 @@ class ParserAggregator(object):
         if len(self.unknown_langs) > 0:
             logging.error("Unknown_langs: {0}".format(self.unknown_langs))
 
-        transaction.commit()
+        #transaction.commit()
 
 
 def main():
