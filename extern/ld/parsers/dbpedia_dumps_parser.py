@@ -11,7 +11,6 @@ parse_and_save() method, that will pickle results to two files files, and
 parse() that only reads end merges results parsed from the two dump.
 """
 
-from collections import defaultdict
 from base_parsers import OfflineParser
 from dbpedia_infobox_dump_parser import DbpediaInfoboxParser
 from dbpedia_shortabstract_parser import DbpediaShortAbstractsParser
@@ -34,33 +33,29 @@ class DbpediaDumpsParser(OfflineParser):
         for d in self.parse(sil_list, fn):
             yield d
 
-    def parse(self, sil_list, fn=None):
+    def parse(self, fn=None):
 
         for d in self.merge_dump_data(
-            sil_list, self.infobox_parser.read_results(fn),
+            self.infobox_parser.read_results(fn),
             self.shortabstract_parser.read_results(fn)):
                 yield d
 
-    def merge_dump_data(self, sil_list, res_info, res_abstract):
-
-        res_info_sil_dict = defaultdict(list)
-        for d in res_info:
-            res_info_sil_dict[d[u'sil']].append(d)
+    def merge_dump_data(self, res_info, res_abstract):
+        
         res_abstract_name_dict = dict([(d[u'name'], d) for d in res_abstract])
-        for s in sil_list:
-            if s not in res_info_sil_dict:
+        for d1 in res_info:
+            if d1['sil'] == u'none' or d1['sil'] == 'n/a':
                 continue
-            for d1 in res_info_sil_dict[s]:
-                if u'name' in d1 and d1[u'name'] in res_abstract_name_dict:
-                    d2 = res_abstract_name_dict[d1[u'name']]
-                    d1[u'altname'] = d1.get(u'altname', []) + d2[u'altname']
-                yield d1
+            if u'name' in d1 and d1[u'name'] in res_abstract_name_dict:
+                d2 = res_abstract_name_dict[d1[u'name']]
+                d1[u'altname'] = d1.get(u'altname', []) + d2[u'altname']
+            yield d1
 
 
 def main():
 
     p = DbpediaDumpsParser()
-    for d in p.parse(['deu', 'hun']):
+    for d in p.parse():
         print repr(d)
 
 if __name__ == "__main__":
