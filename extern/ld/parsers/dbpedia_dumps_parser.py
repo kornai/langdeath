@@ -11,6 +11,8 @@ parse_and_save() method, that will pickle results to two files files, and
 parse() that only reads end merges results parsed from the two dump.
 """
 
+import logging
+
 from base_parsers import OfflineParser
 from dbpedia_infobox_dump_parser import DbpediaInfoboxParser
 from dbpedia_shortabstract_parser import DbpediaShortAbstractsParser
@@ -25,6 +27,12 @@ class DbpediaDumpsParser(OfflineParser):
         self.infobox_parser = DbpediaInfoboxParser(infobox_basedir, new_parse)
         self.shortabstract_parser = DbpediaShortAbstractsParser(
             shortabstract_basedir, new_parse)
+        self.needed_keys = {
+            "name": "name",
+            "altname": "alt_name",
+            "nativename": "alt_name",
+            "sil": "sil",
+        }
 
     def parse_and_save_dumps(self, sil_list, fn=None):
 
@@ -34,11 +42,33 @@ class DbpediaDumpsParser(OfflineParser):
             yield d
 
     def parse(self, fn=None):
+        i_res = self.infobox_parser.read_results(fn)
+        sa_res = self.shortabstract_parser.read_results(fn)
 
-        for d in self.merge_dump_data(
-            self.infobox_parser.read_results(fn),
-            self.shortabstract_parser.read_results(fn)):
-                yield d
+        for d in self.merge_dump_data(i_res, sa_res):
+            new_d = {}
+            for k in d.keys():
+                if k in self.needed_keys:
+                    new_d[self.needed_keys[k]] = d[k]
+            # HACK
+            if len(d["sil"]) == 3 and d["sil"].islower():
+                yield new_d
+            if "lc_ld" in d and len(d["lc_ld"]) > 0:
+                # HACK
+                from itertools import chain
+                sils = []
+                names = []
+                for data in chain(d["lc_ld"]):
+                    if len(data) == 3 and data.islower():
+                        sils.append(data)
+                    else:
+                        names.append(data)
+                if len(sils) == len(names):
+                    for sil, name in zip(sils, names):
+                        if sil != d["sil"]:
+                            child_d = {"sil": sil, "name": name,
+                                       "champion": d["sil"]}
+                            yield child_d
 
     def merge_dump_data(self, res_info, res_abstract):
         
