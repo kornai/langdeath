@@ -38,11 +38,9 @@ class ParserAggregator(object):
         dbpedia_parser = DbpediaDumpsParser(infobox_basedir=dbpedia_res_dir,
             shortabstract_basedir=dbpedia_res_dir)
 
-        self.parsers = [ParseISO639_3(), MacroWPParser(), eth_parser,
-                        CrubadanParser(), la_parser, WalsInfoParser(),
-                        IndigenousParser()]
-
-        self.parsers = [dbpedia_parser]
+        self.parsers = [ParseISO639_3(), MacroWPParser(), dbpedia_parser,
+                        eth_parser, CrubadanParser(), la_parser,
+                        WalsInfoParser(), IndigenousParser()]
 
         self.parsers_todo = [OmniglotParser(), SoftwareSupportParser(res_dir)]
         self.lang_db = LanguageDB()
@@ -96,7 +94,7 @@ class ParserAggregator(object):
         except UnknownLanguageException as e:
             return
 
-    #@transaction.commit_manually
+    @transaction.commit_manually
     def call_parser(self, parser):
         c = 0
         self.parser = parser
@@ -114,7 +112,7 @@ class ParserAggregator(object):
         if len(self.unknown_langs) > 0:
             logging.error("Unknown_langs: {0}".format(self.unknown_langs))
 
-        #transaction.commit()
+        transaction.commit()
 
 
 def main():
