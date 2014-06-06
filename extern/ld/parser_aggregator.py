@@ -20,6 +20,7 @@ from ld.parsers.language_archives_parser import \
 from ld.parsers.macro_wp_parser import MacroWPParser
 from ld.parsers.software_support_parser import SoftwareSupportParser
 from ld.parsers.wals_info_parser import WalsInfoParser
+from ld.parsers.indigenous_parser import IndigenousParser
 
 
 class ParserAggregator(object):
@@ -35,7 +36,9 @@ class ParserAggregator(object):
                      else LanguageArchivesOfflineParser(la_dump_dir))
 
         self.parsers = [ParseISO639_3(), MacroWPParser(), eth_parser,
-                        CrubadanParser(), la_parser, WalsInfoParser()]
+                        CrubadanParser(), la_parser, WalsInfoParser(),
+                        IndigenousParser()]
+
         self.parsers_todo = [OmniglotParser(), SoftwareSupportParser(res_dir)]
         self.lang_db = LanguageDB()
         self.trusted_parsers = set([ParseISO639_3, EthnologueOnlineParser,
