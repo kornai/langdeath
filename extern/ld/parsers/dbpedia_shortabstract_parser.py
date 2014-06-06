@@ -19,18 +19,22 @@ from base_parsers import OfflineParser
 
 class DbpediaShortAbstractsParser(OfflineParser):
 
-    def __init__(self, basedir='dbpedia_dumps',
+    def __init__(self, basedir='dbpedia_dumps', new_parse=False,
                  needed_fn='dbpedia_ontology_languages'):
 
         self.basedir = basedir
+        self.def_result_fn = "saved_shortabstract_results.pickle"
+        if new_parse is True:
+            self.load_data_for_parsing()
+
+    def load_data_for_parsing(self):
         self.fh = open('{0}/short_abstracts_en.nt'
                        .format(self.basedir))
         self.patterns = self.compile_patterns()
-        self.def_result_fn = "saved_shortabstract_results.pickle"
         self.needed_titles = set([l.strip('\n').decode('unicode_escape')
                                   for l in open(
                                       '{0}/{1}'
-                                  .format(basedir, needed_fn))])
+                                      .format(self.basedir, self.needed_fn))])
 
     def compile_patterns(self):
 
@@ -188,7 +192,7 @@ class DbpediaShortAbstractsParser(OfflineParser):
 
 def main():
 
-    parser = DbpediaShortAbstractsParser()
+    parser = DbpediaShortAbstractsParser(new_parse=False)
     for d in parser.parse():
         print d
 
