@@ -20,23 +20,28 @@ from base_parsers import OfflineParser
 
 class DbpediaInfoboxParser(OfflineParser):
 
-    def __init__(self, basedir='dbpedia_dumps',
+    def __init__(self, basedir='dbpedia_dumps', new_parse=False,
                  needed_fn='dbpedia_ontology_languages'):
 
         self.basedir = basedir
         self.def_result_fn = "saved_infobox_results.pickle"
+        if new_parse is True:
+            self.load_data_for_parsing()
+
+    def load_data_for_parsing(self):
+
+        self.needed_titles = set([l.strip('\n').decode('unicode_escape')
+                                   for l in open(
+                                       '{0}/{1}'
+                                       .format(self.basedir, self.needed_fn))])
         self.fh = open('{0}/raw_infobox_properties_en.nt'
-                       .format(self.basedir))
+                        .format(self.basedir))
         self.needed_properties = set(['spokenIn', 'altname', 'iso',
                                       'lc', 'ld', 'name', 'nativename',
                                       'script', 'states', 'nation',
                                      'iso1', 'iso2', 'iso2b', 'iso2t'])
         self.multiple_properties = set(['spokenIn', 'altname', 'states'])
         self.splitters = re.compile('[,;]')
-        self.needed_titles = set([l.strip('\n').decode('unicode_escape')
-                                  for l in open(
-                                      '{0}/{1}'
-                                      .format(basedir, needed_fn))])
 
     def generate_language_blocks(self):
 
@@ -167,9 +172,9 @@ class DbpediaInfoboxParser(OfflineParser):
 
 def main():
 
-    parser = DbpediaInfoboxParser()
+    parser = DbpediaInfoboxParser(new_parse=False)
     for d in parser.parse():
-        if d[u'sil'] == 'deu':
+        if d[u'sil'] == 'ger':
             print repr(d)
 
 
