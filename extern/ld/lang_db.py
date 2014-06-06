@@ -125,7 +125,7 @@ class LanguageDB(object):
             raise TypeError("LanguageDB.add_new_language " +
                             "got non-dict instance")
 
-        logging.debug("adding lang {0}".format(lang['sil']))
+        logging.info(u"adding lang {0}".format(lang['sil']))
         l = Language()
         self.update_lang_data(l, lang)
         self.languages.append(l)
