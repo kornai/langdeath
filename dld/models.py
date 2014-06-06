@@ -55,6 +55,12 @@ class Language(models.Model):
     wals_samples_100 = models.BooleanField(default=False)
     wals_samples_200 = models.BooleanField(default=False)
 
+    indi_blogs = models.IntegerField(blank=True, null=True)
+    indi_posts = models.IntegerField(blank=True, null=True)
+    indi_words = models.IntegerField(blank=True, null=True)
+    indi_users = models.IntegerField(blank=True, null=True)
+    indi_tweets = models.IntegerField(blank=True, null=True)
+
     # many to many fields
     code = models.ManyToManyField('Code', related_name='codes')
     alt_name = models.ManyToManyField('AlternativeName',
