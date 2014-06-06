@@ -1,5 +1,17 @@
-from collections import defaultdict
+"""This parser needs dbpedia dump to be downloaded from
+http://wiki.dbpedia.org/Downloads39
+Three files are needed: Raw Infobox Properties, nt
+to be put into @basedir,
+short abstracts dump (nt) to be put into @basedir, and
+a file containing the titles (one per line) of dbpedia type Language,
+(see Mapping Based Types Dump) which has to be put in
+@basedir/@needed_fn (see constructor).
+Since dumpis are quite big, parsing is a little slow, so there is a
+parse_and_save() method, that will pickle results to two files files, and
+parse() that only reads end merges results parsed from the two dump.
+"""
 
+from collections import defaultdict
 from base_parsers import OfflineParser
 from dbpedia_infobox_dump_parser import DbpediaInfoboxParser
 from dbpedia_shortabstract_parser import DbpediaShortAbstractsParser
@@ -7,35 +19,35 @@ from dbpedia_shortabstract_parser import DbpediaShortAbstractsParser
 
 class DbpediaDumpsParser(OfflineParser):
 
-    def __init__(self, sil_list, infobox_basedir='dbpedia_dumps',
+    def __init__(self, new_parse=False,
+                 infobox_basedir='dbpedia_dumps',
                  shortabstract_basedir='dbpedia_dumps'):
 
-        self.sil_list = sil_list
-        self.infobox_parser = DbpediaInfoboxParser(infobox_basedir)
+        self.infobox_parser = DbpediaInfoboxParser(infobox_basedir, new_parse)
         self.shortabstract_parser = DbpediaShortAbstractsParser(
-            shortabstract_basedir)
+            shortabstract_basedir, new_parse)
 
-    def parse_and_save_dumps(self, fn=None):
+    def parse_and_save_dumps(self, sil_list, fn=None):
 
         self.infobox_parser.parse_and_save(fn)
         self.shortabstract_parser.parse_and_save(fn)
-        for d in self.parse(fn):
+        for d in self.parse(sil_list, fn):
             yield d
 
-    def parse(self, fn=None):
+    def parse(self, sil_list, fn=None):
 
-        for d in self.merge_dump_data(self.infobox_parser.read_results(fn),
-                                      self.shortabstract_parser.
-                                      read_results(fn)):
-            yield d
+        for d in self.merge_dump_data(
+            sil_list, self.infobox_parser.read_results(fn),
+            self.shortabstract_parser.read_results(fn)):
+                yield d
 
-    def merge_dump_data(self, res_info, res_abstract):
+    def merge_dump_data(self, sil_list, res_info, res_abstract):
 
         res_info_sil_dict = defaultdict(list)
         for d in res_info:
             res_info_sil_dict[d[u'sil']].append(d)
         res_abstract_name_dict = dict([(d[u'name'], d) for d in res_abstract])
-        for s in self.sil_list:
+        for s in sil_list:
             if s not in res_info_sil_dict:
                 continue
             for d1 in res_info_sil_dict[s]:
@@ -47,8 +59,8 @@ class DbpediaDumpsParser(OfflineParser):
 
 def main():
 
-    p = DbpediaDumpsParser(['alt'])
-    for d in p.parse():
+    p = DbpediaDumpsParser()
+    for d in p.parse(['deu', 'hun']):
         print repr(d)
 
 if __name__ == "__main__":
