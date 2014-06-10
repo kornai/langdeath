@@ -103,6 +103,9 @@ class DbpediaInfoboxParser(OfflineParser):
                         iso23_codes.append(v)
                 else:
                     d[property_].append(v)
+        if len(d.get('lc', [])) > 0 and len(d.get('lc', []))\
+           == len(d.get('ld', [])):
+            d['lc_ld'] = zip(d['lc'], d['ld'])
         d['iso1_codes'] = iso1_codes
         lc_list = d.get('lc', [])
         d['sil'] = self.choose_sil(iso23_codes, lc_list, language)
