@@ -48,7 +48,7 @@ class DbpediaDumpsParser(OfflineParser):
             for k in d.keys():
                 if k in self.needed_keys:
                     new_d[self.needed_keys[k]] = d[k]
-            yield d
+            yield new_d
             if "lc" in d and "ld" in d and len(d["lc"]) == len(d["ld"]):
                 for i, sil in enumerate(d['lc']):
                     name = d['ld'][i]
