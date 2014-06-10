@@ -144,7 +144,6 @@ class DbpediaInfoboxParser(OfflineParser):
             for d in self.make_dict(language, block):
                 if len(d) > 0:
                     yield d
-                    print repr(d)
 
 
 def main():
