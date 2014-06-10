@@ -49,7 +49,7 @@ def main():
     logging.basicConfig(level=logging.DEBUG)
     parser = WalsInfoParser()
     for d in parser.parse():
-        print "\t".join(d.keys())
+        print u"\t".join((unicode(v) for v in d.values())).encode("utf-8")
 
 if __name__ == "__main__":
     main()
