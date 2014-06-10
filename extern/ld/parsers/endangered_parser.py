@@ -1,6 +1,7 @@
 from base_parsers import OfflineParser
 from os import listdir, path
 from time import sleep
+from contextlib import closing
 import re
 import urllib2
 import logging
@@ -26,6 +27,14 @@ class EndangeredParser(OfflineParser):
             self.category_pages_basedir = category_pages
         self.lang_url_re = re.compile("a href=\"/lang/(.+)\"", re.UNICODE)
         self.setup_handlers()
+        self.create_field_map()
+
+    def create_field_map(self):
+        self.field_map = {
+            'ALSO KNOWN AS': 'alternative name',
+            'LANGUAGE CODE': 'sil',
+            #'CODE AUTHORITY': 'iso_type',
+        }
 
     def setup_handlers(self):
         url_fields = [
@@ -69,20 +78,53 @@ class EndangeredParser(OfflineParser):
 
     def parse_pages(self):
         for lang_url in self.lang_urls():
-            d = self.parse_lang_page(lang_url)
-            yield d
+            with closing(urllib2.urlopen(lang_url)) as page:
+                text = page.read().decode('utf8')
+                d = self.parse_lang_page(text, lang_url)
+                yield d
             sleep(0.5)
 
-    def parse_lang_page(self, url):
-        page = urllib2.urlopen(url)
-        text = page.read().decode('utf8')
+    def parse_lang_page(self, text, url=''):
+        lang_data = dict()
+        lang_data['name'] = self.get_lang_name(text)
+        self.parse_header(text, lang_data, url)
         lang_sect = filter(lambda x: 'Language metadata' in x,
                            text.split('<section>'))
-        if len(lang_sect) != 1:
-            logging.warning('Invalid language page: {0}'.format(url))
-            return
-        lang_info = self.get_lang_info(lang_sect[0])
-        return lang_info
+        lang_data.update(self.get_lang_info(lang_sect[0]))
+        return lang_data
+
+    def parse_header(self, text, lang_data, url=''):
+        subheader = text.split('<article class="subheader">')[1].split(
+            '</article>')[0]
+        lang_data['classification'] = self.get_classification(subheader, url)
+        lang_data['category'] = self.get_category(subheader, url)
+
+    def get_classification(self, text, url=''):
+        try:
+            t = text.split('<em>')[0].split('<div>')[-1]
+            t = t.split('<p>')[1].split('</p>')[0]
+            return t.strip()
+        except ValueError as e:
+            logging.exception('While parsing language classification on site {0}, {1}'.format(
+                url, e))
+
+    def get_category(self, text, url=''):
+        try:
+            t = text.split('<em>')[1].split('</div>')[0]
+            t = t.split('<p>')[1].split('</p>')[0]
+            return t.strip()
+        except ValueError as e:
+            logging.exception('While parsing language category on site {0}, {1}'.format(
+                url, e))
+
+    def get_lang_name(self, text, url=''):
+        try:
+            title_text = text.split('<title>')[1].split('</title>')[0]
+            langname = title_text.split('Endangered Languages Project -')[1].strip()
+            return langname
+        except ValueError as e:
+            logging.exception('While parsing language name on site {0}, {1}'.format(
+                url, e))
 
     def get_lang_info(self, text):
         parts = text.split('<label>')
@@ -94,7 +136,8 @@ class EndangeredParser(OfflineParser):
             if not label in self.field_handlers:
                 logging.warning('Invalid field: {0}'.format(label))
                 continue
-            lang_info[label] = self.field_handlers[label](part)
+            if label in self.field_map:
+                lang_info[self.field_map[label]] = self.field_handlers[label](part)
         return lang_info
 
     def url_field_handler(self, field):
@@ -136,3 +179,4 @@ if __name__ == '__main__':
     cnt = 0
     for lang in p.parse_pages():
         print(lang)
+        break
