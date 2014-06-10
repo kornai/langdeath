@@ -24,6 +24,7 @@ class DbpediaShortAbstractsParser(OfflineParser):
 
         self.basedir = basedir
         self.def_result_fn = "saved_shortabstract_results.pickle"
+        self.needed_fn = needed_fn
         if new_parse is True:
             self.load_data_for_parsing()
 
@@ -192,9 +193,8 @@ class DbpediaShortAbstractsParser(OfflineParser):
 
 def main():
 
-    parser = DbpediaShortAbstractsParser(new_parse=False)
-    for d in parser.parse():
-        print d
+    parser = DbpediaShortAbstractsParser(new_parse=True)
+    parser.parse_and_save()
 
 
 if __name__ == '__main__':
