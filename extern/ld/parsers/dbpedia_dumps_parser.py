@@ -11,8 +11,6 @@ parse_and_save() method, that will pickle results to two files files, and
 parse() that only reads end merges results parsed from the two dump.
 """
 
-import logging
-
 from base_parsers import OfflineParser
 from dbpedia_infobox_dump_parser import DbpediaInfoboxParser
 from dbpedia_shortabstract_parser import DbpediaShortAbstractsParser
@@ -50,34 +48,23 @@ class DbpediaDumpsParser(OfflineParser):
             for k in d.keys():
                 if k in self.needed_keys:
                     new_d[self.needed_keys[k]] = d[k]
-            # HACK
-            if len(d["sil"]) == 3 and d["sil"].islower():
-                yield new_d
-            if "lc_ld" in d and len(d["lc_ld"]) > 0:
-                # HACK
-                from itertools import chain
-                sils = []
-                names = []
-                for data in chain(d["lc_ld"]):
-                    if len(data) == 3 and data.islower():
-                        sils.append(data)
-                    else:
-                        names.append(data)
-                if len(sils) == len(names):
-                    for sil, name in zip(sils, names):
-                        if sil != d["sil"]:
-                            child_d = {"sil": sil, "name": name,
-                                       "champion": d["sil"]}
-                            yield child_d
+            yield d
+            if "lc" in d and "ld" in d and len(d["lc"]) == len(d["ld"]):
+                for i, sil in enumerate(d['lc']):
+                    name = d['ld'][i]
+                    if sil not in d["sil"]:
+                        child_d = {"sil": sil, "name": name,
+                                   "champion": d["sil"]}
+                        yield child_d
 
     def merge_dump_data(self, res_info, res_abstract):
-        
+
         res_abstract_name_dict = dict([(d[u'name'], d) for d in res_abstract])
         for d1 in res_info:
-            if d1['sil'] == u'none' or d1['sil'] == 'n/a':
+            if d1['sil'] == [u'none'] or d1['sil'] == ['n/a']:
                 continue
-            if u'name' in d1 and d1[u'name'] in res_abstract_name_dict:
-                d2 = res_abstract_name_dict[d1[u'name']]
+            if u'name' in d1 and d1[u'name'][0] in res_abstract_name_dict:
+                d2 = res_abstract_name_dict[d1[u'name'][0]]
                 d1[u'altname'] = d1.get(u'altname', []) + d2[u'altname']
             yield d1
 

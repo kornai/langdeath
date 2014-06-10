@@ -11,7 +11,6 @@ read_results() method, that will read results from that file and return
 in the same format as parse() does.
 """
 
-import sys
 import re
 import cPickle
 
@@ -25,6 +24,7 @@ class DbpediaInfoboxParser(OfflineParser):
 
         self.basedir = basedir
         self.def_result_fn = "saved_infobox_results.pickle"
+        self.needed_fn = needed_fn
         if new_parse is True:
             self.load_data_for_parsing()
 
@@ -39,8 +39,7 @@ class DbpediaInfoboxParser(OfflineParser):
         self.needed_properties = set(['spokenIn', 'altname', 'iso',
                                       'lc', 'ld', 'name', 'nativename',
                                       'script', 'states', 'nation',
-                                     'iso1', 'iso2', 'iso2b', 'iso2t'])
-        self.multiple_properties = set(['spokenIn', 'altname', 'states'])
+                                      'iso1', 'iso2', 'iso2b', 'iso2t'])
         self.splitters = re.compile('[,;]')
 
     def generate_language_blocks(self):
@@ -76,74 +75,51 @@ class DbpediaInfoboxParser(OfflineParser):
             return value_[1:-4]
         return value_.split('/')[4][:-1]
 
-    def update_lc_ld_list(self, lc_ld_list, value_):
+    def generate_comma_sep_values(self, value_):
 
-        if len(lc_ld_list) == 0 or len(lc_ld_list[-1]) == 2:
-            lc_ld_list.append([value_])
-        else:
-            lc_ld_list[-1].append(value_)
-        return lc_ld_list
+        for v in self.splitters.split(value_):
+            v = v.strip()
+            if v != '':
+                yield v
 
     def make_dict(self, language, block):
 
         d = {}
         iso1_codes = []
         iso23_codes = []
-        lc_ld_list = []
         for pair in block:
             property_, value_ = pair
             property_ = property_.split('/')[4][:-1]
             if property_ not in self.needed_properties:
                 continue
+            if property_ not in d:
+                d[property_] = []
             value_ = self.clean_value(value_, property_)
-            if property_[:3] == 'iso':
-                if len(value_) == 2:
-                    iso1_codes.append(value_)
+            for v in self.generate_comma_sep_values(value_):
+                if property_[:3] == 'iso':
+                    if len(value_) == 2:
+                        iso1_codes.append(v)
+                    else:
+                        iso23_codes.append(v)
                 else:
-                    iso23_codes.append(value_)
-            elif property_ in ['lc', 'ld']:
-                lc_ld_list = self.update_lc_ld_list(lc_ld_list, value_)
-            elif property_ in self.multiple_properties:
-                if property_ not in d:
-                    d[property_] = []
-                for v in self.splitters.split(value_):
-                    v_stripped = v.strip()
-                    if v_stripped != '':
-                        d[property_].append(v_stripped)
-            else:
-                d[property_] = value_
-
+                    d[property_].append(v)
         d['iso1_codes'] = iso1_codes
-        d['lc_ld'] = lc_ld_list
-        for sil in self.choose_sil(iso23_codes, lc_ld_list, language):
-            d['sil'] = sil
-            yield d
-        if self.check_lc_ld_list(lc_ld_list, language) == 'False':
-            sys.stderr.write('{0}\n'.format(repr(block)))
+        lc_list = d.get('lc', [])
+        d['sil'] = self.choose_sil(iso23_codes, lc_list, language)
+        yield d
 
-    def check_lc_ld_list(self, lc_ld_list, language):
-        for i in lc_ld_list:
-            if len(i) != 2:
-                return False
-        return True
+    def choose_sil(self, iso23_codes, lc, language):
 
-    def choose_sil(self, iso23_codes, lc_ld_list, language):
-
-        if len(lc_ld_list) == 0 and len(iso23_codes) == 0:
+        if len(lc) == 0 and len(iso23_codes) == 0:
             return ['n/a']
-        if len(lc_ld_list) == 0:
+        if len(lc) == 0:
             return [iso23_codes[-1]]
         if len(iso23_codes) == 0:
-            return [sorted(lc_ld_list[0], key=lambda x:len(x))[0]]
-
-        intersect = list(set(iso23_codes).intersection([i[0]
-                                                        for i in lc_ld_list]))
+            return lc[0]
+        intersect = list(set(iso23_codes).intersection(set(lc)))
         if len(intersect) == 0:  # macrolanguage
             return [iso23_codes[-1]]
-        if len(intersect) > 1:
-            sys.stderr.write('more than one SIL code for language {0}'
-                             .format(language))
-        return intersect
+        return list(intersect)
 
     def parse_and_save(self, ofn=None):
         if ofn is None:
@@ -168,15 +144,13 @@ class DbpediaInfoboxParser(OfflineParser):
             for d in self.make_dict(language, block):
                 if len(d) > 0:
                     yield d
+                    print repr(d)
 
 
 def main():
 
-    parser = DbpediaInfoboxParser(new_parse=False)
-    for d in parser.parse():
-        if d[u'sil'] == 'ger':
-            print repr(d)
-
+    parser = DbpediaInfoboxParser(new_parse=True)
+    parser.parse_and_save()
 
 if __name__ == '__main__':
     main()
