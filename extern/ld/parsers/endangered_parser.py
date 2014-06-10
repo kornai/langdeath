@@ -33,7 +33,8 @@ class EndangeredParser(OfflineParser):
         self.field_map = {
             'ALSO KNOWN AS': 'alternative name',
             'LANGUAGE CODE': 'sil',
-            #'CODE AUTHORITY': 'iso_type',
+            'CODE AUTHORITY': 'iso_type',
+            'VARIANTS & DIALECTS': 'dialects',
         }
 
     def setup_handlers(self):
@@ -96,21 +97,24 @@ class EndangeredParser(OfflineParser):
     def parse_header(self, text, lang_data, url=''):
         subheader = text.split('<article class="subheader">')[1].split(
             '</article>')[0]
-        lang_data['classification'] = self.get_classification(subheader, url)
+        lang_data['family'] = self.get_family(subheader, url)
         lang_data['category'] = self.get_category(subheader, url)
 
-    def get_classification(self, text, url=''):
+    def get_family(self, text, url=''):
         try:
             t = text.split('<em>')[0].split('<div>')[-1]
             t = t.split('<p>')[1].split('</p>')[0]
-            return t.strip()
+            return [t.strip().lstrip('Classification: ')]
         except ValueError as e:
-            logging.exception('While parsing language classification on site {0}, {1}'.format(
+            logging.exception('While parsing language family on site {0}, {1}'.format(
                 url, e))
 
     def get_category(self, text, url=''):
+        if not '<em>' in text:
+            return None
         try:
-            t = text.split('<em>')[1].split('</div>')[0]
+            t = text.split('<em>')[0].split('<div>')[-1]
+            t = text.split('</div>')[0]
             t = t.split('<p>')[1].split('</p>')[0]
             return t.strip()
         except ValueError as e:
@@ -177,6 +181,7 @@ if __name__ == '__main__':
     from sys import argv
     p = EndangeredParser(argv[1])
     cnt = 0
+    import pprint
     for lang in p.parse_pages():
-        print(lang)
+        pprint.pprint(lang)
         break
