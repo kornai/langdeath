@@ -1,0 +1,284 @@
+English	yes	0.85	hunspell
+German	yes	0.82	hunspell
+French	yes	0.81	hunspell
+Dutch	yes	0.84	hunspell
+Italian	yes	0.80	hunspell
+Polish	yes	0.82	hunspell
+Spanish	yes	0.80	hunspell
+Russian	yes	0.73	hunspell
+Japanese	no need		isolating	
+Portuguese	yes	0.77	hunspell
+Chinese	no need		isolating	
+Swedish	yes	0.83	hunspell
+Vietnamese	yes	0.83	hunspell
+Ukrainian	yes	0.77	hunspell
+Catalan	yes	0.82	hunspell
+Norwegian (Bokmål)	yes	0.81	hunspell, nb
+Finnish	some tool		Voikko		
+Czech	yes	0.82	hunspell
+Hungarian	yes	0.77	hunspell
+Korean	yes		hunspell
+Persian	yes	0.73	hunspell
+Indonesian	yes	0.69	hunspell
+Turkish	yes	0.74	hunspell
+Romanian	yes	0.79	hunspell
+Arabic	yes	0.84	hunspell
+Slovak	yes	0.79	hunspell
+Esperanto	yes	0.73	hunspell
+Danish	yes	0.82	hunspell
+Serbian	yes	0.72	hunspell
+Lithuanian	yes	0.73	hunspell
+Malay	yes	0.72	hunspell
+Basque	yes	0.77	hunspell
+Hebrew	yes	0.81	hunspell
+Slovenian	yes	0.80	hunspell
+Bulgarian	yes	0.77	hunspell
+Kazakh	yes	0.59	hunspell
+Volapük	no		nothing found		
+Waray-Waray	no		nothing found		
+Croatian	yes	0.74	hunspell
+Hindi	yes	0.70	hunspell
+Estonian	yes	0.73	hunspell
+Azerbaijani	some tool		demo	0.56	
+Galician	yes	0.82	hunspell
+Simple English	yes	0.86	hunspell, en_US
+Norwegian (Nynorsk)	yes	0.81	hunspell, nn
+Latin	yes	0.54	hunspell
+Thai	yes	0.27	hunspell
+Greek	yes	0.82	hunspell
+Newar / Nepal Bhasa	no		nothing found		
+Aromanian	yes	0.44	myspell, myspell-hy
+Occitan	yes	0.66	hunspell
+Serbo-Croatian	yes	0.75	hunspell
+Georgian	some tool		online		
+Macedonian	yes	0.79	hunspell
+Tagalog	yes	0.69	hunspell
+Haitian	some tool		OpenOffice Extension		
+Piedmontese	no		nothing found		
+Telugu	yes	0.47	myspell, in rpm
+Tamil	some tool		demo	0.31	
+Belarusian (Taraškievica)	yes	0.71	hunspell, code: be
+Cebuano	some tool		online		
+Breton	yes	0.75	hunspell
+Belarusian	yes	0.71	hunspell
+Latvian	yes	0.77	hunspell
+Albanian	yes	0.81	myspell
+Javanese	no		nothing found		
+Malagasy	yes	0.62	hunspell
+Welsh	yes	0.74	hunspell
+Luxembourgish	some tool		OpenOffice 3.x Extension		
+Marathi	yes	0.10	hunspell
+Icelandic	yes	0.84	hunspell
+Bosnian	yes	0.74	hunspell, see sr
+Yoruba	no	src: fedora		
+Aragonese	yes	0.74	hunspell
+Armenian	yes	0.44	hunspell
+Bishnupriya Manipuri	no	src: fedora		
+West Frisian	yes	0.77	hunspell, just fy_NL for Frisian
+Lombard	no		nothing found		
+Malayalam	yes	0.40	hunspell
+Swahili	yes	0.74	myspell
+Western Panjabi	some tool		demo	0.02	code: pa
+Bengali	yes	0.40	hunspell
+Ido	no		nothing found		
+Afrikaans	yes	0.81	hunspell
+Gujarati	yes	0.60	hunspell
+Cantonese	no need		isolating (Chinese)		
+Nepali	yes	0.52	hunspell
+Low Saxon	yes	0.58	hunspell
+Kurdish	yes	0.57	hunspell
+Asturian	yes	0.74	hunspell
+Urdu	yes	0.85	hunspell
+Sicilian	no		nothing found		
+Sundanese	no		nothing found		
+Quechua	yes	0.31	hunspell
+Zazaki	no		nothing found		
+Bashkir	some tool		commercial		
+Tatar	yes	0.84	hunspell
+Burmese	no	src: fedora		
+Irish	yes	0.81	hunspell
+Chuvash	yes	0.59	hunspell
+Interlingua	yes	0.79	hunspell
+Neapolitan	no		nothing found		
+Samogitian	no		nothing found		
+Banyumasan	no		nothing found		
+Walloon	yes	0.72	hunspell
+Kannada	yes	0.55	hunspell
+Alemannic	no		nothing found		
+Amharic	some tool		demo	0.64	
+Buginese	no		nothing found		
+Tajik	no	src: fedora		
+Scottish Gaelic	yes	0.66	hunspell
+Min Nan	no need		isolating (Chinese)		
+Yiddish	some tool		OpenOffice 3.x Extension		
+Venetian	no		nothing found		
+Fiji Hindi	no		nothing found		
+Tarantino	no		nothing found		
+Scots	no		nothing found		
+Ossetian	no		nothing found		
+Egyptian Arabic	yes		hunspell, in debian, ar_EG 
+Nahuatl	no		nothing found		
+Uzbek	some tool		demo	0.08	
+Sakha	no		nothing found		
+Mongolian	yes	0.77	hunspell
+Mazandarani	no		nothing found		
+Sanskrit	no	src: fedora		
+Kapampangan	no		nothing found		
+Upper Sorbian	yes	0.63	myspell, hsb_DE
+Maori	yes	0.82	myspell
+Limburgian	no		nothing found		
+Kirghiz	yes	0.51	hunspell
+Sinhalese	yes	0.57	hunspell
+Corsican	no		nothing found		
+Gan	no need		isolating (Chinese)		
+Gilaki	no		nothing found		
+Sorani	no		nothing found		
+Tibetan	no	src: fedora		
+Faroese	yes	0.77	hunspell
+Bavarian	no		nothing found		
+Central Bicolano	no		nothing found		
+Ilokano	no		nothing found		
+Hill Mari	no		nothing found		
+Võro	no		nothing found		
+Dutch Low Saxon	no		nothing found		
+Turkmen	yes		hunspell
+West Flemish	no		nothing found		
+Northern Sami	yes	0.70	hunspell
+Manx	yes		hunspell
+Divehi	no		nothing found		
+Rusyn	no	src: fedora		
+Pashto	no		nothing found		
+Norman	no		nothing found		
+Pangasinan	no		nothing found		
+Komi-Permyak	no		nothing found		
+Punjabi	yes	0.33	hunspell
+Romansh	no	src: fedora		
+Khmer	yes		hunspell
+Komi	no		nothing found		
+Udmurt	no		nothing found		
+Kashubian	yes	0.33	hunspell
+Meadow Mari	no		nothing found		
+Friulian	yes	0.79	myspell
+Maltese	yes		hunspell
+Wu	no need		isolating (Chinese)		
+Ligurian	no		nothing found		
+Uyghur	no	src: fedora		
+Ladino	no		nothing found		
+Pali	no		nothing found		
+Zeelandic	no		nothing found		
+Sardinian	yes		hunspell
+Bihari	no		nothing found		
+Classical Chinese	no need		isolating (Chinese)		
+Novial	no		nothing found		
+Ripuarian	no		nothing found		
+Oriya	yes	0.03	hunspell
+Anglo-Saxon	no need		group		
+Cornish	no		nothing found		
+Somali	yes		hunspell
+Navajo	no		nothing found		
+Saterland Frisian	no		nothing found		
+Mingrelian	no		nothing found		
+Hakka	no need		isolating (Chinese)		
+Aymara	no		nothing found		
+Franco-Provençal/Arpitan	no		nothing found		
+North Frisian	yes	0.18	hunspell, just fy_NL for Frisian
+Extremaduran	no		nothing found		
+Silesian	no		nothing found		
+Picard	no		nothing found		
+Interlingue	no		nothing found		
+Gagauz	no		nothing found		
+Hawaiian	some tool		Firefox add-on		
+Kalmyk	no		nothing found		
+Lingala	yes	0.43	hunspell
+Kinyarwanda	yes		hunspell, x.dic
+Pennsylvania German	no		nothing found		de_US: broken link
+Palatinate German	yes	0.33	hunspell, de_DE
+Karachay-Balkar	no		nothing found		
+Crimean Tatar	no	src: fedora		
+Emilian-Romagnol	no need		group		
+Acehnese	no		nothing found		
+Guarani	no	src: fedora		
+Tongan	no		nothing found		
+Chechen	no		nothing found		
+Greenlandic	no	src: fedora		
+Assyrian Neo-Aramaic	no		nothing found		
+Erzya	some tool		online analiser		
+Lower Sorbian	yes	0.65	hunspell
+Vepsian	no		nothing found		
+Banjar	no		nothing found		
+Papiamentu	no	src: fedora		
+Assamese	yes	0.20	myspell, myspell-as
+Tok Pisin	yes	0.67	hunspell, tpi
+Lak	no		nothing found		
+Wolof	no	src: fedora		
+Moksha	no		nothing found		
+Lojban	no		nothing found		
+Kabyle	no		nothing found		
+Avar	no		nothing found		
+Zamboanga Chavacano	no		nothing found		
+Shona	no		nothing found		
+Tahitian	no	src: fedora		
+Sranan	no		nothing found		
+Kabardian Circassian	no		nothing found		
+Lao	no		nothing found		
+Abkhazian	no		nothing found		
+Lezgian	no		nothing found		
+Mirandese	no		nothing found		
+Latgalian	some tool		OpenOffice Extension		
+Igbo	some tool		dic.html		
+Nauruan	no		nothing found		
+Kongo	no		nothing found		
+Tetum	yes	0.70	hunspell
+Zhuang	no		nothing found		
+Karakalpak	no		nothing found		
+Northern Sotho	yes	0.60	hunspell, ns-ZA
+Zulu	yes	0.33	hunspell
+Romani	no		nothing found		
+Old Church Slavonic	no		nothing found		
+Tswana	yes		hunspell, x.dic
+Cherokee	no		nothing found		
+Samoan	no		nothing found		
+Bislama	no		nothing found		
+Moldovan	no		nothing found		
+Bambara	no	src: fedora		
+Inuktitut	no	src: fedora		
+Inupiak	no		nothing found		
+Cheyenne	no		nothing found		
+Norfolk	no		nothing found		
+Swati	yes	0.26	hunspell
+Gothic	no		nothing found		
+Sindhi	some tool		OpenOffice Extension		
+Pontic	no		nothing found		
+Min Dong	no need		isolating (Chinese)		
+Ewe	some tool		Firefox add-on		
+Hausa	some tool		Firefox add-on		
+Tigrinya	yes	0.64	hunspell
+Buryat (Russia)	no		nothing found		
+Oromo	yes		hunspell
+Kashmiri	no	src: fedora		
+Tsonga	yes	0.57	hunspell
+Venda	yes	0.66	hunspell
+Sango	no	src: fedora		
+Kirundi	no		nothing found		
+Kikuyu	yes		myspell, OpenOffice Extension as well
+Dzongkha	no	src: fedora		
+Cree	no		nothing found		
+Luganda	no	src: fedora		
+Akan	yes	0.61	hunspell
+Tumbuka	no		nothing found		
+Fijian	yes	0.81	hunspell
+Southern Sotho	no		nothing found		
+Twi	no		nothing found		= akan?
+Chamorro	no		nothing found		
+Chichewa	yes	0.56	hunspell
+Fula	no		nothing found		
+Xhosa	yes	0.24	hunspell
+Ndonga	no		nothing found		
+Sichuan Yi	no		nothing found		
+Choctaw	no		nothing found		
+Marshallese	no		nothing found		
+Afar	no	src: fedora		
+Kuanyama	no		nothing found		
+Hiri Motu	no		nothing found		
+Muscogee	no		nothing found		
+Kanuri	no		nothing found		
