@@ -26,7 +26,14 @@ class SoftwareSupportParser(TSV_parser):
             ('{0}/office13_lp'.format(self.resdir),
              {"true_key": ['office13_lp']}),
             ('{0}/office_if_pack'.format(self.resdir),
-             {"field_target": {0: 'name', 5: 'office13_if_pack'}})
+             {"field_target": {0: 'name', 5: 'office13_if_pack'}}),
+            ('{0}/hunspell.tsv'.format(self.resdir),
+             {"field_target": {
+                 0: 'sil', 
+                 1: 'name', 
+                 2: 'hunspell_status', 
+                 3: 'hunspell_coverage'
+             }})
         ]
         for args in parameters:
             for lang in parser.parse(args[0], **args[1]):

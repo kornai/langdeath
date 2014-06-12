@@ -59,3 +59,19 @@ The tab-separated file has the following fields and values:
             Office 2013
 
         values are "download", "buy", or "none".
+
+3 HUNSPELL
+
+hunspell.tsv contains spell-checking information on languages. The
+tab-separated file has the following fileds:
+    iso-639-3 code
+    language name
+    status
+    coverage
+    comment
+
+Status has the following values (with the number of languages with the vale):
+    136 no          -- We do not know about any spell-ckecker for the language
+    118 yes         -- There are hunspell or myspell .aff and .dic files for the language
+     19 some tool   -- There is no .aff and .dic, only some other tool
+     11 no need     -- The language is isolating or it is a group of languages
