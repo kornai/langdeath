@@ -64,6 +64,7 @@ The tab-separated file has the following fields and values:
 
 hunspell.tsv contains spell-checking information on languages. The
 tab-separated file has the following fileds:
+    iso-639-3 code
     language name
     status
     coverage
