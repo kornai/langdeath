@@ -19,7 +19,7 @@ class BaseParser(object):
             f.write(cPickle.dumps(lang_data))
 
     def parse_all(self):
-        return []
+        yield None
 
 
 class OnlineParser(BaseParser):
