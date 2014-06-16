@@ -28,7 +28,7 @@ class BaseParser(object):
             d = list(self.parse_all())
             with open(fn, 'wb') as f:
                 f.write(cPickle.dumps(d))
-            return list(self.parse_all())
+            return d
 
     def parse_all(self):
         yield None
