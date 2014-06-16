@@ -12,37 +12,26 @@ in the same format as parse() does.
 """
 
 import re
+import sys
 import cPickle
 
-from base_parsers import OfflineParser
+from dbpedia_base_parser import DbpediaNTBaseParser
 
 
-class DbpediaShortAbstractsParser(OfflineParser):
+class DbpediaShortAbstractsParser(DbpediaNTBaseParser):
 
-    def __init__(self, basedir='dbpedia_dumps', new_parse=False,
-                 needed_fn='dbpedia_ontology_languages'):
-
-        self.basedir = basedir
+    def __init__(self, basedir, new_parse=False):
+        super(DbpediaShortAbstractsParser, self).__init__(basedir)
         self.def_result_fn = "saved_shortabstract_results.pickle"
-        self.needed_fn = needed_fn
-        if new_parse is True:
-            self.load_data_for_parsing()
-
-    def load_data_for_parsing(self):
-        self.fh = open('{0}/short_abstracts_en.nt'
-                       .format(self.basedir))
+        self.fh = open('{0}/short_abstracts_en.nt'.format(self.basedir))
         self.patterns = self.compile_patterns()
-        self.needed_titles = set([l.strip('\n').decode('unicode_escape')
-                                  for l in open(
-                                      '{0}/{1}'
-                                      .format(self.basedir, self.needed_fn))])
 
     def compile_patterns(self):
 
         patterns = {}
         splitter_phrases =\
                 ['in\s[A-Za-z]+\s', '[A-Z][a-z]*:', ';', ',', '/', '~',
-                           '[^A-Za-z]or[^A-Za-z]', '[^A-Za-z]\u2013[^A-Za-z]',
+                '[^A-Za-z]or[^A-Za-z]', '[^A-Za-z]\u2013[^A-Za-z]',
                 'in\s.*?\sdialect', 'in\s.*?\sscript', 'in\s.*?\slanguage']
         patterns['splitters'] =\
                 re.compile('|'.join([w for w in splitter_phrases]))
@@ -120,13 +109,6 @@ class DbpediaShortAbstractsParser(OfflineParser):
             m = pat.search(string)
         return string
 
-    def get_language_from_title(self, title):
-
-        words = title.split('_')
-        if words[-1] in ['language', 'languages']:
-            return ' '.join(words[:-1])
-        return ' '.join(words)
-
     def parse_alternatives(self, language, abstract):
 
         found_langs = set([])
@@ -175,25 +157,18 @@ class DbpediaShortAbstractsParser(OfflineParser):
         return self.read_results()
 
     def parse_dump(self):
-
-        l = self.fh.readline()
-        for l in self.fh:
-                if l[0] == '#':
-                    continue
-                data = l.strip('\n').decode('unicode_escape').split(' ')
-                url, _, abstract = data[0], data[1], ' '.join(data[2:])
-                title = url.split('/')[4].split('>')[0]
-                if title not in self.needed_titles:
-                    continue
-                language = self.get_language_from_title(title)
-                alternatives = self.parse_alternatives(language, abstract)
-                if len(alternatives) > 0:
-                    yield {u'name': language, u'altname': alternatives}
+        for lang in self.parse_languages():
+            name = lang["name"]
+            abstract = lang["<http://www.w3.org/2000/01/rdf-schema#comment>"][0]
+            alternatives = self.parse_alternatives(name, abstract)
+            if len(alternatives) > 0:
+                yield {u'name': name, u'altname': alternatives}
 
 
 def main():
 
-    parser = DbpediaShortAbstractsParser(new_parse=True)
+    bd = sys.argv[1]
+    parser = DbpediaShortAbstractsParser(bd, new_parse=True)
     parser.parse_and_save()
 
 
