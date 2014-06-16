@@ -1,4 +1,5 @@
 import cPickle
+from os import path
 
 
 class BaseParser(object):
@@ -14,12 +15,23 @@ class BaseParser(object):
 
     def dump_to_file(self, ofn=None):
         fn = ofn if ofn else self.pickle_fn
-        with open(fn, 'w') as f:
+        with open(fn, 'wb') as f:
             lang_data = list(self.parse_all())
             f.write(cPickle.dumps(lang_data))
 
+    def parse_or_load(self, pickle_fn=None):
+        fn = pickle_fn if pickle_fn else self.pickle_fn
+        if path.exists(fn):
+            with open(fn, 'rb') as f:
+                return cPickle.load(f)
+        else:
+            d = list(self.parse_all())
+            with open(fn, 'wb') as f:
+                f.write(cPickle.dumps(d))
+            return list(self.parse_all())
+
     def parse_all(self):
-        return []
+        yield None
 
 
 class OnlineParser(BaseParser):
