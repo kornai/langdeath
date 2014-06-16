@@ -5,6 +5,21 @@ from ld.langdeath_exceptions import ParserException
 from utils import get_html, replace_html_formatting
 
 
+def add_champion(d):
+    c = d['code']
+    s = d['sil']
+    if c != s:
+        if len(c) == 2:
+            # WP code, it's okay, no need
+            pass
+        elif len(c) > 3 and "-" in c:
+            d['champion'] = d['sil']
+            d['sil'] = d['code']
+        else:
+            d['sil'] = d['code']
+    del d['code']
+
+
 class CrubadanParser(OnlineParser):
 
     def __init__(self):
@@ -24,6 +39,7 @@ class CrubadanParser(OnlineParser):
             'FLOSS SplChk': 'cru_floss_splchk',
             'WT': 'cru_watchtower',
             'UDHR': 'cru_udhr',
+            'Code': 'code'
         }
 
     def generate_rows(self, tabular):
@@ -88,6 +104,9 @@ class CrubadanParser(OnlineParser):
                     value = (cells[i] if cells[i] != "-" else None)
                 if key in self.needed_keys:
                     d[self.needed_keys[key]] = value
+
+            add_champion(d)
+
             return d
 
         except Exception as e:
@@ -122,6 +141,9 @@ class CrubadanParser(OnlineParser):
 
         html = get_html(self.url)
         for dict_ in self.generate_dictionaries(html):
+            if dict_['sil'] == "agp":
+                # it's not real data, duplicated row with wrong sil
+                continue
             yield dict_
 
 

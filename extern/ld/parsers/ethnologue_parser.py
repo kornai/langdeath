@@ -235,7 +235,7 @@ class EthnologueBaseParser(object):
         for sil_code in sil_codes:
             try:
                 self.sil = sil_code
-                html = self.get_html(self.sil).decode('utf-8')
+                html = self.get_html(self.sil)
                 d = {}
                 d['sil'] = sil_code
                 d['name'] = self.get_title(html)
@@ -283,10 +283,10 @@ class EthnologueOfflineParser(OfflineParser, EthnologueBaseParser):
         super(EthnologueOfflineParser, self).__init__()
         self.basedir = basedir
 
-    def get_html(self, sil):
+    def get_html(self, sil, encoding='utf-8'):
         fn = '{0}/{1}'.format(self.basedir, self.sil)
         if os.path.exists(fn):
-            return open(fn).read()
+            return open(fn).read().decode(encoding)
         else:
             raise ParserException()
 

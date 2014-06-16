@@ -56,5 +56,5 @@ class OmniglotParser(OnlineParser):
         """
         html_parser = OmniglotHTMLParser()
         html_filen, headers = urllib.urlretrieve(self.url)
-        html_parser.feed(open(html_filen).read())
+        html_parser.feed(open(html_filen).read().decode('utf-8'))
         return iter(html_parser.lang_updates)
