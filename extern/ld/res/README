@@ -12,24 +12,66 @@ In some cases, additional information is specified in parens:
 
 2 MICROSOFT
 
-2.1 WINDOWS 7 LANGUAGE PACKS 
+2.1 WINDOWS 8 
 
-microsoft_pack lists languages with a Windows 7 language pack, copied from
-http://windows.microsoft.com/en-us/windows7/products/features/language-packs.
+2.1.1 LANGUAGE PACK 
+
+win8_pack lists languages with a Windows 8 language pack, copied from
+http://windows.microsoft.com/en-us/windows/language-packs#lptabs=win8
 The first filed contains the name of the language in English, and the second
 one, separated by tab, contains the inner (local) name. There are parens,
 similar to those with Mac input methods: country, script variant, or
 language variant.
 
-2.2 OFFICE LANGUAGE INTERFACE PACK
+2.1.2 WINDOWS INPUT OPTIONS
 
-microsoft_if_pack contains data about Office Language Interface Packs from
+win8_input_option lists Windows 8 input options translated from a Hungarian
+Windows 8. There are parens, similar to those with Mac input methods.
+
+2.2 OFFICE
+
+
+2.2.1 LANGUAGE PACK
+
+Lists of languages with an Office 2013 Language Pack were taken from two
+sites:
+    Data from http://office.microsoft.com/en-us/language-packs/ has been
+    copied to the tab-separated file office13_lp that has the following
+    two fields:
+        some kind of code of the Language
+        native name
+        
+    Data at
+    http://office.microsoft.com/en-us/language-packs/microsoft-office-language-packs-2013-faq-faqs-FX102897395.aspx
+    is paresed by office13_lp_faq.py 
+
+2.2.2 LANGUAGE INTERFACE PACK
+
+Data in the file office13_if_pack was taken from
 http://office.microsoft.com/en-001/downloads/office-language-interface-pack-lip-downloads-HA001113350.aspx.
-The file has the following tab-separated fileds:
-    language name in English
-    native name of the language
-    Office 2003
-    Office 2007
-    Office 2010	
-    Office 2013
-Filed values are "download", "buy", or "none".
+The tab-separated file has the following fields and values:
+        fileds
+            language name in English
+            native name of the language
+            Office 2003
+            Office 2007
+            Office 2010	
+            Office 2013
+
+        values are "download", "buy", or "none".
+
+3 HUNSPELL
+
+hunspell.tsv contains spell-checking information on languages. The
+tab-separated file has the following fileds:
+    iso-639-3 code
+    language name
+    status
+    coverage
+    comment
+
+Status has the following values (with the number of languages with the vale):
+    136 no          -- We do not know about any spell-ckecker for the language
+    118 yes         -- There are hunspell or myspell .aff and .dic files for the language
+     19 some tool   -- There is no .aff and .dic, only some other tool
+     11 no need     -- The language is isolating or it is a group of languages
