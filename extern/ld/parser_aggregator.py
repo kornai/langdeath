@@ -35,7 +35,7 @@ class ParserAggregator(object):
                       else EthnologueOfflineParser(eth_dump_dir))
         la_parser = (LanguageArchivesOnlineParser() if not la_dump_dir
                      else LanguageArchivesOfflineParser(la_dump_dir))
-        dbpedia_parser = DbpediaParserAggregator(ibasedir=dbpedia_res_dir)
+        dbpedia_parser = DbpediaParserAggregator(basedir=dbpedia_res_dir)
 
         self.parsers = [ParseISO639_3(), MacroWPParser(), dbpedia_parser,
                         eth_parser, CrubadanParser(), la_parser,
