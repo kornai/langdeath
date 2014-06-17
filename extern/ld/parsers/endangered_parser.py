@@ -21,10 +21,18 @@ class EndangeredParser(OfflineParser):
         self.lang_data = defaultdict(lambda: defaultdict(dict))
         self.html_parser = HTMLParser()
         self.sil_id_map = open('sil_id.map', 'w')
+        self.needed_fields_csv = {
+            'Codes.code_authorities': 'iso_type',
+            'Codes.classification': 'family',
+        }
+
+    def parse_all(self):
+        for d in self.parse_all_csv():
+            yield d
 
     def parse_all_csv(self):
         for lang_csv, sil in self.download_csvs():
-            self.add_lang_data(lang_csv, sil)
+            yield self.parse_csv(lang_csv, sil)
 
     def download_csvs(self):
         for sil in self.sils:
@@ -38,12 +46,12 @@ class EndangeredParser(OfflineParser):
             finally:
                 sleep(2)
 
-    def add_lang_data(self, csv_text, id_):
+    def parse_csv(self, csv_text, id_):
         r = csv.reader(csv_text)
-        mapping = dict()
+        head = dict()
         l = [i.decode('utf8') for i in r.next()]
         for i, fd in enumerate(l):
-            mapping[i] = fd
+            head[i] = fd
         table = list()
         sources = list()
         for line_ in r:
@@ -51,12 +59,25 @@ class EndangeredParser(OfflineParser):
             table.append(line)
             sources.append(line[11])
             sil = line[37]
+        lang_data = dict()
+        lang_data['sil'] = sil
         for i, data in enumerate(table):
             for j, fd in enumerate(data):
                 if fd and bool(fd) and fd.lower() != 'none':
+                    self.add_and_unify(lang_data, head[j], fd, sources[i])
                     #self.lang_data[sil][(sources[i], mapping[j])] = fd.replace('\n', ' ')
                     #print fd.replace('\n', ' ')
-                    print(u'{0}\t{1}\t{2}\t{3}\t{4}'.format(id_, sil, sources[i], mapping[j], fd.replace('\n', ' ')).encode('utf8', 'ignore'))
+
+                    #print(u'{0}\t{1}\t{2}\t{3}\t{4}'.format(id_, sil, sources[i], mapping[j], fd.replace('\n', ' ')).encode('utf8', 'ignore'))
+        return lang_data
+
+    def add_and_unify(self, lang_data, key_, val, source):
+        if not key_ in self.needed_fields_csv:
+            return
+        key = self.needed_fields_csv[key_]
+        if not key in lang_data:
+            lang_data[key] = val
+            return
 
     def parse_all_html(self):
         self.setup_handlers()
