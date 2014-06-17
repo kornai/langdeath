@@ -1,10 +1,44 @@
+import cPickle
+from os import path
+
+
 class BaseParser(object):
-    pass
+
+    @property
+    def pickle_fn(self):
+        return type(self).__name__ + '.pickle'
+
+    def load_from_file(self, ifn=None):
+        fn = ifn if ifn else self.pickle_fn
+        with open(fn) as f:
+            return cPickle.load(f)
+
+    def dump_to_file(self, ofn=None):
+        fn = ofn if ofn else self.pickle_fn
+        with open(fn, 'wb') as f:
+            lang_data = list(self.parse_all())
+            f.write(cPickle.dumps(lang_data))
+
+    def parse_or_load(self, pickle_fn=None):
+        fn = pickle_fn if pickle_fn else self.pickle_fn
+        if path.exists(fn):
+            with open(fn, 'rb') as f:
+                return cPickle.load(f)
+        else:
+            d = list(self.parse_all())
+            with open(fn, 'wb') as f:
+                f.write(cPickle.dumps(d))
+            return d
+
+    def parse_all(self):
+        yield None
+
 
 class OnlineParser(BaseParser):
     """Inherit this class if the parser will do everything on its own,
     downloading, parsing, no assistance, supplementary files are needed
     """
+
 
 class OfflineParser(BaseParser):
     """Inherit this class if the parser will need some extern files that
