@@ -40,7 +40,7 @@ class ParserAggregator(object):
         self.parsers = [ParseISO639_3(), MacroWPParser(), dbpedia_parser,
                         eth_parser, CrubadanParser(), la_parser,
                         WalsInfoParser(), IndigenousParser()]
-        self.parsers = [OmniglotParser()]
+        #self.parsers = [OmniglotParser()]
 
         self.parsers_todo = [OmniglotParser(), SoftwareSupportParser(res_dir)]
         self.lang_db = LanguageDB()

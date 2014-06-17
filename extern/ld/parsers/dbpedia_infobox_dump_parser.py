@@ -83,7 +83,8 @@ class DbpediaMapPropertiesParser(DbpediaNTBaseParser):
         self.load_data_for_parsing()
         for lang in self.parse_languages():
             for d in self.clean_dict(lang):
-                if len(d) > 0:
+                if len(d) > 0 and "sil" in d and len(d["sil"]) == 1:
+                    d["sil"] = d["sil"][0]
                     yield d
 
 
