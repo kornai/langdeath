@@ -21,7 +21,7 @@ class Language(models.Model):
     longitude = models.FloatField(blank=True, null=True)
     latitude = models.FloatField(blank=True, null=True)
 
-    eth_status = models.IntegerField(blank=True, null=True)
+    eth_status = models.CharField(max_length=100, blank=True)
     eth_population = models.IntegerField(blank=True, null=True)
 
     cru_docs = models.IntegerField(blank=True, null=True)
