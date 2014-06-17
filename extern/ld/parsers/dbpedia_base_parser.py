@@ -20,6 +20,7 @@ class DbpediaNTBaseParser(OfflineParser):
             value = self.clean_value(value)
             key = self.clean_key(key)
             page = page.split('/')[4].split('>')[0]
+            #print repr(page), repr(key), repr(value), repr(actual_lang)
             if page not in self.needed_titles:
                 if len(actual_lang) > 0:
                     yield actual_lang
@@ -34,7 +35,6 @@ class DbpediaNTBaseParser(OfflineParser):
                     yield actual_lang
                     actual_lang = {}
                     actual_lang['name'] = name
-                    continue
 
             actual_lang.setdefault(key, []).append(value)
         if len(actual_lang) > 0:

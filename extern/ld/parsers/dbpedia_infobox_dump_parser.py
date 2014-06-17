@@ -1,33 +1,24 @@
 """This parser needs dbpedia dump to be downloaded from
 http://wiki.dbpedia.org/Downloads39
-Two files are needed: Raw Infobox Properties, nt
+Three files are needed: Raw Infobox Properties, nt, cleaned mapping properties
 to be put into @basedir, and
 a file containing the titles (one per line) of dbpedia type Language,
 (see Mapping Based Types Dump) which has to be put in
 @basedir/@needed_fn (see constructor).
-Since dump is quite big, parsing is a little slow, so there is a
-parse_and_save() method, that will pickle results to a file, and
-read_results() method, that will read results from that file and return
-in the same format as parse() does.
 """
 
 import re
 import sys
-import cPickle
 
 from dbpedia_base_parser import DbpediaNTBaseParser
 
 
 class DbpediaRawInfoboxParser(DbpediaNTBaseParser):
 
-    def __init__(self, basedir, new_parse=False):
+    def __init__(self, basedir):
         super(DbpediaRawInfoboxParser, self).__init__(basedir)
-        self.def_result_fn = "saved_raw_infobox_results.pickle"
-        if new_parse is True:
-            self.load_data_for_parsing()
 
     def load_data_for_parsing(self):
-
         self.fh = open('{0}/raw_infobox_properties_en.nt'.format(self.basedir))
 
     def clean_dict(self, lang):
@@ -41,25 +32,11 @@ class DbpediaRawInfoboxParser(DbpediaNTBaseParser):
             d['lc_ld'] = zip(lang['lc'], lang['ld'])
             yield d
 
-    def parse_and_save(self, ofn=None):
-        if ofn is None:
-            ofn = self.basedir + "/" + self.def_result_fn
-        of = open(ofn, "wb")
-        res = list(self.parse_dump())
-        cPickle.dump(res, of, -1)
-
-    def read_results(self, ifn=None):
-        if ifn is None:
-            ifn = self.basedir + "/" + self.def_result_fn
-        ifile = open(ifn)
-        return cPickle.load(ifile)
-
     def parse(self):
-        # this is just an alias to work the same way as other parsers
-        return self.read_results()
+        return self.parse_or_load()
 
-    def parse_dump(self):
-
+    def parse_all(self):
+        self.load_data_for_parsing()
         for lang in self.parse_languages():
             for d in self.clean_dict(lang):
                 if len(d) > 0:
@@ -68,11 +45,8 @@ class DbpediaRawInfoboxParser(DbpediaNTBaseParser):
 
 class DbpediaMapPropertiesParser(DbpediaNTBaseParser):
 
-    def __init__(self, basedir='dbpedia_dumps', new_parse=False):
+    def __init__(self, basedir):
         super(DbpediaMapPropertiesParser, self).__init__(basedir)
-        self.def_result_fn = "saved_map_properties_results.pickle"
-        if new_parse is True:
-            self.load_data_for_parsing()
         self.needed_keys = {
             "name": "name",
             "iso6393Code": "sil",
@@ -101,24 +75,12 @@ class DbpediaMapPropertiesParser(DbpediaNTBaseParser):
                 d[self.needed_keys[k]] = lang[k]
         yield d
 
-    def parse_and_save(self, ofn=None):
-        if ofn is None:
-            ofn = self.basedir + "/" + self.def_result_fn
-        of = open(ofn, "wb")
-        res = list(self.parse_dump())
-        cPickle.dump(res, of, -1)
-
-    def read_results(self, ifn=None):
-        if ifn is None:
-            ifn = self.basedir + "/" + self.def_result_fn
-        ifile = open(ifn)
-        return cPickle.load(ifile)
-
     def parse(self):
         # this is just an alias to work the same way as other parsers
-        return self.read_results()
+        return self.parse_or_load()
 
-    def parse_dump(self):
+    def parse_all(self):
+        self.load_data_for_parsing()
         for lang in self.parse_languages():
             for d in self.clean_dict(lang):
                 if len(d) > 0:
@@ -128,10 +90,10 @@ class DbpediaMapPropertiesParser(DbpediaNTBaseParser):
 def main():
 
     bd = sys.argv[1]
-    parser = DbpediaRawInfoboxParser(bd, new_parse=True)
+    parser = DbpediaRawInfoboxParser(bd)
     parser.parse_and_save()
-    #parser = DbpediaMapPropertiesParser(bd, new_parse=True)
-    #parser.parse_and_save()
+    parser = DbpediaMapPropertiesParser(bd)
+    parser.parse_and_save()
 
 if __name__ == '__main__':
     main()

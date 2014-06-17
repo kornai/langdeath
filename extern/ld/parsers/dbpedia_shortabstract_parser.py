@@ -5,26 +5,22 @@ to be put into @basedir, and
 a file containing the titles (one per line) of dbpedia type Language,
 (see Mapping Based Types Dump) which has to be put in
 @basedir/@needed_fn (see constructor).
-Since dump is quite big, parsing is a little slow, so there is a
-parse_and_save() method, that will pickle results to a file, and
-read_results() method, that will read results from that file and return
-in the same format as parse() does.
 """
 
 import re
 import sys
-import cPickle
 
 from dbpedia_base_parser import DbpediaNTBaseParser
 
 
 class DbpediaShortAbstractsParser(DbpediaNTBaseParser):
 
-    def __init__(self, basedir, new_parse=False):
+    def __init__(self, basedir):
         super(DbpediaShortAbstractsParser, self).__init__(basedir)
-        self.def_result_fn = "saved_shortabstract_results.pickle"
-        self.fh = open('{0}/short_abstracts_en.nt'.format(self.basedir))
         self.patterns = self.compile_patterns()
+
+    def load_data_for_parsing(self):
+        self.fh = open('{0}/short_abstracts_en.nt'.format(self.basedir))
 
     def compile_patterns(self):
 
@@ -139,24 +135,12 @@ class DbpediaShortAbstractsParser(DbpediaNTBaseParser):
         else:
             return []
 
-    def parse_and_save(self, ofn=None):
-        if ofn is None:
-            ofn = self.basedir + "/" + self.def_result_fn
-        of = open(ofn, "wb")
-        res = list(self.parse_dump())
-        cPickle.dump(res, of, -1)
-
-    def read_results(self, ifn=None):
-        if ifn is None:
-            ifn = self.basedir + "/" + self.def_result_fn
-        ifile = open(ifn)
-        return cPickle.load(ifile)
-
     def parse(self):
         # this is just an alias to work the same way as other parsers
-        return self.read_results()
+        return self.parse_or_load()
 
-    def parse_dump(self):
+    def parse_all(self):
+        self.load_data_for_parsing()
         for lang in self.parse_languages():
             name = lang["name"]
             abstract = lang["<http://www.w3.org/2000/01/rdf-schema#comment>"][0]
@@ -168,7 +152,7 @@ class DbpediaShortAbstractsParser(DbpediaNTBaseParser):
 def main():
 
     bd = sys.argv[1]
-    parser = DbpediaShortAbstractsParser(bd, new_parse=True)
+    parser = DbpediaShortAbstractsParser(bd)
     parser.parse_and_save()
 
 
