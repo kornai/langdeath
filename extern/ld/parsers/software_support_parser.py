@@ -24,8 +24,9 @@ class SoftwareSupportParser(TSV_parser):
             ('{0}/win8_input_option'.format(self.resdir),
              {"true_key": ['win8_input_method']}),
             ('{0}/office13_lp'.format(self.resdir),
-             {"true_key": ['office13_lp']}),
-            ('{0}/office_if_pack'.format(self.resdir),
+             {"field_target": {1: 'name'},
+              "true_key": ['office13_lp']}),
+            ('{0}/office13_if_pack'.format(self.resdir),
              {"field_target": {0: 'name', 5: 'office13_if_pack'}}),
             ('{0}/hunspell.tsv'.format(self.resdir),
              {"field_target": {
@@ -41,3 +42,9 @@ class SoftwareSupportParser(TSV_parser):
 
         for lang in langs.itervalues():
             yield lang
+
+def test():
+    import sys
+    p = SoftwareSupportParser(sys.argv[1])
+    for l in p.parse():
+        print l
