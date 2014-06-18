@@ -153,7 +153,8 @@ class LanguageDB(object):
         """Looks for language that is most similar to lang"""
         if not isinstance(lang, dict):
             raise TypeError("LanguageDB.get_closest " +
-                            "got non-dict instance as @lang")
+                            "got non-dict instance as @lang: {0}".format(
+                            repr(lang)))
 
         if "sil" in lang:
             languages = Language.objects.filter(sil=lang['sil'])

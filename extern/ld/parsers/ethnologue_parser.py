@@ -3,11 +3,11 @@ import os
 import re
 from utils import get_html
 
-from base_parsers import OnlineParser, OfflineParser
+from base_parsers import OnlineParser, OfflineParser, BaseParser
 from ld.langdeath_exceptions import ParserException
 
 
-class EthnologueBaseParser(object):
+class EthnologueBaseParser(BaseParser):
 
     def __init__(self):
 
@@ -231,6 +231,10 @@ class EthnologueBaseParser(object):
         raise NotImplementedError()
 
     def parse(self, sil_codes):
+        return self.parse_or_load(sil_codes=sil_codes)
+
+    def parse_all(self, **kwargs):
+        sil_codes = kwargs["sil_codes"]
         errors = set()
         for sil_code in sil_codes:
             try:
