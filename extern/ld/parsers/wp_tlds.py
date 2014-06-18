@@ -23,7 +23,7 @@ class WikipediaToplevelDomainParser(OnlineParser):
         buf = StringIO( response.read())
         f = gzip.GzipFile(fileobj=buf)
         for line in f.readlines():
-            # the following lines copied from
+            # parts copied from
             # hunmisc/hunmisc/wikipedia/parse_insert_into_rows.py
             if not line.startswith("INSERT INTO"):
                 continue
