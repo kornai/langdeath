@@ -1,5 +1,7 @@
 # input: parsed(!) Wikipedia
 import sys
+from os import listdir
+from os.path import isfile, join
 
 from math import log
 from collections import defaultdict
@@ -106,12 +108,22 @@ class WikipediaAdjustedSizeCounter():
         return wp_size, e, stub_limit, article_count, stub_count, adjusted_size
 
 
+def count_for_all_in_dir(path):
+
+    files = [f for f in listdir(path) if isfile(join(path, f))]
+    a = WikipediaAdjustedSizeCounter()
+    for fn in files:
+        try:
+            f = '{0}/{1}'.format(path, fn)
+            print a.count(f)
+        except Exception as e:
+            sys.stderr.write('file: {0}, problem: {1}\n'.format(f, e))
+
+
 def main():
 
-    data = sys.argv[1]
-    a = WikipediaAdjustedSizeCounter()
-    print a.count(data)
-
+    path = sys.argv[1]
+    count_for_all_in_dir(path)
 
 if __name__ == "__main__":
     main()
