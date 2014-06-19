@@ -171,6 +171,13 @@ class LanguageDB(object):
             languages = Language.objects.filter(sil=lang['sil'])
             return languages
 
+        if "code" in lang:
+            for src, code in lang["code"].iteritems():
+                languages = Language.objects.filter(code__code_name=src,
+                                                    code__code=code)
+                if len(languages) > 0:
+                    return languages
+
         if "name" in lang:
             languages = Language.objects.filter(name=lang['name'])
             if len(languages) > 0:

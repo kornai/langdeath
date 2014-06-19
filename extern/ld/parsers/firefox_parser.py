@@ -41,7 +41,7 @@ class FirefoxHTMLParser(HTMLParser):
             self.lang_updates.append({
                 'name': self.en_name,
                 'native_name': self.native,
-                'code': [("firefox", self.code)],
+                'code': {"firefox": self.code},
                 'firefox_dict': self.dic,
                 'firefox_lpack': self.pack
             })

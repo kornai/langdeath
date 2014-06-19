@@ -11,7 +11,7 @@ def normalize_alt_name(name):
 class Language(models.Model):
     name = models.CharField(max_length=100)
     native_name = models.CharField(max_length=100)
-    sil = models.CharField(max_length=10, unique=True)
+    sil = models.CharField(max_length=20, unique=True)
     last_updated = models.DateTimeField('last updated', default=timezone.now())
     iso_scope = models.CharField(max_length=20, blank=True)
     iso_type = models.CharField(max_length=100, blank=True)
@@ -67,6 +67,16 @@ class Language(models.Model):
     indi_words = models.IntegerField(blank=True, null=True)
     indi_users = models.IntegerField(blank=True, null=True)
     indi_tweets = models.IntegerField(blank=True, null=True)
+
+    wp_articles = models.IntegerField(blank=True, null=True)
+    wp_total = models.IntegerField(blank=True, null=True)
+    wp_edits = models.IntegerField(blank=True, null=True)
+    wp_admins = models.IntegerField(blank=True, null=True)
+    wp_users = models.IntegerField(blank=True, null=True)
+    wp_active_users = models.IntegerField(blank=True, null=True)
+    wp_images = models.IntegerField(blank=True, null=True)
+    wp_depth = models.IntegerField(blank=True, null=True)
+    wp_inc = models.BooleanField(default=False)
 
     # many to many fields
     code = models.ManyToManyField('Code', related_name='codes')

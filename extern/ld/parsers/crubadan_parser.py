@@ -6,7 +6,7 @@ from utils import get_html, replace_html_formatting
 
 
 def add_champion(d):
-    c = d['code']
+    c = d['crucode']
     s = d['sil']
     if c != s:
         if len(c) == 2:
@@ -14,10 +14,10 @@ def add_champion(d):
             pass
         elif len(c) > 3 and "-" in c:
             d['champion'] = d['sil']
-            d['sil'] = d['code']
+            d['sil'] = d['crucode']
         else:
-            d['sil'] = d['code']
-    del d['code']
+            d['sil'] = d['crucode']
+    del d['crucode']
 
 
 class CrubadanParser(OnlineParser):
@@ -39,7 +39,8 @@ class CrubadanParser(OnlineParser):
             'FLOSS SplChk': 'cru_floss_splchk',
             'WT': 'cru_watchtower',
             'UDHR': 'cru_udhr',
-            'Code': 'code'
+            'Code': 'crucode',
+            'WP': 'other_codes'
         }
 
     def generate_rows(self, tabular):
@@ -102,6 +103,13 @@ class CrubadanParser(OnlineParser):
                         value = True
                 else:
                     value = (cells[i] if cells[i] != "-" else None)
+                if key == "WP":
+                    if value is None:
+                        # not every language has wp code
+                        continue
+
+                    value = {"wiki": value}
+
                 if key in self.needed_keys:
                     d[self.needed_keys[key]] = value
 
