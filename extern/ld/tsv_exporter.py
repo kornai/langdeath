@@ -14,6 +14,17 @@ def bool_norm(value):
     return (1 if value else 0)
 
 
+def hunspell_status_norm(value):
+    if value == "yes":
+        return 1.0
+    elif value == "some tool":
+        return 0.5
+    elif value == "no need":
+        return 0.0
+    else:
+        return 0.0
+
+
 def export_to_tsv(ofstream):
     header = ["sil", "eth_status", "eth_pop", "cru_docs", "cru_words",
               "cru_chars", "cru_splchk", "cru_wt", "cru_udhr", "omni",
@@ -25,7 +36,8 @@ def export_to_tsv(ofstream):
               "la_oth_res_in_online", "la_oth_res_in_all",
               "la_oth_res_about_online", "la_oth_res_about_all",
               "mac_input", "mac_input_partial", "microsoft_pack",
-              "win8_input_method", "office_if_pack",
+              "win8_input_method", "office13_if_pack", "office13_lp",
+              "hunspell_status", "hunspell_coverage",
               "wals_samples_100", "wals_samples_200",
               "indi_blogs", "indi_posts", "indi_words", "indi_users",
               "indi_tweets"]
@@ -73,7 +85,11 @@ def export_to_tsv(ofstream):
         data.append(bool_norm(lang.mac_input_partial))
         data.append(bool_norm(lang.microsoft_pack))
         data.append(bool_norm(lang.win8_input_method))
-        data.append(bool_norm(lang.office_if_pack))
+        data.append(bool_norm(lang.office13_if_pack))
+        data.append(bool_norm(lang.office13_lp))
+
+        data.append(hunspell_status_norm(lang.hunspell_status))
+        data.append(num_norm(lang.hunspell_coverage))
 
         data.append(num_norm(lang.wals_samples_100))
         data.append(num_norm(lang.wals_samples_200))
@@ -85,6 +101,7 @@ def export_to_tsv(ofstream):
         data.append(num_norm(lang.indi_tweets))
 
         ofstream.write("{0}\n".format("\t".join(str(d) for d in data)))
+
 
 def main():
     export_to_tsv(sys.stdout)
