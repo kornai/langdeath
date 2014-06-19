@@ -48,7 +48,7 @@ class IndigenousParser(OnlineParser):
             # add row data based on header into a dict
             data = dict([(self.needed_keys[h[i]], row[i]) for i in
                          xrange(len(row) - 1) if h[i] in self.needed_keys])
-            data['code'] = row[-1]
+            #data['code'] = row[-1]
             d[row[-1]] = data
         return d
 
