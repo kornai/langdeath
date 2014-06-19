@@ -76,6 +76,7 @@ class Language(models.Model):
     wp_active_users = models.IntegerField(blank=True, null=True)
     wp_images = models.IntegerField(blank=True, null=True)
     wp_depth = models.IntegerField(blank=True, null=True)
+    wp_inc = models.BooleanField(default=False)
 
     # many to many fields
     code = models.ManyToManyField('Code', related_name='codes')
