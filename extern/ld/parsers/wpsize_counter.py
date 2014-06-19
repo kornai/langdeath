@@ -105,7 +105,8 @@ class WikipediaAdjustedSizeCounter():
         wp_size, article_count, stub_count =\
             self.count_wp_size_from_file(data_file, stub_limit)
         adjusted_size = wp_size * e
-        return wp_size, e, stub_limit, article_count, stub_count, adjusted_size
+        return {'wp_real_articles': article_count,
+                'wp_adjusted_size': adjusted_size}
 
 
 def count_for_all_in_dir(path):
@@ -115,7 +116,7 @@ def count_for_all_in_dir(path):
     for fn in files:
         try:
             f = '{0}/{1}'.format(path, fn)
-            print a.count(f)
+            yield a.count(f)
         except Exception as e:
             sys.stderr.write('file: {0}, problem: {1}\n'.format(f, e))
 
@@ -123,7 +124,8 @@ def count_for_all_in_dir(path):
 def main():
 
     path = sys.argv[1]
-    count_for_all_in_dir(path)
+    for d in count_for_all_in_dir(path):
+        print d
 
 if __name__ == "__main__":
     main()
