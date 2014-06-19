@@ -43,8 +43,8 @@ class ParserAggregator(object):
         self.parsers = [ParseISO639_3(), MacroWPParser(), dbpedia_parser,
                         eth_parser, CrubadanParser(), la_parser,
                         WalsInfoParser(), IndigenousParser(),
-                        WikipediaListOfLanguagesParser()]
-        #self.parsers = [WikipediaIncubatorsParser()]
+                        WikipediaListOfLanguagesParser(),
+                        WikipediaIncubatorsParser()]
         #self.parsers = [OmniglotParser()]
         #self.parsers = [FirefoxParser()]
         #self.parsers = [SoftwareSupportParser(res_dir)]
