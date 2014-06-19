@@ -4,6 +4,7 @@ import os
 import subprocess as sub
 import random
 from maxent import MaxentModel
+import maxent
 from math import ceil
 from collections import defaultdict
 from math import log
@@ -22,7 +23,8 @@ def simple_train(event_list):
     for e in event_list:
         m.add_event(e[0], e[1])
     m.end_add_event()
-    m.train()
+    #maxent.set_verbose(1)
+    m.train(30, 'lbfgs', 2)
     return m
 
 
@@ -71,7 +73,7 @@ def train_orig_models(c_f, v_f, h_f, m_f, contexts, seed_path):
            [(contexts[i.strip()], 'v') for i in v_f] +\
            [(contexts[i.strip()], 'h') for i in h_f] +\
            [(contexts[i.strip()], 'm') for i in m_f]
-    print e_2
+    
     random.shuffle(e_2)
     random.shuffle(e_3a)
     random.shuffle(e_3b)
@@ -129,7 +131,7 @@ def train_filtered_models(needed_feats, events):
 def preproc(n, f):
 
     if f == 'n/a':
-        return f
+        return 'n/a'
     if f == 'True':
         return 1
     if f == 'False':
@@ -138,7 +140,11 @@ def preproc(n, f):
     if n in set(['eth_pop', 'cru_docs', 'cru_words', 'cru_chars', 
                  'la_primary_texts_online', 'la_primary_texts_all',
                  'la_lang_descr_online', 'lang.la_lang_descr_all',
-                 'la_lex_res_online']):
+                 'la_lex_res_online', 'indi_tweets', 'indi_words', 
+                 'la_oth_res_about_all', 'la_oth_res_about_online', 
+                 'la_oth_res_in_all', 'la_oth_res_in_online', 
+                 'indi_users', 'indi_posts', 'indi_blogs', 'la_lex_res_all', 
+                 'la_res_about_online', 'la_res_about_all', 'la_res_in_all']):
         return log(f)
     return f
 
@@ -216,7 +222,6 @@ def process_seed(c, v, h, m, ff, seed_path):
     for m in 'm_2', 'm_3a', 'm_3b', 'm_4':
         label(eval(m), langs, features, '{0}/labelings/{1}_class'
               .format(seed_path, m[2:]))
-
     fs_2 = get_top_feats('{0}/models/2_class'.format(seed_path))
     fs_3a = get_top_feats('{0}/models/3a_class'.format(seed_path))
     fs_3b = get_top_feats('{0}/models/3b_class'.format(seed_path))
