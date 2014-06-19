@@ -41,6 +41,10 @@ class SoftwareSupportParser(TSV_parser):
                 # hunspell contained xxw prefix, we don't need it anymore
                 if 'sil' in lang and lang['sil'].startswith("xxw"):
                     del lang['sil']
+                if ('hunspell_coverage' in lang
+                        and not lang['hunspell_coverage']):
+
+                    del lang['hunspell_coverage']
 
                 langs[lang['name']].update(lang)
 
