@@ -1,5 +1,5 @@
 from collections import defaultdict
-
+import sys
 
 from tsv_parser import TSV_parser
 
@@ -30,21 +30,33 @@ class SoftwareSupportParser(TSV_parser):
              {"field_target": {0: 'name', 5: 'office13_if_pack'}}),
             ('{0}/hunspell.tsv'.format(self.resdir),
              {"field_target": {
-                 0: 'sil', 
-                 1: 'name', 
-                 2: 'hunspell_status', 
+                 0: 'sil',
+                 1: 'name',
+                 2: 'hunspell_status',
                  3: 'hunspell_coverage'
              }})
         ]
         for args in parameters:
             for lang in parser.parse(args[0], **args[1]):
+                # hunspell contained xxw prefix, we don't need it anymore
+                if 'sil' in lang and lang['sil'].startswith("xxw"):
+                    del lang['sil']
+                if ('hunspell_coverage' in lang
+                        and not lang['hunspell_coverage']):
+
+                    del lang['hunspell_coverage']
+
                 langs[lang['name']].update(lang)
 
         for lang in langs.itervalues():
             yield lang
 
-def test():
-    import sys
+
+def main():
     p = SoftwareSupportParser(sys.argv[1])
     for l in p.parse():
         print l
+
+
+if __name__ == "__main__":
+    main()

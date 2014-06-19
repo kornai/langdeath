@@ -5,44 +5,29 @@ to be put into @basedir, and
 a file containing the titles (one per line) of dbpedia type Language,
 (see Mapping Based Types Dump) which has to be put in
 @basedir/@needed_fn (see constructor).
-Since dump is quite big, parsing is a little slow, so there is a
-parse_and_save() method, that will pickle results to a file, and
-read_results() method, that will read results from that file and return
-in the same format as parse() does.
 """
 
 import re
-import cPickle
+import sys
 
-from base_parsers import OfflineParser
+from dbpedia_base_parser import DbpediaNTBaseParser
 
 
-class DbpediaShortAbstractsParser(OfflineParser):
+class DbpediaShortAbstractsParser(DbpediaNTBaseParser):
 
-    def __init__(self, basedir='dbpedia_dumps', new_parse=False,
-                 needed_fn='dbpedia_ontology_languages'):
-
-        self.basedir = basedir
-        self.def_result_fn = "saved_shortabstract_results.pickle"
-        self.needed_fn = needed_fn
-        if new_parse is True:
-            self.load_data_for_parsing()
+    def __init__(self, basedir):
+        super(DbpediaShortAbstractsParser, self).__init__(basedir)
+        self.patterns = self.compile_patterns()
 
     def load_data_for_parsing(self):
-        self.fh = open('{0}/short_abstracts_en.nt'
-                       .format(self.basedir))
-        self.patterns = self.compile_patterns()
-        self.needed_titles = set([l.strip('\n').decode('unicode_escape')
-                                  for l in open(
-                                      '{0}/{1}'
-                                      .format(self.basedir, self.needed_fn))])
+        self.fh = open('{0}/short_abstracts_en.nt'.format(self.basedir))
 
     def compile_patterns(self):
 
         patterns = {}
         splitter_phrases =\
                 ['in\s[A-Za-z]+\s', '[A-Z][a-z]*:', ';', ',', '/', '~',
-                           '[^A-Za-z]or[^A-Za-z]', '[^A-Za-z]\u2013[^A-Za-z]',
+                '[^A-Za-z]or[^A-Za-z]', '[^A-Za-z]\u2013[^A-Za-z]',
                 'in\s.*?\sdialect', 'in\s.*?\sscript', 'in\s.*?\slanguage']
         patterns['splitters'] =\
                 re.compile('|'.join([w for w in splitter_phrases]))
@@ -120,13 +105,6 @@ class DbpediaShortAbstractsParser(OfflineParser):
             m = pat.search(string)
         return string
 
-    def get_language_from_title(self, title):
-
-        words = title.split('_')
-        if words[-1] in ['language', 'languages']:
-            return ' '.join(words[:-1])
-        return ' '.join(words)
-
     def parse_alternatives(self, language, abstract):
 
         found_langs = set([])
@@ -157,43 +135,24 @@ class DbpediaShortAbstractsParser(OfflineParser):
         else:
             return []
 
-    def parse_and_save(self, ofn=None):
-        if ofn is None:
-            ofn = self.basedir + "/" + self.def_result_fn
-        of = open(ofn, "wb")
-        res = list(self.parse_dump())
-        cPickle.dump(res, of, -1)
-
-    def read_results(self, ifn=None):
-        if ifn is None:
-            ifn = self.basedir + "/" + self.def_result_fn
-        ifile = open(ifn)
-        return cPickle.load(ifile)
-
     def parse(self):
         # this is just an alias to work the same way as other parsers
-        return self.read_results()
+        return self.parse_or_load()
 
-    def parse_dump(self):
-
-        l = self.fh.readline()
-        for l in self.fh:
-                if l[0] == '#':
-                    continue
-                data = l.strip('\n').decode('unicode_escape').split(' ')
-                url, _, abstract = data[0], data[1], ' '.join(data[2:])
-                title = url.split('/')[4].split('>')[0]
-                if title not in self.needed_titles:
-                    continue
-                language = self.get_language_from_title(title)
-                alternatives = self.parse_alternatives(language, abstract)
-                if len(alternatives) > 0:
-                    yield {u'name': language, u'altname': alternatives}
+    def parse_all(self):
+        self.load_data_for_parsing()
+        for lang in self.parse_languages():
+            name = lang["name"]
+            abstract = lang["<http://www.w3.org/2000/01/rdf-schema#comment>"][0]
+            alternatives = self.parse_alternatives(name, abstract)
+            if len(alternatives) > 0:
+                yield {u'name': name, u'altname': alternatives}
 
 
 def main():
 
-    parser = DbpediaShortAbstractsParser(new_parse=True)
+    bd = sys.argv[1]
+    parser = DbpediaShortAbstractsParser(bd)
     parser.parse_and_save()
 
 
