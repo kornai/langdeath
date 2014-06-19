@@ -8,6 +8,8 @@ import urllib2
 import csv
 import logging
 
+from endangered_utils import aggregate_category, aggregate_l1
+
 logging.getLogger().setLevel(logging.DEBUG)
 
 
@@ -47,10 +49,27 @@ class EndangeredParser(OfflineParser):
         ])
 
     def parse_all(self):
+        cnt = 0
         for id_ in self.ids:
+            logging.debug('Parsing: {0}'.format(id_))
             csv_data = self.download_and_parse_csv(id_)
             html_data = self.download_and_parse_html(id_)
-            yield self.merge_dicts(csv_data, html_data)
+            html_data['id'] = id_
+            d = self.merge_dicts(csv_data, html_data)
+            d['id'] = id_
+            self.aggregate_numbers(d)
+            yield d
+            cnt += 1
+            if cnt > 2:
+                return
+
+    def aggregate_numbers(self, d):
+        speakers = [i[1] for i in d.get('speakers', [])]
+        aggr = aggregate_l1(speakers)
+        d['speakers'].add(('aggregate', aggr))
+        categories = [i[1] for i in d.get('endangered_level', [])]
+        aggr = aggregate_category(categories)
+        d['endangered_level'].add(('aggregate', aggr))
 
     def download_and_parse_csv(self, id_):
         offline_path = path.join(self.offline_dir, id_ + '.csv')
@@ -79,6 +98,7 @@ class EndangeredParser(OfflineParser):
                     return self.parse_html(text, self.base_url + id_)
                 except IndexError:
                     logging.exception('Unable to parse a section in {0} HTML'.format(id_))
+                    raise
                     return {}
         try:
             with closing(urllib2.urlopen(self.base_url + id_)) as page:
@@ -205,7 +225,7 @@ class EndangeredParser(OfflineParser):
 
     def add_by_source(self, lang_data, text):
         try:
-            part = text.split('<h4>Language information by source')[1].split('<h4>Samples</h4>')[0]
+            part = text.split('<h4>Language information by source')[1].split('<h4>Samples</h4>')[0].split('<!-- SAMPLES -->')[0]
         except IndexError:
             return
         for sect, source in self.get_sections(part, 1):
@@ -235,12 +255,10 @@ class EndangeredParser(OfflineParser):
             elif 'PLACES' in title:
                 places = list()
                 for a in field.split('<a')[1:]:
-                    l = a.split('Location">')[1].split('</a>')[0].strip()
-                    places.append(l)
+                    l = a.split('Location')[1].split('>')[1].split('</a>')[0].strip()
+                    places.extend([i.strip() for i in l.split(',')])
                 if places:
                     yield places, 'places'
-            else:
-                print(title.encode('utf8'))
 
     def get_sections(self, text, offset=0):
         sections = text.split('Information from:')[offset + 1:]
@@ -259,7 +277,6 @@ class EndangeredParser(OfflineParser):
                 try:
                     conf = field.split('<h6>')[1].split(' ')[0]
                 except IndexError:
-                    logging.warning('No confidence for lang')
                     conf = 0
                 yield (fd, int(conf)), 'endangered_level'
             elif 'data-topic="Speakers"' in stripped:
