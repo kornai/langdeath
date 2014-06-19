@@ -40,7 +40,7 @@ def export_to_tsv(ofstream):
               "hunspell_status", "hunspell_coverage",
               "wals_samples_100", "wals_samples_200",
               "indi_blogs", "indi_posts", "indi_words", "indi_users",
-              "indi_tweets"]
+              "indi_tweets", "firefox_lpack", "firefox_dict"]
     ofstream.write("#{0}\n".format("\t".join(header)))
 
     for lang in Language.objects.all():
@@ -99,6 +99,9 @@ def export_to_tsv(ofstream):
         data.append(num_norm(lang.indi_words))
         data.append(num_norm(lang.indi_users))
         data.append(num_norm(lang.indi_tweets))
+
+        data.append(bool_norm(lang.firefox_lpack))
+        data.append(bool_norm(lang.firefox_dict))
 
         ofstream.write("{0}\n".format("\t".join(str(d) for d in data)))
 
