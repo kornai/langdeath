@@ -18,7 +18,7 @@ def export_to_tsv(ofstream):
     header = ["sil", "eth_status", "eth_pop", "cru_docs", "cru_words",
               "cru_chars", "cru_splchk", "cru_wt", "cru_udhr", "omni",
               "la_primary_texts_online", "la_primary_texts_all",
-              "la_lang_descr_online", "lang.la_lang_descr_all",
+              "la_lang_descr_online", "la_lang_descr_all",
               "la_lex_res_online", "la_lex_res_all",
               "la_res_in_online", "la_res_in_all",
               "la_res_about_online", "la_res_about_all",
