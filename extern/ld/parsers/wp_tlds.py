@@ -7,6 +7,7 @@ import operator
 import logging
 
 from base_parsers import OnlineParser
+from list_of_wikipedia_parser import WikipediaListOfLanguagesParser
 
 class WikipediaToplevelDomainParser(OnlineParser):
     def get_file(self, wp_code):
@@ -65,15 +66,16 @@ class WikipediaToplevelDomainParser(OnlineParser):
         return self.tld_freq
 
     def parse(self):
-        wp_codes = [ 
-            'ar', 'az', 'bg', 'ca', 'cs', 'da', 'de', 'el', 'en', 'eo', 'es',
-            'et', 'eu', 'fa', 'fi', 'fr', 'gl', 'he', 'hi', 'hr', 'hu', 'id',
-            'it', 'ja', 'ka', 'kk', 'ko', 'la', 'li', 'lt', 'mg', 'mk', 'ms',
-            'nl', 'no', 'oc', 'pa', 'pa', 'pl', 'pt', 'ro', 'ru', 'sk', 'sl',
-            'sr', 'sv', 'sw', 'th', 'tr', 'uk', 'vi', 'zh']
-        for wp_code in wp_codes:
-            yield self.tlds(wp_code)
-
+        list_parser = WikipediaListOfLanguagesParser()
+        for lang_dict in list_parser.parse():
+            wp_code = lang_dict['Wiki']
+            try:
+                yield self.tlds(wp_code)
+            except urllib2.HTTPError as e:
+                if e.code==404:
+                    pass
+                else:
+                    raise e
 
 def test():
     p = WikipediaToplevelDomainParser()
