@@ -29,6 +29,8 @@ class LanguageDB(object):
             self.add_country(data, lang)
         elif name == "name":
             self.add_name(data, lang)
+        elif name == "native_name":
+            self.add_native_name(data, lang)
         elif name == "alt_names":
             self.add_alt_name(data, lang)
         elif name == "champion":
@@ -39,6 +41,15 @@ class LanguageDB(object):
             lang.name = data
 
         if data == lang.name:
+            return
+
+        self.add_alt_name(data, lang)
+
+    def add_native_name(self, data, lang):
+        if lang.native_name == "":
+            lang.name = data
+
+        if data == lang.native_name:
             return
 
         self.add_alt_name(data, lang)
