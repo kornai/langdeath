@@ -2,6 +2,7 @@ from base_parsers import OfflineParser
 from time import sleep
 from contextlib import closing
 from collections import defaultdict
+from os import path
 from HTMLParser import HTMLParser
 import urllib2
 import csv
@@ -12,45 +13,95 @@ logging.getLogger().setLevel(logging.DEBUG)
 
 class EndangeredParser(OfflineParser):
 
-    def __init__(self, sils_fn=None):
+    def __init__(self, id_fn=None, offline_dir=''):
         self.base_url = 'http://www.endangeredlanguages.com/lang/'
-        self.sils = list()
-        if sils_fn:
-            with open(sils_fn) as f:
-                self.sils = [l.strip() for l in f]
+        self.ids = list()
+        if id_fn:
+            with open(id_fn) as f:
+                self.ids = [l.strip() for l in f]
         self.lang_data = defaultdict(lambda: defaultdict(dict))
         self.html_parser = HTMLParser()
         self.sil_id_map = open('sil_id.map', 'w')
+        self.timeout = 2
+        self.setup_handlers()
+        self.offline_dir = offline_dir
+        self.set_fields = set(['altname', 'dialects', 'family', 'champions', 'scripts', 'places'])
+        self.fields_to_unify = set(['iso_type', 'sil', 'name'])
         self.needed_fields_csv = {
             'Codes.code_authorities': 'iso_type',
             'Codes.classification': 'family',
+            'Codes.code_authorities': 'iso_type',
+            'Codes.code_val': 'sil',
+            'Codes.dialect_varieties': 'dialects',
         }
+        self.needed_fields_html = {
+            'ALSO KNOWN AS': 'altname',
+            'LANGUAGE CODE': 'sil',
+            'CODE AUTHORITY': 'iso_type',
+            'VARIANTS & DIALECTS': 'dialects',
+            'location': 'location',
+        }
+        self.skip_h5 = set([
+            'No samples have been submitted',
+            'No documents have been added',
+        ])
 
     def parse_all(self):
-        for d in self.parse_all_csv():
-            yield d
+        for id_ in self.ids:
+            csv_data = self.download_and_parse_csv(id_)
+            html_data = self.download_and_parse_html(id_)
+            yield self.merge_dicts(csv_data, html_data)
 
-    def parse_all_csv(self):
-        for lang_csv, sil in self.download_csvs():
-            yield self.parse_csv(lang_csv, sil)
+    def download_and_parse_csv(self, id_):
+        offline_path = path.join(self.offline_dir, id_ + '.csv')
+        if path.exists(offline_path):
+            with open(offline_path) as f:
+                return self.parse_csv(f.readlines(), id_)
+        try:
+            logging.debug('Downloading CSV: ' + str(id_))
+            with closing(urllib2.urlopen(self.base_url + id_ + '/csv')) as page:
+                lines = list(page)
+                with open(offline_path, 'w') as f:
+                    f.write(''.join(lines))
+                return self.parse_csv(lines, id_)
+        except urllib2.HTTPError:
+            logging.warning('Unable to download CSV: ' + str(id_) + '. Perhaps this ID does not exist?')
+            return {}
+        finally:
+            sleep(self.timeout)
 
-    def download_csvs(self):
-        for sil in self.sils:
-            logging.debug('Downloading CSV: ' + sil)
-            try:
-                with closing(urllib2.urlopen(self.base_url + sil + '/csv')) as page:
-                    text = page.readlines()
-                    yield text, sil
-            except urllib2.HTTPError:
-                continue
-            finally:
-                sleep(2)
+    def download_and_parse_html(self, id_):
+        offline_path = path.join(self.offline_dir, id_ + '.html')
+        if path.exists(offline_path):
+            with open(offline_path) as f:
+                text = self.html_parser.unescape(f.read().decode('utf8'))
+                try:
+                    return self.parse_html(text, self.base_url + id_)
+                except IndexError:
+                    logging.exception('Unable to parse a section in {0} HTML'.format(id_))
+                    return {}
+        try:
+            with closing(urllib2.urlopen(self.base_url + id_)) as page:
+                logging.debug('Downloading HTML: ' + str(id_))
+                text = self.html_parser.unescape(page.read().decode('utf8'))
+                with open(offline_path, 'w') as f:
+                    f.write(text.encode('utf8'))
+                try:
+                    return self.parse_html(text, self.base_url + id_)
+                except IndexError:
+                    logging.exception('Unable to parse a section in {0} HTML'.format(id_))
+                    return {}
+        except urllib2.HTTPError:
+            logging.exception('Unable to download HTML {0}'.format(id_))
+            return {}
+        finally:
+            sleep(self.timeout)
 
     def parse_csv(self, csv_text, id_):
         r = csv.reader(csv_text)
         head = dict()
-        l = [i.decode('utf8') for i in r.next()]
-        for i, fd in enumerate(l):
+        headline = [i.decode('utf8') for i in r.next()]
+        for i, fd in enumerate(headline):
             head[i] = fd
         table = list()
         sources = list()
@@ -58,60 +109,50 @@ class EndangeredParser(OfflineParser):
             line = [i.decode('utf8') for i in line_]
             table.append(line)
             sources.append(line[11])
-            sil = line[37]
         lang_data = dict()
-        lang_data['sil'] = sil
         for i, data in enumerate(table):
             for j, fd in enumerate(data):
                 if fd and bool(fd) and fd.lower() != 'none':
-                    self.add_and_unify(lang_data, head[j], fd, sources[i])
-                    #self.lang_data[sil][(sources[i], mapping[j])] = fd.replace('\n', ' ')
-                    #print fd.replace('\n', ' ')
-
-                    #print(u'{0}\t{1}\t{2}\t{3}\t{4}'.format(id_, sil, sources[i], mapping[j], fd.replace('\n', ' ')).encode('utf8', 'ignore'))
+                    self.csv_add_and_unify(lang_data, head[j], fd, sources[i])
         return lang_data
 
-    def add_and_unify(self, lang_data, key_, val, source):
+    def csv_add_and_unify(self, lang_data, key_, val, source):
         if not key_ in self.needed_fields_csv:
             return
         key = self.needed_fields_csv[key_]
-        if not key in lang_data:
-            lang_data[key] = val
-            return
+        val = [i.strip() for i in val.split(';') if i.strip()]
+        lang_data[(source, key)] = val
 
-    def parse_all_html(self):
-        self.setup_handlers()
-        self.create_field_map()
-        for sil in self.sils:
-            logging.debug('Downloading HTML: ' + sil)
-            real_sil = ''
-            try:
-                with closing(urllib2.urlopen(self.base_url + sil)) as page:
-                    text = self.html_parser.unescape(page.read().decode('utf8'))
-                    try:
-                        real_sil = self.parse_html(text, self.base_url + sil)
-                        for key, val in sorted(self.lang_data[real_sil].iteritems()):
-                            if type(val) == list:
-                                val_str = '\t'.join(val)
-                            else:
-                                val_str = val.strip() if val else ''
-                            print(u'{0}\t{1}\t{2}\t{3}\t{4}'.format(sil, real_sil, key[0], key[1], val_str).encode('utf8', 'ignore'))
-                    except IndexError:
-                        logging.exception('Unable to parse a section in {0} HTML'.format(sil))
-            except urllib2.HTTPError:
-                logging.exception('Unable to download HTML {0}'.format(sil))
+    def merge_dicts(self, csv_data, html_data):
+        lang_data = defaultdict(set)
+        to_unify = defaultdict(list)
+        self.add_values_from_dict(csv_data, lang_data, to_unify)
+        self.add_values_from_dict(html_data, lang_data, to_unify)
+        self.add_unifiable_fields(lang_data, to_unify)
+        return lang_data
+
+    def add_values_from_dict(self, src, tgt, to_unify):
+        for (source, key), val in src.iteritems():
+            if key in self.set_fields:
+                if type(val) == unicode:
+                    tgt[key].add(val)
+                else:
+                    tgt[key] |= set(val)
+            elif key in self.fields_to_unify:
+                if type(val) == unicode:
+                    to_unify[key].append(val)
+                else:
+                    to_unify[key].extend(val)
             else:
-                self.sil_id_map.write('{0}\t{1}\n'.format(sil, real_sil))
-            finally:
-                sleep(2)
+                tgt[key].add((source, val))
 
-    def create_field_map(self):
-        self.field_map = {
-            'ALSO KNOWN AS': 'alternative name',
-            'LANGUAGE CODE': 'sil',
-            'CODE AUTHORITY': 'iso_type',
-            'VARIANTS & DIALECTS': 'dialects',
-        }
+    def add_unifiable_fields(self, data, to_unify):
+        for key, vals in to_unify.iteritems():
+            counts = dict()
+            for v in set(vals):
+                counts[v] = vals.count(v)
+            max_ = max(counts.iteritems(), key=lambda x: x[1])
+            data[key] = max_[0]
 
     def setup_handlers(self):
         url_fields = [
@@ -141,19 +182,16 @@ class EndangeredParser(OfflineParser):
 
     def parse_html(self, text, url=''):
         lang_data = dict()
-        lang_data['name'] = self.get_lang_name(text)
+        lang_data[('html', 'name')] = self.get_lang_name(text)
         self.parse_header(text, lang_data, url)
         lang_sect = filter(lambda x: 'Language metadata' in x,
                            text.split('<section>'))
         lang_data.update(self.get_lang_info(lang_sect[0]))
-        sil = lang_data['sil'][0]
-        for k, v in lang_data.iteritems():
-            self.lang_data[sil][('html', k)] = v
-        self.add_by_source(text, sil)
-        self.add_location_info(text, sil)
-        return sil
+        self.add_by_source(lang_data, text)
+        self.add_location_info(lang_data, text)
+        return lang_data
 
-    def add_location_info(self, text, sil):
+    def add_location_info(self, lang_data, text):
         part = text.split('LOCATION INFORMATION')[-1].split('END CAROUSEL')[0]
         for sect, source in self.get_sections(part):
             for p in sect.split('<td>')[1:]:
@@ -161,23 +199,53 @@ class EndangeredParser(OfflineParser):
                     continue
                 if 'data-topic="Location"' in p:
                     fd = p.split('"Location">')[1].split('</a>')[0].strip()
-                    self.lang_data[sil][('html - ' + source, 'location')] = fd
+                    lang_data[(source, 'location')] = fd
                 else:
                     logging.debug('Location field not recognized: ' + p.encode('utf8'))
 
-    def add_by_source(self, text, sil):
+    def add_by_source(self, lang_data, text):
         try:
             part = text.split('<h4>Language information by source')[1].split('<h4>Samples</h4>')[0]
         except IndexError:
             return
         for sect, source in self.get_sections(part, 1):
             for field, fd_type in self.get_fields_from_subsection(sect):
-                self.lang_data[sil][('html - ' + source, fd_type)] = field
+                lang_data[(source, fd_type)] = field
+            for field, fd_type in self.get_subfields_from_subsection(sect):
+                lang_data[(source, fd_type)] = field
+
+    def get_subfields_from_subsection(self, section):
+        fields = section.split('<dt')
+        for field in fields[1:]:
+            title = field.split('>')[1].split('</dt>')[0].split('<')[0].strip()
+            if 'OTHER LANGUAGES USED BY THE COMMUNITY' in title:
+                langs = list()
+                for a in field.split('<a')[1:]:
+                    l = a.split('Context">')[1].split('</a>')[0].strip().lstrip('and ')
+                    langs.append(l)
+                yield langs, 'champions'
+            elif 'Scripts' in title:
+                scripts = list()
+                for a in field.split('<a')[1:]:
+                    l = a.split('Other">')[1].split('</a>')[0].strip()
+                    if not 'none' in l.lower():
+                        scripts.append(l)
+                if scripts:
+                    yield scripts, 'scripts'
+            elif 'PLACES' in title:
+                places = list()
+                for a in field.split('<a')[1:]:
+                    l = a.split('Location">')[1].split('</a>')[0].strip()
+                    places.append(l)
+                if places:
+                    yield places, 'places'
+            else:
+                print(title.encode('utf8'))
 
     def get_sections(self, text, offset=0):
         sections = text.split('Information from:')[offset + 1:]
         for section in sections:
-            source = section.split('\n')[0].strip().rstrip('</p>').strip()
+            source = section.split('\n')[0].strip().rstrip('</p>').lstrip(u'\u201c').strip()
             yield section, source
 
     def get_fields_from_subsection(self, section):
@@ -188,28 +256,32 @@ class EndangeredParser(OfflineParser):
             stripped = field.split('</h5>')[0]
             if 'class="endangered_level"' in stripped:
                 fd = stripped.split('>')[1].split('<')[0].strip()
-                yield fd, 'endangered_level'
+                try:
+                    conf = field.split('<h6>')[1].split(' ')[0]
+                except IndexError:
+                    logging.warning('No confidence for lang')
+                    conf = 0
+                yield (fd, int(conf)), 'endangered_level'
             elif 'data-topic="Speakers"' in stripped:
                 num = stripped.split('<')[-2].split('>')[-1]
-                yield num, 'speakers'
+                yield num.replace(',', ''), 'speakers'
+            elif any(i in stripped for i in self.skip_h5):
+                continue
             else:
                 logging.debug('<h5> field not recognized: ' + stripped.encode('utf8'))
 
     def parse_header(self, text, lang_data, url=''):
         subheader = text.split('<article class="subheader">')[1].split(
             '</article>')[0]
-        family = self.get_family(subheader, url)
-        if family:
-            lang_data['family'] = family
         category = self.get_category(subheader, url)
         if category:
-            lang_data['category'] = category
+            lang_data[('html', 'family')] = [category]
 
     def get_family(self, text, url=''):
         try:
             t = text.split('<em>')[0].split('<div>')[-1]
             t = t.split('<p>')[1].split('</p>')[0]
-            return [t.strip().lstrip('Classification: ')]
+            return t.strip().lstrip('Classification: ')
         except (ValueError, IndexError) as e:
             logging.exception('While parsing language family on site {0}, {1}'.format(
                 url, e))
@@ -222,7 +294,7 @@ class EndangeredParser(OfflineParser):
             t = text.split('<em>')[0].split('<div>')[-1]
             t = text.split('</div>')[0]
             t = t.split('<p>')[1].split('</p>')[0]
-            return t.strip()
+            return t.strip().lstrip('Classification: ')
         except ValueError as e:
             logging.exception('While parsing language category on site {0}, {1}'.format(
                 url, e))
@@ -246,8 +318,11 @@ class EndangeredParser(OfflineParser):
             if not label in self.field_handlers:
                 logging.warning('Invalid field: {0}'.format(label))
                 continue
-            if label in self.field_map:
-                lang_info[self.field_map[label]] = self.field_handlers[label](part)
+            if label in self.needed_fields_html:
+                lab = self.needed_fields_html[label]
+                #if lab == 'category' and ('html', 'category') in lang_info:
+                    #continue
+                lang_info[('html', lab)] = self.field_handlers[label](part)
         return lang_info
 
     def url_field_handler(self, field):
@@ -285,11 +360,5 @@ class EndangeredParser(OfflineParser):
 
 if __name__ == '__main__':
     from sys import argv
-    p = EndangeredParser(argv[1])
-    p.parse_all_csv()
-    #for sil, data in p.lang_data.iteritems():
-        #for key, val in sorted(data.iteritems()):
-            #print(u'{0}\t{1}\t{2}\t{3}'.format(sil, key[0], key[1], val).encode('utf8', 'ignore'))
-    #import json
-    #print p.lang_data
-    #print json.dumps(p.lang_data)
+    p = EndangeredParser(argv[1], argv[2])
+    p.parse_or_load()
