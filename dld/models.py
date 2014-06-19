@@ -56,6 +56,9 @@ class Language(models.Model):
     hunspell_status = models.CharField(max_length=100, blank=True)
     hunspell_coverage = models.FloatField(blank=True, null=True)
 
+    firefox_lpack = models.BooleanField(default=False)
+    firefox_dict = models.BooleanField(default=False)
+
     wals_samples_100 = models.BooleanField(default=False)
     wals_samples_200 = models.BooleanField(default=False)
 

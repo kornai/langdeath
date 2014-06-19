@@ -22,6 +22,7 @@ from ld.parsers.software_support_parser import SoftwareSupportParser
 from ld.parsers.wals_info_parser import WalsInfoParser
 from ld.parsers.indigenous_parser import IndigenousParser
 from ld.parsers.dbpedia_parser_aggregator import DbpediaParserAggregator
+from ld.parsers.firefox_parser import FirefoxParser
 
 
 class ParserAggregator(object):
@@ -41,8 +42,11 @@ class ParserAggregator(object):
                         eth_parser, CrubadanParser(), la_parser,
                         WalsInfoParser(), IndigenousParser()]
         #self.parsers = [OmniglotParser()]
+        #self.parsers = [FirefoxParser()]
+        #self.parsers = [SoftwareSupportParser(res_dir)]
 
-        self.parsers_todo = [OmniglotParser(), SoftwareSupportParser(res_dir)]
+        self.parsers_todo = [OmniglotParser(), SoftwareSupportParser(res_dir),
+                            FirefoxParser()]
         self.lang_db = LanguageDB()
         self.trusted_parsers = set([ParseISO639_3, EthnologueOnlineParser,
                                    EthnologueOfflineParser, CrubadanParser,
