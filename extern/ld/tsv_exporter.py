@@ -40,7 +40,10 @@ def export_to_tsv(ofstream):
               "hunspell_status", "hunspell_coverage",
               "wals_samples_100", "wals_samples_200",
               "indi_blogs", "indi_posts", "indi_words", "indi_users",
-              "indi_tweets", "firefox_lpack", "firefox_dict"]
+              "indi_tweets", "firefox_lpack", "firefox_dict",
+              "wp_articles", "wp_total", "wp_edits", "wp_admins", "wp_users",
+              "wp_active_users", "wp_images", "wp_depth", "wp_inc"]
+             ]
     ofstream.write("#{0}\n".format("\t".join(header)))
 
     for lang in Language.objects.all():
@@ -102,6 +105,16 @@ def export_to_tsv(ofstream):
 
         data.append(bool_norm(lang.firefox_lpack))
         data.append(bool_norm(lang.firefox_dict))
+
+        data.append(num_norm(lang.wp_articles))
+        data.append(num_norm(lang.wp_total))
+        data.append(num_norm(lang.wp_edits))
+        data.append(num_norm(lang.wp_admins))
+        data.append(num_norm(lang.wp_users))
+        data.append(num_norm(lang.wp_active_users))
+        data.append(num_norm(lang.wp_images))
+        data.append(num_norm(lang.wp_depth))
+        data.append(bool_norm(lang.wp_inc))
 
         ofstream.write("{0}\n".format("\t".join(str(d) for d in data)))
 
