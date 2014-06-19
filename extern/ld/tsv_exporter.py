@@ -43,7 +43,7 @@ def export_to_tsv(ofstream):
               "indi_tweets", "firefox_lpack", "firefox_dict",
               "wp_articles", "wp_total", "wp_edits", "wp_admins", "wp_users",
               "wp_active_users", "wp_images", "wp_depth", "wp_inc"]
-             ]
+
     ofstream.write("#{0}\n".format("\t".join(header)))
 
     for lang in Language.objects.all():
