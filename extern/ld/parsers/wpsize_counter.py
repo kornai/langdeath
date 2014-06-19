@@ -21,6 +21,7 @@ class WikipediaAdjustedSizeCounter(BaseParser):
         self.basic_limit = basic_limit
         self.entropy_sample_lines = entropy_sample_lines
         self.path = path
+        self.name_regex = re.compile('(.*?)wiki')
 
     def compile_regexes(self):
 
@@ -82,6 +83,7 @@ class WikipediaAdjustedSizeCounter(BaseParser):
             i += 1
             if i > self.entropy_sample_lines:
                 return sample
+        return sample    
 
     def count_wp_size_from_file(self, data_file, stub_limit):
 
@@ -119,15 +121,11 @@ class WikipediaAdjustedSizeCounter(BaseParser):
         files = [f for f in listdir(self.path)
                  if isfile(join(self.path, f))]
         for fn in files:
-            try:
-                f = '{0}/{1}'.format(self.path, fn)
-                print f
-                c = fn[:2]
-                d = self.count(f)
-                d['code'] = {"wiki": c}
-                yield d
-            except Exception as e:
-                sys.stderr.write('file: {0}, problem: {1}\n'.format(f, e))
+            f = '{0}/{1}'.format(self.path, fn)
+            c = self.name_regex.match(fn).groups()[0]
+            d = self.count(f)
+            d['code'] = {"wiki": c}
+            yield d
 
 
 def main():
