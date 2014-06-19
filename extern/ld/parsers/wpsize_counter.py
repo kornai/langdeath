@@ -121,9 +121,10 @@ class WikipediaAdjustedSizeCounter(BaseParser):
         for fn in files:
             try:
                 f = '{0}/{1}'.format(self.path, fn)
+                print f
                 c = fn[:2]
                 d = self.count(f)
-                d['wp_code'] = c
+                d['code'] = {"wiki": c}
                 yield d
             except Exception as e:
                 sys.stderr.write('file: {0}, problem: {1}\n'.format(f, e))
