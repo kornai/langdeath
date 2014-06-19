@@ -1,8 +1,8 @@
-import sys
 from HTMLParser import HTMLParser
 import urllib
 
 from base_parsers import OnlineParser
+
 
 class FirefoxHTMLParser(HTMLParser):
     def __init__(self):
@@ -12,7 +12,7 @@ class FirefoxHTMLParser(HTMLParser):
         self.in_native = False
         self.in_software = False
         self.lang_updates = []
-        
+
     def handle_starttag(self, tag, attrs):
         if tag == 'tbody':
             self.in_tbody = True
@@ -28,7 +28,7 @@ class FirefoxHTMLParser(HTMLParser):
                 self.in_native = True
             else:
                 self.in_software = True
-            
+
     def handle_endtag(self, tag):
         if tag == 'tbody':
             self.in_tbody = False
@@ -40,12 +40,12 @@ class FirefoxHTMLParser(HTMLParser):
         elif tag == 'tr' and self.in_tbody:
             self.lang_updates.append({
                 'name': self.en_name,
-                'native' : self.native,
-                'ffox_code':self.code,
-                'ffox_dict': self.dic,
-                'ffox_lpack' : self.pack
+                'native_name': self.native,
+                'code': [("firefox", self.code)],
+                'firefox_dict': self.dic,
+                'firefox_lpack': self.pack
             })
-    
+
     def handle_data(self, text):
         if self.in_tbody:
             if self.in_en_name:
@@ -58,6 +58,7 @@ class FirefoxHTMLParser(HTMLParser):
                 elif text.endswith('Pack'):
                     self.pack = True
 
+
 class FirefoxParser(OnlineParser):
     def parse(self):
         self.url = 'https://addons.mozilla.org/en-US/firefox/language-tools/'
@@ -65,6 +66,7 @@ class FirefoxParser(OnlineParser):
         html_filen, headers = urllib.urlretrieve(self.url)
         html_parser.feed(open(html_filen).read().decode('utf-8'))
         return iter(html_parser.lang_updates)
+
 
 def test():
     p = FirefoxParser()

@@ -51,7 +51,13 @@ class Language(models.Model):
     mac_input_partial = models.BooleanField(default=False)
     microsoft_pack = models.BooleanField(default=False)
     win8_input_method = models.BooleanField(default=False)
-    office_if_pack = models.BooleanField(default=False)
+    office13_if_pack = models.BooleanField(default=False)
+    office13_lp = models.BooleanField(default=False)
+    hunspell_status = models.CharField(max_length=100, blank=True)
+    hunspell_coverage = models.FloatField(blank=True, null=True)
+
+    firefox_lpack = models.BooleanField(default=False)
+    firefox_dict = models.BooleanField(default=False)
 
     wals_samples_100 = models.BooleanField(default=False)
     wals_samples_200 = models.BooleanField(default=False)
