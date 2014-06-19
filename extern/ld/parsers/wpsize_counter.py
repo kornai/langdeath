@@ -1,24 +1,26 @@
-# input: parsed(!) Wikipedia
+# input: path containing files of parsed Wikipedias
 import sys
 from os import listdir
 from os.path import isfile, join
-
 from math import log
 from collections import defaultdict
 import re
 import string
 import gzip
 
+from base_parsers import BaseParser
 
-class WikipediaAdjustedSizeCounter():
 
-    def __init__(self, basic_limit=2000, entropy_sample_lines=50000):
+class WikipediaAdjustedSizeCounter(BaseParser):
+
+    def __init__(self, path, basic_limit=2000, entropy_sample_lines=50000):
 
         self.numerals = set(string.digits)
         self.punctuation = set(string.punctuation)
         self.compile_regexes()
         self.basic_limit = basic_limit
         self.entropy_sample_lines = entropy_sample_lines
+        self.path = path
 
     def compile_regexes(self):
 
@@ -108,23 +110,30 @@ class WikipediaAdjustedSizeCounter():
         return {'wp_real_articles': article_count,
                 'wp_adjusted_size': adjusted_size}
 
+    def parse(self):
+        return self.parse_or_load()
 
-def count_for_all_in_dir(path):
+    def parse_all(self, **kwargs):
+        # counts wp sizes for all dump file in self.path
 
-    files = [f for f in listdir(path) if isfile(join(path, f))]
-    a = WikipediaAdjustedSizeCounter()
-    for fn in files:
-        try:
-            f = '{0}/{1}'.format(path, fn)
-            yield a.count(f)
-        except Exception as e:
-            sys.stderr.write('file: {0}, problem: {1}\n'.format(f, e))
+        files = [f for f in listdir(self.path)
+                 if isfile(join(self.path, f))]
+        for fn in files:
+            try:
+                f = '{0}/{1}'.format(self.path, fn)
+                c = fn[:2]
+                d = self.count(f)
+                d['wp_code'] = c
+                yield d
+            except Exception as e:
+                sys.stderr.write('file: {0}, problem: {1}\n'.format(f, e))
 
 
 def main():
 
     path = sys.argv[1]
-    for d in count_for_all_in_dir(path):
+    a = WikipediaAdjustedSizeCounter(path)
+    for d in a.parse():
         print d
 
 if __name__ == "__main__":
