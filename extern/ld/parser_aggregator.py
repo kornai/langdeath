@@ -23,6 +23,8 @@ from ld.parsers.wals_info_parser import WalsInfoParser
 from ld.parsers.indigenous_parser import IndigenousParser
 from ld.parsers.dbpedia_parser_aggregator import DbpediaParserAggregator
 from ld.parsers.firefox_parser import FirefoxParser
+from ld.parsers.list_of_wikipedia_parser import WikipediaListOfLanguagesParser
+from ld.parsers.wikipedia_incubators_parser import WikipediaIncubatorsParser
 
 
 class ParserAggregator(object):
@@ -40,17 +42,20 @@ class ParserAggregator(object):
 
         self.parsers = [ParseISO639_3(), MacroWPParser(), dbpedia_parser,
                         eth_parser, CrubadanParser(), la_parser,
-                        WalsInfoParser(), IndigenousParser()]
+                        WalsInfoParser(), IndigenousParser(),
+                        WikipediaListOfLanguagesParser()]
+        #self.parsers = [WikipediaIncubatorsParser()]
         #self.parsers = [OmniglotParser()]
         #self.parsers = [FirefoxParser()]
         #self.parsers = [SoftwareSupportParser(res_dir)]
 
         self.parsers_todo = [OmniglotParser(), SoftwareSupportParser(res_dir),
-                            FirefoxParser()]
+                             FirefoxParser()]
         self.lang_db = LanguageDB()
         self.trusted_parsers = set([ParseISO639_3, EthnologueOnlineParser,
                                    EthnologueOfflineParser, CrubadanParser,
-                                   MacroWPParser, DbpediaParserAggregator])
+                                   MacroWPParser, DbpediaParserAggregator,
+                                   WikipediaListOfLanguagesParser])
         self.parsers_needs_sil = set([EthnologueOfflineParser,
                                       EthnologueOnlineParser,
                                       LanguageArchivesOfflineParser,
