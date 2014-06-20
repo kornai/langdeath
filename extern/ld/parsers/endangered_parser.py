@@ -52,6 +52,9 @@ class EndangeredParser(OfflineParser):
             'No documents have been added',
         ])
 
+    def parse(self):
+        return self.parse_or_load()
+
     def parse_all(self):
         for id_ in self.ids:
             logging.debug('Parsing: {0}'.format(id_))
