@@ -133,7 +133,7 @@ def aggregate_l1(fields_):
     if len(fields) == 0:
         return 0
     for fd in fields:
-        num = normalize_num(fd.strip().lower())
+        num = normalize_number(fd.strip().lower())
         if num == 0:
             num = 1
         s += math.log(num)
@@ -141,18 +141,29 @@ def aggregate_l1(fields_):
     return round(math.exp(s), 1)
 
 
-def normalize_num(num):
-    if num_re.match(num):
-        return int(num_re.match(num).group(1))
-    elif num.strip().lower() in zeros:
+def geometric_mean(numbers):
+    if len(numbers) == 0:
         return 0
+    s = 0
+    for n in numbers:
+        s += math.log(n)
+    s /= len(numbers)
+    return round(math.exp(s), 1)
+
+
+def normalize_number(num):
+    if num_re.match(num):
+        n = int(num_re.match(num).group(1))
+        return n if n > 0 else 1
+    elif num.strip().lower() in zeros:
+        return 1
     elif num.strip().lower() in unknown:
         return 30
     elif num.strip().lower() in few:
         return 30
     elif interval_re.match(num):
         m = interval_re.match(num)
-        return geometric_mean(int(m.group(1)), int(m.group(2)))
+        return geometric_mean2(int(m.group(1)), int(m.group(2)))
     elif date_after_re.match(num):
         return int(date_after_re.match(num).group(1))
     elif 'few dozen' in num:
@@ -175,5 +186,5 @@ def normalize_num(num):
         stderr.write('Unmatched {0}\n'.format(num.encode('utf8')))
 
 
-def geometric_mean(n1, n2):
+def geometric_mean2(n1, n2):
     return math.sqrt(n1 * n2)
