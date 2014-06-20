@@ -76,5 +76,3 @@ def test():
     p = FirefoxParser()
     for l in p.parse():
         print l
-
-test()
