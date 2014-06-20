@@ -26,7 +26,7 @@ def hunspell_status_norm(value):
 
 
 def export_to_tsv(ofstream):
-    header = ["sil", "eth_status", "eth_pop", "cru_docs", "cru_words",
+    header = ["sil", "eth_pop", "cru_docs", "cru_words",
               "cru_chars", "cru_splchk", "cru_wt", "cru_udhr", "omni",
               "la_primary_texts_online", "la_primary_texts_all",
               "la_lang_descr_online", "la_lang_descr_all",
@@ -43,7 +43,8 @@ def export_to_tsv(ofstream):
               "indi_tweets", "firefox_lpack", "firefox_dict",
               "wp_articles", "wp_total", "wp_edits", "wp_admins", "wp_users",
               "wp_active_users", "wp_images", "wp_depth", "wp_inc",
-              "wp_real_articles", "wp_adjusted_size"]
+              "wp_real_articles", "wp_adjusted_size",
+              "eth_status"]
 
     ofstream.write("#{0}\n".format("\t".join(header)))
 
@@ -51,14 +52,6 @@ def export_to_tsv(ofstream):
         data = []
 
         data.append(lang.sil)
-
-        eth_status = lang.eth_status
-        if not eth_status:
-            eth_status = default_eth_status
-        else:
-            eth_status = float(
-                eth_status.replace("a", "").replace("b", ""))
-        data.append(eth_status)
 
         data.append(num_norm(lang.eth_population))
 
@@ -118,6 +111,15 @@ def export_to_tsv(ofstream):
         data.append(bool_norm(lang.wp_inc))
         data.append(num_norm(lang.wp_real_articles))
         data.append(num_norm(lang.wp_adjusted_size))
+
+        eth_statuses = lang.endangered_levels.filter(src="ethnologue").all()
+        if len(eth_statuses) == 0:
+            eth_status = default_eth_status
+        else:
+            eth_status = eth_statuses[0].level
+            eth_status = float(
+                eth_status.replace("a", "").replace("b", ""))
+        data.append(eth_status)
 
         ofstream.write("{0}\n".format("\t".join(str(d) for d in data)))
 
