@@ -243,7 +243,7 @@ class EndangeredParser(OfflineParser):
                 for a in field.split('<a')[1:]:
                     l = a.split('Context">')[1].split('</a>')[0].strip().lstrip('and ')
                     langs.append(l)
-                yield langs, 'champions'
+                yield langs, 'other_langs'
             elif 'Scripts' in title:
                 scripts = list()
                 for a in field.split('<a')[1:]:
