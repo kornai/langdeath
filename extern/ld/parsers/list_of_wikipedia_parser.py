@@ -11,7 +11,7 @@ class WikipediaListOfLanguagesParser(OnlineParser):
 
         self.url = 'http://meta.wikimedia.org/wiki/List_of_Wikipedias'
         self.needed_keys = {
-            "Wiki": "code",
+            "Wiki": "other_codes",
             "Language": "name",
             "Language (local)": "native_name",
             "Articles": "wp_articles",
@@ -104,7 +104,7 @@ class WikipediaListOfLanguagesParser(OnlineParser):
                 continue
 
             k2 = self.needed_keys[k]
-            if k2 == "code":
+            if k2 == "other_codes":
                 cd[k2] = {"wiki": d[k]}
             if k2 in ["name", "native_name"]:
                 cd[k2] = d[k]
@@ -121,8 +121,8 @@ class WikipediaListOfLanguagesParser(OnlineParser):
         html = get_html(self.url)
         for dict_ in self.generate_dictionaries(html):
             cd = self.clean_dict(dict_)
-            if cd["code"]["wiki"] in ["simple", "be-x-old", "arc"]:
-                cd["sil"] = "xxw-{0}".format(cd["code"]["wiki"])
+            if cd["other_codes"]["wiki"] in ["simple", "be-x-old", "arc"]:
+                cd["sil"] = "xxw-{0}".format(cd["other_codes"]["wiki"])
             yield self.clean_dict(dict_)
 
 
