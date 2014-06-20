@@ -25,6 +25,7 @@ from ld.parsers.dbpedia_parser_aggregator import DbpediaParserAggregator
 from ld.parsers.firefox_parser import FirefoxParser
 from ld.parsers.list_of_wikipedia_parser import WikipediaListOfLanguagesParser
 from ld.parsers.wikipedia_incubators_parser import WikipediaIncubatorsParser
+from ld.parsers.wpsize_counter import WikipediaAdjustedSizeCounter
 
 
 class ParserAggregator(object):
@@ -33,7 +34,7 @@ class ParserAggregator(object):
     two langauges (or any other data) that are possibly the same
     """
     def __init__(self, eth_dump_dir='', la_dump_dir='', dbpedia_res_dir='',
-                 res_dir='extern/ld/res'):
+                 wpdumps_dir='', res_dir='extern/ld/res'):
         eth_parser = (EthnologueOnlineParser() if not eth_dump_dir
                       else EthnologueOfflineParser(eth_dump_dir))
         la_parser = (LanguageArchivesOnlineParser() if not la_dump_dir
@@ -44,7 +45,8 @@ class ParserAggregator(object):
                         eth_parser, CrubadanParser(), la_parser,
                         WalsInfoParser(), IndigenousParser(),
                         WikipediaListOfLanguagesParser(),
-                        WikipediaIncubatorsParser()]
+                        WikipediaIncubatorsParser(),
+                        WikipediaAdjustedSizeCounter(wpdumps_dir)]
         #self.parsers = [OmniglotParser()]
         #self.parsers = [FirefoxParser()]
         #self.parsers = [SoftwareSupportParser(res_dir)]

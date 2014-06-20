@@ -77,6 +77,8 @@ class Language(models.Model):
     wp_images = models.IntegerField(blank=True, null=True)
     wp_depth = models.IntegerField(blank=True, null=True)
     wp_inc = models.BooleanField(default=False)
+    wp_real_articles = models.FloatField(blank=True, null=True)
+    wp_adjusted_size = models.FloatField(blank=True, null=True)
 
     # many to many fields
     code = models.ManyToManyField('Code', related_name='codes')
