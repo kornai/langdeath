@@ -110,8 +110,10 @@ def aggregate_category(fields):
         avg += int(conf)
         if not int(conf) == 0:
             not_zero += 1
+    if len(fields) == 0:
+        return 0, 0
     if not_zero == 0:
-        return sum(i[0] for i in categories) / float(len(categories))
+        return sum(i[0] for i in categories) / float(len(categories)), 0
     avg = float(avg) / not_zero
     score = 0.0
     weights = 0.0
@@ -122,7 +124,7 @@ def aggregate_category(fields):
         else:
             weights += weight
             score += cat * weight
-    return sum(i[0] for i in categories) / float(len(categories))
+    return sum(i[0] for i in categories) / float(len(categories)), weights / float(len(categories))
 
 
 def aggregate_l1(fields):
@@ -132,7 +134,7 @@ def aggregate_l1(fields):
         if num == 0:
             num = 1
         nums.append(num)
-    return float(stats.gmean(nums))
+    return round(float(stats.gmean(nums)), 1)
 
 
 def normalize_num(num):
