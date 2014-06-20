@@ -1,6 +1,7 @@
 import sys
 
 from dld.models import Language
+from ld.parsers.endangered_utils import aggregate_category
 
 default_eth_status = 7.7
 na = "n/a"
@@ -44,7 +45,7 @@ def export_to_tsv(ofstream):
               "wp_articles", "wp_total", "wp_edits", "wp_admins", "wp_users",
               "wp_active_users", "wp_images", "wp_depth", "wp_inc",
               "wp_real_articles", "wp_adjusted_size",
-              "eth_status"]
+              "eth_status", "endangered_aggregated_status"]
 
     ofstream.write("#{0}\n".format("\t".join(header)))
 
@@ -120,6 +121,15 @@ def export_to_tsv(ofstream):
             eth_status = float(
                 eth_status.replace("a", "").replace("b", ""))
         data.append(eth_status)
+
+        end_statuses = lang.endangered_levels.all()
+        to_agg = []
+        for es in end_statuses:
+            if es.src == "ethnologue":
+                continue
+            to_agg.append((es.level, es.confidence))
+        end_status, end_conf = aggregate_category(to_agg)
+        data.append(end_status)
 
         ofstream.write("{0}\n".format("\t".join(str(d) for d in data)))
 
