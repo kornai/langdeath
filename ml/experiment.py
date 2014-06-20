@@ -4,7 +4,6 @@ import os
 import subprocess as sub
 import random
 from maxent import MaxentModel
-import maxent
 from math import ceil
 from collections import defaultdict
 from math import log
@@ -144,8 +143,11 @@ def preproc(n, f):
                  'la_oth_res_about_all', 'la_oth_res_about_online', 
                  'la_oth_res_in_all', 'la_oth_res_in_online', 
                  'indi_users', 'indi_posts', 'indi_blogs', 'la_lex_res_all', 
-                 'la_res_about_online', 'la_res_about_all', 'la_res_in_all']):
-        return log(f)
+                 'la_res_about_online', 'la_res_about_all', 'la_res_in_all',
+                 'wp_articles', 'wp_total', 'wp_edits', 'wp_admins', 
+                 'wp_users', 'wp_active_users', 'wp_images', 'wp_depth', 
+                  'wp_real_articles', 'wp_adjusted_size']):
+        return log(f + 1)
     return f
 
 def get_features(ff):
