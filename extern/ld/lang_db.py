@@ -2,7 +2,8 @@ import logging
 import re
 
 from dld.models import normalize_alt_name, Language, Code, Country, \
-    AlternativeName, CountryName, LanguageAltName
+    AlternativeName, CountryName, LanguageAltName, EndangeredLevel, Speaker, \
+    Coordinates
 
 from ld.langdeath_exceptions import LangdeathException
 
@@ -13,7 +14,8 @@ class LanguageDB(object):
     def __init__(self):
         self.languages = []
         self.spec_fields = set(["other_codes", "country", "name", "alt_names",
-                                "champion"])
+                                "champion", "speaker", "speakers",
+                                "endangered_level", "location"])
 
     def add_attr(self, name, data, lang):
         if name in self.spec_fields:
@@ -35,6 +37,12 @@ class LanguageDB(object):
             self.add_alt_name(data, lang)
         elif name == "champion":
             self.add_champion(data, lang)
+        elif name == "endangered_level":
+            self.add_endangered_levels(data, lang)
+        elif name == "speaker" or name == "speakers":
+            self.add_speakers(data, lang)
+        elif name == "location":
+            self.add_location(data, lang)
 
     def add_name(self, data, lang):
         if lang.name == "":
@@ -130,6 +138,33 @@ class LanguageDB(object):
         lang.champion = ch
         ch.save(), lang.save()
 
+    def add_endangered_levels(self, data, lang):
+        for src, level, conf in data:
+            el = EndangeredLevel(src=src[:90], level=level, confidence=conf)
+            el.save()
+            lang.save()
+            lang.endangered_levels.add(el)
+            el.save()
+            lang.save()
+
+    def add_location(self, data, lang):
+        for src, lon, lat in data:
+            c = Coordinates(src=src[:90], longitude=lon, latitude=lat)
+            c.save()
+            lang.save()
+            lang.locations.add(c)
+            c.save()
+            lang.save()
+
+    def add_speakers(self, data, lang):
+        for src, type_, num in data:
+            s = Speaker(src=src[:90], num=num, l_type=type_)
+            s.save()
+            lang.save()
+            lang.speakers.add(s)
+            s.save()
+            lang.save()
+
     def add_new_language(self, lang):
         """Inserts new language to db"""
         if not isinstance(lang, dict):
@@ -151,6 +186,8 @@ class LanguageDB(object):
                             "got non-Language instance as @tgt")
 
         for key in update.iterkeys():
+            if key == "id":
+                continue
             if key.startswith("_"):
                 continue
             try:

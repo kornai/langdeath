@@ -18,10 +18,6 @@ class Language(models.Model):
     champion = models.ForeignKey('Language', blank=True, null=True,
                                  related_name='sublang')
 
-    longitude = models.FloatField(blank=True, null=True)
-    latitude = models.FloatField(blank=True, null=True)
-
-    eth_status = models.CharField(max_length=100, blank=True)
     eth_population = models.IntegerField(blank=True, null=True)
 
     cru_docs = models.IntegerField(blank=True, null=True)
@@ -86,7 +82,10 @@ class Language(models.Model):
                                       through='LanguageAltName',
                                       related_name='lang')
     country = models.ManyToManyField('Country', related_name='lang')
-    speaker = models.ManyToManyField('Speaker', related_name='lang')
+    speakers = models.ManyToManyField('Speaker', related_name='lang')
+    endangered_levels = models.ManyToManyField('EndangeredLevel',
+                                               related_name='Language')
+    locations = models.ManyToManyField('Coordinates', related_name='Language')
 
     def __unicode__(self):
         return u"{0} ({1})".format(self.name, self.sil)
@@ -119,7 +118,20 @@ class LanguageAltName(models.Model):
 class Speaker(models.Model):
     l_type = models.CharField(max_length=2,
                               choices=[("L1", "L1"), ("L2", "L2")])
-    source = models.CharField(max_length=100)
+    src = models.CharField(max_length=1000)
+    num = models.IntegerField(blank=True, null=True)
+
+
+class EndangeredLevel(models.Model):
+    src = models.CharField(max_length=1000)
+    level = models.CharField(max_length=100)
+    confidence = models.FloatField(blank=True, null=True)
+
+
+class Coordinates(models.Model):
+    src = models.CharField(max_length=1000)
+    longitude = models.FloatField(blank=True, null=True)
+    latitude = models.FloatField(blank=True, null=True)
 
 
 class Country(models.Model):

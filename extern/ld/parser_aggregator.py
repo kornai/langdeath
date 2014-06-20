@@ -26,6 +26,7 @@ from ld.parsers.firefox_parser import FirefoxParser
 from ld.parsers.list_of_wikipedia_parser import WikipediaListOfLanguagesParser
 from ld.parsers.wikipedia_incubators_parser import WikipediaIncubatorsParser
 from ld.parsers.wpsize_counter import WikipediaAdjustedSizeCounter
+from ld.parsers.endangered_parser import EndangeredParser
 
 
 class ParserAggregator(object):
@@ -46,10 +47,10 @@ class ParserAggregator(object):
                         WalsInfoParser(), IndigenousParser(),
                         WikipediaListOfLanguagesParser(),
                         WikipediaIncubatorsParser(),
-                        WikipediaAdjustedSizeCounter(wpdumps_dir)]
+                        WikipediaAdjustedSizeCounter(wpdumps_dir),
+                        EndangeredParser(), OmniglotParser(), FirefoxParser(),
+                        SoftwareSupportParser(res_dir)]
         #self.parsers = [OmniglotParser()]
-        #self.parsers = [FirefoxParser()]
-        #self.parsers = [SoftwareSupportParser(res_dir)]
 
         self.parsers_todo = [OmniglotParser(), SoftwareSupportParser(res_dir),
                              FirefoxParser()]
