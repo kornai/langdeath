@@ -7,13 +7,14 @@ from collections import defaultdict
 import re
 import string
 import gzip
+from bz2 import BZ2File
 
 from base_parsers import BaseParser
 
 
 class WikipediaAdjustedSizeCounter(BaseParser):
 
-    def __init__(self, path, basic_limit=2000, entropy_sample_lines=50000):
+    def __init__(self, path='', basic_limit=2000, entropy_sample_lines=50000):
 
         self.numerals = set(string.digits)
         self.punctuation = set(string.punctuation)
@@ -21,10 +22,10 @@ class WikipediaAdjustedSizeCounter(BaseParser):
         self.basic_limit = basic_limit
         self.entropy_sample_lines = entropy_sample_lines
         self.path = path
-        self.name_regex = re.compile('(.*?)wiki')
 
     def compile_regexes(self):
-
+        
+        self.name_regex = re.compile('(.*?)wiki')
         self.title_pattern = re.compile('^%%#PAGE (.*)')
 
     def get_char_counts_of_all(self, data):
@@ -38,7 +39,7 @@ class WikipediaAdjustedSizeCounter(BaseParser):
                         d[ch] += 1
         return d
 
-    def get_char_length_of_real(self, data, min_chars):
+    def count_wp_size_from_lines(self, data, min_chars):
 
         c = 0
         stub_count = 0
@@ -53,20 +54,8 @@ class WikipediaAdjustedSizeCounter(BaseParser):
         return c, article_count, stub_count
 
     def generate_pages(self, data, min_chars):
-
-        page = []
-        for l in data:
-            l = l.strip().decode('utf-8')
-            title_matched = self.title_pattern.match(l)
-            if title_matched is not None:
-                char_counts = sum([len(l) for l in page])
-                yield char_counts > min_chars, page
-                l = title_matched.groups()[0]
-                page = []
-            page.append(l)
-        char_counts = sum([len(l) for l in page])
-        yield char_counts > min_chars, page
-
+         raise NotImplementedError()
+    
     def calculate_entropy(self, values):
 
         sum_ = sum(values)
@@ -87,20 +76,28 @@ class WikipediaAdjustedSizeCounter(BaseParser):
 
     def count_wp_size_from_file(self, data_file, stub_limit):
 
-        f = gzip.open(data_file)
-        c, a, s = self.get_char_length_of_real(f, stub_limit)
+        f = self.file_opener(data_file)
+        c, a, s = self.count_wp_size_from_lines(f, stub_limit)
         f.close()
         return c, a, s
+    
+    def file_opener(self, f):
+        raise NotImplementedError()
 
     def count_entropy_from_file(self, data_file):
 
-        f = gzip.open(data_file)
+        f = self.file_opener(data_file)
         f_sample = self.get_sample(f)
-        d = self.get_char_counts_of_all(f_sample)
+        e, stub_limit = self.count_entropy_from_lines(f_sample)
+        f.close()
+        return e, stub_limit
+
+    def count_entropy_from_lines(self, data):    
+
+        d = self.get_char_counts_of_all(data)
         values = d.values()
         e = self.calculate_entropy(values)
         stub_limit = self.basic_limit/e
-        f.close()
         return e, stub_limit
 
     def count(self, data_file):
@@ -128,11 +125,92 @@ class WikipediaAdjustedSizeCounter(BaseParser):
             yield d
 
 
+class WikipediaAdjustedSizeCounter_AutoParser(WikipediaAdjustedSizeCounter):
+      
+      def file_opener(self, f):
+          return gzip.open(f)
+
+      def generate_pages(self, data, min_chars):
+        
+        page = []
+        for l in data:
+            l = l.strip().decode('utf-8')
+            title_matched = self.title_pattern.match(l)
+            if title_matched is not None:
+                char_counts = sum([len(l) for l in page])
+                yield char_counts > min_chars, page
+                l = title_matched.groups()[0]
+                page = []
+            page.append(l)
+        char_counts = sum([len(l) for l in page])
+        yield char_counts > min_chars, page
+
+
+class WikipediaAdjustedSizeCounter_WPExtractor(WikipediaAdjustedSizeCounter):
+       
+    def file_opener(self, f):
+        return BZ2File(f)
+       
+    def generate_pages(self, data, min_chars):
+
+        page = []
+        for l in data:
+            l = l.strip().decode('utf-8')
+            if l[:6] == '</doc>':
+                char_counts = sum(
+                    [len(filter(lambda x:x != ' ', [c for c in l]))
+                     for l in page])
+                yield char_counts > min_chars, page
+                page = []
+            else:    
+                if l[:8] == '<doc id=' or len(l) == 0:
+                    continue
+                page.append(l) 
+        char_counts = sum([len(l) for l in page])
+        yield char_counts > min_chars, page
+
+
+class WPIncubatorAdjustedSizeCounter(WikipediaAdjustedSizeCounter_WPExtractor):
+
+    def __init__(self, fn, **kwargs):
+        super(WPIncubatorAdjustedSizeCounter, self).__init__(**kwargs)
+        self.fn = fn
+    
+    def count(self, lines):
+        e, stub_limit = self.count_entropy_from_lines(lines)
+        wp_size, article_count, stub_count =\
+                self.count_wp_size_from_lines(lines, stub_limit)
+        adjusted_size = wp_size * e
+        return {'wp_real_articles': article_count,
+                'wp_adjusted_size': adjusted_size}
+    
+    def get_dict_of_data(self):
+        
+        d = defaultdict(list)
+        fh = self.file_opener(self.fn)
+        for is_real, page in self.generate_pages(fh, 0):
+            if len(page) < 2:
+                continue
+            title = page[0]
+            lang = title.split('/')[1]
+            for l in page:
+                d[lang].append(l.encode('utf-8'))
+        return d    
+
+    def parse_all(self, **kwargs):
+
+        lines_dict = self.get_dict_of_data()
+        for lang in lines_dict:
+            lines = lines_dict[lang]
+            d = self.count(lines) 
+            d['wp_code'] = lang
+            yield d
+
 def main():
 
-    path = sys.argv[1]
-    a = WikipediaAdjustedSizeCounter(path)
-    for d in a.parse():
+    fn = sys.argv[1]
+    a = WPIncubatorAdjustedSizeCounter(fn)
+    for d in a.parse_all():
         print d
 
 if __name__ == "__main__":
