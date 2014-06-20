@@ -9,7 +9,7 @@ import csv
 import logging
 import re
 
-from endangered_utils import aggregate_l1
+from endangered_utils import geometric_mean, normalize_number
 
 logging.getLogger().setLevel(logging.DEBUG)
 
@@ -64,7 +64,7 @@ class EndangeredParser(OfflineParser):
 
     def aggregate_numbers(self, d):
         speakers = [i[2] for i in d.get('speakers', [])]
-        aggr = aggregate_l1(speakers)
+        aggr = geometric_mean(speakers)
         d['speakers'].add(('aggregate', 'L1', aggr))
 
     def download_and_parse_csv(self, id_):
@@ -293,8 +293,10 @@ class EndangeredParser(OfflineParser):
                     conf = 0
                 yield (fd, int(conf)), 'endangered_level'
             elif 'data-topic="Speakers"' in stripped:
-                num = stripped.split('<')[-2].split('>')[-1]
-                yield ('L1', num.replace(',', '')), 'speakers'
+                num = stripped.split('<')[-2].split('>')[-1].replace(',', '').lower()
+                num = normalize_number(num)
+                num = num if num > 0 else 1
+                yield ('L1', num), 'speakers'
             elif any(i in stripped for i in self.skip_h5):
                 continue
             else:
