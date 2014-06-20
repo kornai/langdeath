@@ -7,8 +7,9 @@ from HTMLParser import HTMLParser
 import urllib2
 import csv
 import logging
+import re
 
-from endangered_utils import aggregate_category, aggregate_l1
+from endangered_utils import aggregate_l1
 
 logging.getLogger().setLevel(logging.DEBUG)
 
@@ -27,8 +28,11 @@ class EndangeredParser(OfflineParser):
         self.timeout = 2
         self.setup_handlers()
         self.offline_dir = offline_dir
-        self.set_fields = set(['altname', 'dialects', 'family', 'champions', 'scripts', 'places'])
+        self.location_sep_re = re.compile(r'[,;]', re.UNICODE)
+        self.set_fields = set(['altname', 'dialects', 'family', 'other_langs', 'scripts', 'places'])
         self.fields_to_unify = set(['iso_type', 'sil', 'name'])
+        self.to_triplet = set(['endangered_level', 'speakers'])
+        self.multiply_records = set(['location'])
         self.needed_fields_csv = {
             'Codes.code_authorities': 'iso_type',
             'Codes.classification': 'family',
@@ -49,27 +53,19 @@ class EndangeredParser(OfflineParser):
         ])
 
     def parse_all(self):
-        cnt = 0
         for id_ in self.ids:
             logging.debug('Parsing: {0}'.format(id_))
             csv_data = self.download_and_parse_csv(id_)
             html_data = self.download_and_parse_html(id_)
-            html_data['id'] = id_
             d = self.merge_dicts(csv_data, html_data)
             d['id'] = id_
             self.aggregate_numbers(d)
             yield d
-            cnt += 1
-            if cnt > 2:
-                return
 
     def aggregate_numbers(self, d):
-        speakers = [i[1] for i in d.get('speakers', [])]
+        speakers = [i[2] for i in d.get('speakers', [])]
         aggr = aggregate_l1(speakers)
-        d['speakers'].add(('aggregate', aggr))
-        categories = [i[1] for i in d.get('endangered_level', [])]
-        aggr = aggregate_category(categories)
-        d['endangered_level'].add(('aggregate', aggr))
+        d['speakers'].add(('aggregate', 'L1', aggr))
 
     def download_and_parse_csv(self, id_):
         offline_path = path.join(self.offline_dir, id_ + '.csv')
@@ -158,11 +154,16 @@ class EndangeredParser(OfflineParser):
                     tgt[key].add(val)
                 else:
                     tgt[key] |= set(val)
+            elif key in self.to_triplet:
+                tgt[key].add((source, val[0], val[1]))
             elif key in self.fields_to_unify:
                 if type(val) == unicode:
                     to_unify[key].append(val)
                 else:
                     to_unify[key].extend(val)
+            elif key in self.multiply_records:
+                for v in val:
+                    tgt[key].add((source, v[0], v[1]))
             else:
                 tgt[key].add((source, val))
 
@@ -219,9 +220,21 @@ class EndangeredParser(OfflineParser):
                     continue
                 if 'data-topic="Location"' in p:
                     fd = p.split('"Location">')[1].split('</a>')[0].strip()
-                    lang_data[(source, 'location')] = fd
+                    locations = list(self.get_locations_from_field(fd))
+                    lang_data[(source, 'location')] = locations
                 else:
                     logging.debug('Location field not recognized: ' + p.encode('utf8'))
+
+    def get_locations_from_field(self, fd):
+        fd_clean = fd.replace(u'\u200e', '').rstrip('; ').replace('lat :', '').replace('. ', '.')
+        numbers = list(self.location_sep_re.split(fd_clean))
+        for i in range(0, len(numbers), 2):
+            try:
+                lon = float(numbers[i])
+                lat = float(numbers[i + 1])
+                yield float(lon), float(lat)
+            except:
+                logging.warning('Unable to parse location field: ' + fd.encode('utf8'))
 
     def add_by_source(self, lang_data, text):
         try:
@@ -256,7 +269,7 @@ class EndangeredParser(OfflineParser):
                 places = list()
                 for a in field.split('<a')[1:]:
                     l = a.split('Location')[1].split('>')[1].split('</a>')[0].strip()
-                    places.extend([i.strip() for i in l.split(',')])
+                    places.extend([i.strip().replace('</a', '') for i in l.split(',')])
                 if places:
                     yield places, 'places'
 
@@ -281,7 +294,7 @@ class EndangeredParser(OfflineParser):
                 yield (fd, int(conf)), 'endangered_level'
             elif 'data-topic="Speakers"' in stripped:
                 num = stripped.split('<')[-2].split('>')[-1]
-                yield num.replace(',', ''), 'speakers'
+                yield ('L1', num.replace(',', '')), 'speakers'
             elif any(i in stripped for i in self.skip_h5):
                 continue
             else:
