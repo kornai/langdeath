@@ -1,3 +1,4 @@
 */*pyc
+*.pyc
 **/*swp
 langdeath.db.sqlite3
