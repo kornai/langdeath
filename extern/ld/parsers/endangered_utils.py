@@ -1,5 +1,4 @@
 from sys import stderr
-from scipy import stats
 import re
 import math
 
@@ -124,17 +123,22 @@ def aggregate_category(fields):
         else:
             weights += weight
             score += cat * weight
-    return sum(i[0] for i in categories) / float(len(categories)), weights / float(len(categories))
+    return sum(i[0] for i in categories) / float(len(categories)), \
+        weights / float(len(categories))
 
 
-def aggregate_l1(fields):
-    nums = list()
+def aggregate_l1(fields_):
+    fields = list(fields_)
+    s = 0
+    if len(fields) == 0:
+        return 0
     for fd in fields:
         num = normalize_num(fd.strip().lower())
         if num == 0:
             num = 1
-        nums.append(num)
-    return round(float(stats.gmean(nums)), 1)
+        s += math.log(num)
+    s /= len(fields)
+    return round(math.exp(s), 1)
 
 
 def normalize_num(num):
