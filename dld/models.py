@@ -1,6 +1,7 @@
 from django.db import models
 from django.utils import timezone
 
+
 def normalize_alt_name(name):
     remove_punct = name.replace(",", "").replace("(", "")
     remove_punct = remove_punct.replace(")", "")
@@ -10,7 +11,7 @@ def normalize_alt_name(name):
 class Language(models.Model):
     name = models.CharField(max_length=100)
     native_name = models.CharField(max_length=100)
-    sil = models.CharField(max_length=10, unique=True)
+    sil = models.CharField(max_length=20, unique=True)
     last_updated = models.DateTimeField('last updated', default=timezone.now())
     iso_scope = models.CharField(max_length=20, blank=True)
     iso_type = models.CharField(max_length=100, blank=True)
@@ -50,7 +51,13 @@ class Language(models.Model):
     mac_input_partial = models.BooleanField(default=False)
     microsoft_pack = models.BooleanField(default=False)
     win8_input_method = models.BooleanField(default=False)
-    office_if_pack = models.BooleanField(default=False)
+    office13_if_pack = models.BooleanField(default=False)
+    office13_lp = models.BooleanField(default=False)
+    hunspell_status = models.CharField(max_length=100, blank=True)
+    hunspell_coverage = models.FloatField(blank=True, null=True)
+
+    firefox_lpack = models.BooleanField(default=False)
+    firefox_dict = models.BooleanField(default=False)
 
     wals_samples_100 = models.BooleanField(default=False)
     wals_samples_200 = models.BooleanField(default=False)
@@ -60,6 +67,18 @@ class Language(models.Model):
     indi_words = models.IntegerField(blank=True, null=True)
     indi_users = models.IntegerField(blank=True, null=True)
     indi_tweets = models.IntegerField(blank=True, null=True)
+
+    wp_articles = models.IntegerField(blank=True, null=True)
+    wp_total = models.IntegerField(blank=True, null=True)
+    wp_edits = models.IntegerField(blank=True, null=True)
+    wp_admins = models.IntegerField(blank=True, null=True)
+    wp_users = models.IntegerField(blank=True, null=True)
+    wp_active_users = models.IntegerField(blank=True, null=True)
+    wp_images = models.IntegerField(blank=True, null=True)
+    wp_depth = models.IntegerField(blank=True, null=True)
+    wp_inc = models.BooleanField(default=False)
+    wp_real_articles = models.FloatField(blank=True, null=True)
+    wp_adjusted_size = models.FloatField(blank=True, null=True)
 
     # many to many fields
     code = models.ManyToManyField('Code', related_name='codes')

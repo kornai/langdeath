@@ -1,6 +1,8 @@
 import cPickle
 from os import path
 
+from ld.langdeath_exceptions import ParserException
+
 
 class BaseParser(object):
 
@@ -19,19 +21,28 @@ class BaseParser(object):
             lang_data = list(self.parse_all())
             f.write(cPickle.dumps(lang_data))
 
-    def parse_or_load(self, pickle_fn=None):
+    def parse_or_load(self, pickle_fn=None, **kwargs):
         fn = pickle_fn if pickle_fn else self.pickle_fn
         if path.exists(fn):
             with open(fn, 'rb') as f:
-                return cPickle.load(f)
+                for res in cPickle.load(f):
+                    yield res
         else:
-            d = list(self.parse_all())
-            with open(fn, 'wb') as f:
-                f.write(cPickle.dumps(d))
-            return d
+            d = []
+            try:
+                for data in self.parse_all(**kwargs):
+                    yield data
+                    d.append(data)
+                    with open(fn, 'wb') as f:
+                        f.write(cPickle.dumps(d))
+            except ParserException as e:
+                if len(d) > 0:
+                    with open(fn, 'wb') as f:
+                        f.write(cPickle.dumps(d))
+                raise e
 
-    def parse_all(self):
-        yield None
+    def parse_all(self, **kwargs):
+        raise NotImplementedError()
 
 
 class OnlineParser(BaseParser):

@@ -2,12 +2,12 @@ import sys
 import os
 import re
 
-from base_parsers import OnlineParser, OfflineParser
+from base_parsers import OnlineParser, OfflineParser, BaseParser
 from ld.langdeath_exceptions import ParserException
 from utils import get_html
 
 
-class LanguageArchivesBaseParser(object):
+class LanguageArchivesBaseParser(BaseParser):
 
     def __init__(self):
         self.needed_keys = {
@@ -78,6 +78,10 @@ class LanguageArchivesBaseParser(object):
         return [s.strip() for s in res.groups()[0].split(',')]
 
     def parse(self, sil_codes):
+        return self.parse_or_load(sil_codes=sil_codes)
+
+    def parse_all(self, **kwargs):
+        sil_codes = kwargs["sil_codes"]
         errors = []
         for sil in sil_codes:
             try:

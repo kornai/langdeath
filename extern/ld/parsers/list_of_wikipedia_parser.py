@@ -10,6 +10,20 @@ class WikipediaListOfLanguagesParser(OnlineParser):
     def __init__(self):
 
         self.url = 'http://meta.wikimedia.org/wiki/List_of_Wikipedias'
+        self.needed_keys = {
+            "Wiki": "other_codes",
+            "Language": "name",
+            "Language (local)": "native_name",
+            "Articles": "wp_articles",
+            "Total": "wp_total",
+            "Edits": "wp_edits",
+            "Admins": "wp_admins",
+            "Users": "wp_users",
+            "Active Users": "wp_active_users",
+            "Images": "wp_images",
+            "Depth": "wp_depth"
+        }
+        self.numnorm = lambda x: re.compile(",([0-9]{3})").sub("\\1", x)
 
     def generate_rows(self, tabular):
 
@@ -83,11 +97,33 @@ class WikipediaListOfLanguagesParser(OnlineParser):
                 row_dict = self.get_row_dict(column_titles, cells)
                 yield row_dict
 
+    def clean_dict(self, d):
+        cd = {}
+        for k in d:
+            if k not in self.needed_keys:
+                continue
+
+            k2 = self.needed_keys[k]
+            if k2 == "other_codes":
+                cd[k2] = {"wiki": d[k]}
+            if k2 in ["name", "native_name"]:
+                cd[k2] = d[k]
+            if k2.startswith("wp_"):
+                norm = self.numnorm(d[k])
+                try:
+                    cd[k2] = int(norm)
+                except ValueError:
+                    cd[k2] = 0
+        return cd
+
     def parse(self):
 
         html = get_html(self.url)
         for dict_ in self.generate_dictionaries(html):
-            yield dict_
+            cd = self.clean_dict(dict_)
+            if cd["other_codes"]["wiki"] in ["simple", "be-x-old", "arc"]:
+                cd["sil"] = "xxw-{0}".format(cd["other_codes"]["wiki"])
+            yield self.clean_dict(dict_)
 
 
 def main():

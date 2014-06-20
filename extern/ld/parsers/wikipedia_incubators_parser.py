@@ -10,6 +10,7 @@ class WikipediaIncubatorsParser(OnlineParser):
     def __init__(self):
 
         self.url = 'http://incubator.wikimedia.org/wiki/Incubator:Wikis'
+        self.name_pat = re.compile("Wikipedia (.*)(?=\(wp)\(wp/([^\)]*)")
 
     def generate_rows(self, tabular):
 
@@ -99,7 +100,12 @@ class WikipediaIncubatorsParser(OnlineParser):
 
         html = get_html(self.url)
         for dict_ in self.generate_dictionaries(html):
-            yield dict_
+            s = dict_["info page"]
+            m = self.name_pat.search(s)
+            name = m.group(1).strip()
+            inc_code = m.group(2).strip()
+            yield {"name": name, "code": {"wiki_inc": inc_code},
+                   "wp_inc": True}
 
 
 def main():

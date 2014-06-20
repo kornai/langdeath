@@ -21,7 +21,11 @@ from ld.parsers.macro_wp_parser import MacroWPParser
 from ld.parsers.software_support_parser import SoftwareSupportParser
 from ld.parsers.wals_info_parser import WalsInfoParser
 from ld.parsers.indigenous_parser import IndigenousParser
-from ld.parsers.dbpedia_dumps_parser import DbpediaDumpsParser
+from ld.parsers.dbpedia_parser_aggregator import DbpediaParserAggregator
+from ld.parsers.firefox_parser import FirefoxParser
+from ld.parsers.list_of_wikipedia_parser import WikipediaListOfLanguagesParser
+from ld.parsers.wikipedia_incubators_parser import WikipediaIncubatorsParser
+from ld.parsers.wpsize_counter import WikipediaAdjustedSizeCounter
 
 
 class ParserAggregator(object):
@@ -30,23 +34,30 @@ class ParserAggregator(object):
     two langauges (or any other data) that are possibly the same
     """
     def __init__(self, eth_dump_dir='', la_dump_dir='', dbpedia_res_dir='',
-                 res_dir='extern/ld/res'):
+                 wpdumps_dir='', res_dir='extern/ld/res'):
         eth_parser = (EthnologueOnlineParser() if not eth_dump_dir
                       else EthnologueOfflineParser(eth_dump_dir))
         la_parser = (LanguageArchivesOnlineParser() if not la_dump_dir
                      else LanguageArchivesOfflineParser(la_dump_dir))
-        dbpedia_parser = DbpediaDumpsParser(infobox_basedir=dbpedia_res_dir,
-            shortabstract_basedir=dbpedia_res_dir)
+        dbpedia_parser = DbpediaParserAggregator(basedir=dbpedia_res_dir)
 
         self.parsers = [ParseISO639_3(), MacroWPParser(), dbpedia_parser,
                         eth_parser, CrubadanParser(), la_parser,
-                        WalsInfoParser(), IndigenousParser()]
+                        WalsInfoParser(), IndigenousParser(),
+                        WikipediaListOfLanguagesParser(),
+                        WikipediaIncubatorsParser(),
+                        WikipediaAdjustedSizeCounter(wpdumps_dir)]
+        #self.parsers = [OmniglotParser()]
+        #self.parsers = [FirefoxParser()]
+        #self.parsers = [SoftwareSupportParser(res_dir)]
 
-        self.parsers_todo = [OmniglotParser(), SoftwareSupportParser(res_dir)]
+        self.parsers_todo = [OmniglotParser(), SoftwareSupportParser(res_dir),
+                             FirefoxParser()]
         self.lang_db = LanguageDB()
         self.trusted_parsers = set([ParseISO639_3, EthnologueOnlineParser,
                                    EthnologueOfflineParser, CrubadanParser,
-                                   MacroWPParser, DbpediaDumpsParser])
+                                   MacroWPParser, DbpediaParserAggregator,
+                                   WikipediaListOfLanguagesParser])
         self.parsers_needs_sil = set([EthnologueOfflineParser,
                                       EthnologueOnlineParser,
                                       LanguageArchivesOfflineParser,
