@@ -58,7 +58,7 @@ def export_to_tsv(ofstream):
         if len(l1s) == 0:
             l1 = na
         else:
-            l1 = l1s[0].num
+            l1 = sum(l.num for l in l1s) / float(len(l1s))
         data.append(l1)
         l2s = lang.speakers.filter(l_type="L2").all()
         if len(l2s) == 0:
