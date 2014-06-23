@@ -17,7 +17,7 @@ class EthnologueBaseParser(BaseParser):
             'Name': 'name',
             'Country': 'country',
             'Language Status': 'endangered_level',
-            'Population': 'eth_population',
+            'Population': 'speakers',
             'Alternate Names': 'alt_name'
         }
 
@@ -251,7 +251,8 @@ class EthnologueBaseParser(BaseParser):
                             if key == 'Population':
                                 population, ethnic_population = \
                                     self.normalize_population(value)
-                                d[self.needed_keys[key]] = population
+                                value = [("ethnologue", "L1", population)]
+                                d[self.needed_keys[key]] = value
                                 d['eth_ethnic_population'] = ethnic_population
                             elif key == 'Language Status':
                                 value = [("ethnologue",

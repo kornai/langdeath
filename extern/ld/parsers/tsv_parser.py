@@ -27,3 +27,15 @@ class TSV_parser(OfflineParser):
                     for key in true_key:
                         lang[key] = True
                 yield lang
+
+
+class L2Parser(TSV_parser):
+    def __init__(self, fn):
+        super(TSV_parser, self).__init__()
+        self.fn = fn
+
+    def parse(self):
+        field_target = {0: "sil", 1: "speakers"}
+        for res in super(L2Parser, self).parse(self.fn, field_target):
+            res["speakers"] = [("ethnologue", "L2", res["speakers"])]
+            yield res
