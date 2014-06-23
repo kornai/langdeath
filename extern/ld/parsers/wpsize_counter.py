@@ -210,8 +210,8 @@ class WPIncubatorAdjustedSizeCounter(WikipediaAdjustedSizeCounter_WPExtractor):
 
 def main():
 
-    fn = sys.argv[1]
-    a = WPIncubatorAdjustedSizeCounter(fn)
+    dir_ = sys.argv[1]
+    a = WikipediaAdjustedSizeCounter_AutoParser(dir_)
     for d in a.parse():
         print d
 
