@@ -104,7 +104,7 @@ class WikipediaIncubatorsParser(OnlineParser):
             m = self.name_pat.search(s)
             name = m.group(1).strip()
             inc_code = m.group(2).strip()
-            yield {"name": name, "code": {"wiki_inc": inc_code},
+            yield {"name": name, "other_codes": {"wiki_inc": inc_code},
                    "wp_inc": True}
 
 
