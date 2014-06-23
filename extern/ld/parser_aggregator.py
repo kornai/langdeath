@@ -25,7 +25,8 @@ from ld.parsers.dbpedia_parser_aggregator import DbpediaParserAggregator
 from ld.parsers.firefox_parser import FirefoxParser
 from ld.parsers.list_of_wikipedia_parser import WikipediaListOfLanguagesParser
 from ld.parsers.wikipedia_incubators_parser import WikipediaIncubatorsParser
-from ld.parsers.wpsize_counter import WikipediaAdjustedSizeCounter
+from ld.parsers.wpsize_counter import WikipediaAdjustedSizeCounter, \
+    WPIncubatorAdjustedSizeCounter
 from ld.parsers.endangered_parser import EndangeredParser
 from ld.parsers.tsv_parser import L2Parser
 
@@ -36,13 +37,14 @@ class ParserAggregator(object):
     two langauges (or any other data) that are possibly the same
     """
     def __init__(self, eth_dump_dir='', la_dump_dir='', dbpedia_res_dir='',
-                 wpdumps_dir='', res_dir='extern/ld/res'):
+                 wpdumps_dir='', wpinc_dump_fn='', res_dir='extern/ld/res'):
         eth_parser = (EthnologueOnlineParser() if not eth_dump_dir
                       else EthnologueOfflineParser(eth_dump_dir))
         la_parser = (LanguageArchivesOnlineParser() if not la_dump_dir
                      else LanguageArchivesOfflineParser(la_dump_dir))
         dbpedia_parser = DbpediaParserAggregator(basedir=dbpedia_res_dir)
         l2_parser = L2Parser(res_dir + "/" + "ethnologue_l2")
+        wpinc_adj_parser = WPIncubatorAdjustedSizeCounter(wpinc_dump_fn)
 
         self.parsers = [ParseISO639_3(), MacroWPParser(), dbpedia_parser,
                         eth_parser, l2_parser, CrubadanParser(), la_parser,
@@ -51,8 +53,10 @@ class ParserAggregator(object):
                         WikipediaIncubatorsParser(),
                         WikipediaAdjustedSizeCounter(wpdumps_dir),
                         EndangeredParser(), OmniglotParser(), FirefoxParser(),
-                        SoftwareSupportParser(res_dir)]
-        #self.parsers = []
+                        SoftwareSupportParser(res_dir),
+                        wpinc_adj_parser]
+        self.parsers = [WikipediaIncubatorsParser()]
+        self.parsers = [wpinc_adj_parser]
 
         self.parsers_todo = [OmniglotParser(), SoftwareSupportParser(res_dir),
                              FirefoxParser()]
