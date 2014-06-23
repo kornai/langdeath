@@ -132,7 +132,7 @@ def export_to_tsv(ofstream):
         else:
             eth_status = eth_statuses[0].level
             eth_status = float(
-                eth_status.replace("a", "").replace("b", ""))
+                eth_status.replace("a", ".0").replace("b", ".5"))
         data.append(eth_status)
 
         end_statuses = lang.endangered_levels.all()
