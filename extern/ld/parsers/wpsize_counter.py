@@ -11,6 +11,7 @@ from bz2 import BZ2File
 
 from base_parsers import BaseParser
 
+
 class WikipediaAdjustedSizeCounter(BaseParser):
 
     def __init__(self, path='', basic_limit=2000, entropy_sample_lines=50000):
@@ -23,7 +24,7 @@ class WikipediaAdjustedSizeCounter(BaseParser):
         self.path = path
 
     def compile_regexes(self):
-        
+
         self.name_regex = re.compile('(.*?)wiki')
         self.title_pattern = re.compile('^%%#PAGE (.*)')
 
@@ -53,8 +54,8 @@ class WikipediaAdjustedSizeCounter(BaseParser):
         return c, article_count, stub_count
 
     def generate_pages(self, data, min_chars):
-         raise NotImplementedError()
-    
+        raise NotImplementedError()
+
     def calculate_entropy(self, values):
 
         sum_ = sum(values)
@@ -71,7 +72,7 @@ class WikipediaAdjustedSizeCounter(BaseParser):
             i += 1
             if i > self.entropy_sample_lines:
                 return sample
-        return sample    
+        return sample
 
     def count_wp_size_from_file(self, data_file, stub_limit):
 
@@ -79,7 +80,7 @@ class WikipediaAdjustedSizeCounter(BaseParser):
         c, a, s = self.count_wp_size_from_lines(f, stub_limit)
         f.close()
         return c, a, s
-    
+
     def file_opener(self, f):
         raise NotImplementedError()
 
@@ -203,8 +204,8 @@ class WPIncubatorAdjustedSizeCounter(WikipediaAdjustedSizeCounter_WPExtractor):
         lines_dict = self.get_dict_of_data()
         for lang in lines_dict:
             lines = lines_dict[lang]
-            d = self.count(lines) 
-            d['wp_code'] = lang
+            d = self.count(lines)
+            d['other_codes'] = {"wiki_inc": lang}
             yield d
 
 def main():
