@@ -1,7 +1,7 @@
 import sys
 
 from dld.models import Language
-from ld.parsers.endangered_utils import aggregate_category
+from ld.parsers.endangered_utils import aggregate_category, geometric_mean
 
 default_eth_status = 7.7
 na = "n/a"
@@ -54,13 +54,15 @@ def export_to_tsv(ofstream):
 
         data.append(lang.sil)
 
-        l1s = lang.speakers.filter(l_type="L1").all()
+        l1s = [l1 for l1 in lang.speakers.filter(l_type="L1").all()
+               if l1.src != "aggregate" and l1.num is not None]
         if len(l1s) == 0:
             l1 = na
         else:
-            l1 = sum(l.num for l in l1s) / float(len(l1s))
+            l1 = geometric_mean([l.num + 1 for l in l1s])
         data.append(l1)
-        l2s = lang.speakers.filter(l_type="L2").all()
+        l2s = [l2 for l2 in lang.speakers.filter(l_type="L2").all()
+               if l2.src != "aggregate" and l2.num is not None]
         if len(l2s) == 0:
             l2 = na
         else:
