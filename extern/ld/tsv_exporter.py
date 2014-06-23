@@ -27,7 +27,7 @@ def hunspell_status_norm(value):
 
 
 def export_to_tsv(ofstream):
-    header = ["sil", "eth_pop", "cru_docs", "cru_words",
+    header = ["sil", "l1", "l2", "cru_docs", "cru_words",
               "cru_chars", "cru_splchk", "cru_wt", "cru_udhr", "omni",
               "la_primary_texts_online", "la_primary_texts_all",
               "la_lang_descr_online", "la_lang_descr_all",
@@ -54,7 +54,18 @@ def export_to_tsv(ofstream):
 
         data.append(lang.sil)
 
-        data.append(num_norm(lang.eth_population))
+        l1s = lang.speakers.filter(l_type="L1").all()
+        if len(l1s) == 0:
+            l1 = na
+        else:
+            l1 = l1s[0].num
+        data.append(l1)
+        l2s = lang.speakers.filter(l_type="L2").all()
+        if len(l2s) == 0:
+            l2 = na
+        else:
+            l2 = l2s[0].num
+        data.append(l2)
 
         data.append(num_norm(lang.cru_docs))
         data.append(num_norm(lang.cru_words))
