@@ -10,11 +10,10 @@ import gzip
 from bz2 import BZ2File
 
 from base_parsers import BaseParser
-import cPickle
 
 class WikipediaAdjustedSizeCounter(BaseParser):
 
-    def __init__(self, path='', basic_limit=200, entropy_sample_lines=50000):
+    def __init__(self, path='', basic_limit=2000, entropy_sample_lines=50000):
 
         self.numerals = set(string.digits)
         self.punctuation = set(string.punctuation)
@@ -156,18 +155,15 @@ class WikipediaAdjustedSizeCounter_WPExtractor(WikipediaAdjustedSizeCounter):
     def generate_pages(self, data, min_chars):
         page = []
         for l in data:
-            print 159, l
             l = l.strip().decode('utf-8')
             if l[:6] == '</doc>':
-                print 162
                 char_counts = sum(
-                    [len(filter(lambda x:x != ' ', [c for c in l]))
-                     for l in page])
+                    [len(filter(lambda x:x != ' ', [c for c in line]))
+                     for line in page])
                 page.append(l)
                 yield char_counts > min_chars, page
                 page = []
             else:    
-                print 170
                 if l[:8] == '<doc id=' or len(l) == 0:
                     continue
                 page.append(l) 
@@ -206,10 +202,7 @@ class WPIncubatorAdjustedSizeCounter(WikipediaAdjustedSizeCounter_WPExtractor):
 
         lines_dict = self.get_dict_of_data()
         for lang in lines_dict:
-            if lang != 'enm':
-                continue
             lines = lines_dict[lang]
-            print lines
             d = self.count(lines) 
             d['wp_code'] = lang
             yield d
