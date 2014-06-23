@@ -16,7 +16,7 @@ class EthnologueBaseParser(BaseParser):
             'ISO 639-3': 'sil',
             'Name': 'name',
             'Country': 'country',
-            'Language Status': 'eth_status',
+            'Language Status': 'endangered_level',
             'Population': 'eth_population',
             'Alternate Names': 'alt_name'
         }
@@ -254,8 +254,13 @@ class EthnologueBaseParser(BaseParser):
                                 d[self.needed_keys[key]] = population
                                 d['eth_ethnic_population'] = ethnic_population
                             elif key == 'Language Status':
-                                d[self.needed_keys[key]] = \
-                                    self.normalize_lang_status(value)
+                                value = [("ethnologue",
+                                         self.normalize_lang_status(value),
+                                         None)]
+                                if value[0][1] is None:
+                                    continue
+
+                                d[self.needed_keys[key]] = value
                             elif key == "Alternate Names":
                                 value = [s.strip() for s in value.split(",")]
                                 d[self.needed_keys[key]] = value

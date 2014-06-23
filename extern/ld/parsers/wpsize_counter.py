@@ -120,8 +120,9 @@ class WikipediaAdjustedSizeCounter(BaseParser):
         for fn in files:
             f = '{0}/{1}'.format(self.path, fn)
             c = self.name_regex.match(fn).groups()[0]
+            c = c.replace("_", "-")
             d = self.count(f)
-            d['wp_code'] = c
+            d['other_codes'] = {"wiki": c}
             yield d
 
 

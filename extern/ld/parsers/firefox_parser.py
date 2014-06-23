@@ -1,5 +1,6 @@
 from HTMLParser import HTMLParser
 import urllib
+import re
 
 from base_parsers import OnlineParser
 
@@ -49,7 +50,10 @@ class FirefoxHTMLParser(HTMLParser):
     def handle_data(self, text):
         if self.in_tbody:
             if self.in_en_name:
-                self.en_name = text.strip()
+                self.en_name = re.sub(
+                    '(?i)spell(?:ing)?( check(er)?)?( dictionary)?', 
+                    '',
+                    text.strip())
             elif self.in_native:
                 self.native = text.strip()
             elif self.in_software:

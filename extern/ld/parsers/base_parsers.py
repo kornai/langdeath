@@ -33,6 +33,8 @@ class BaseParser(object):
                 for data in self.parse_all(**kwargs):
                     yield data
                     d.append(data)
+                with open(fn, 'wb') as f:
+                    f.write(cPickle.dumps(d))
             except ParserException as e:
                 if len(d) > 0:
                     with open(fn, 'wb') as f:
