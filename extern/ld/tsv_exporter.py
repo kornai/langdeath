@@ -44,7 +44,7 @@ def export_to_tsv(ofstream):
               "indi_tweets", "firefox_lpack", "firefox_dict",
               "wp_articles", "wp_total", "wp_edits", "wp_admins", "wp_users",
               "wp_active_users", "wp_images", "wp_depth", "wp_inc",
-              "wp_real_articles", "wp_adjusted_size",
+              "wp_real_articles", "wp_adjusted_size", "wp_real_ratio",
               "eth_status", "endangered_aggregated_status"]
 
     ofstream.write("#{0}\n".format("\t".join(header)))
@@ -125,6 +125,10 @@ def export_to_tsv(ofstream):
         data.append(bool_norm(lang.wp_inc))
         data.append(num_norm(lang.wp_real_articles))
         data.append(num_norm(lang.wp_adjusted_size))
+        try:
+            data.append(num_norm(lang.wp_real_articles/lang.wp_articles))
+        except TypeError:
+            data.append(na)
 
         eth_statuses = lang.endangered_levels.filter(src="ethnologue").all()
         if len(eth_statuses) == 0:
