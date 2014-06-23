@@ -10,11 +10,11 @@ import gzip
 from bz2 import BZ2File
 
 from base_parsers import BaseParser
-
+import cPickle
 
 class WikipediaAdjustedSizeCounter(BaseParser):
 
-    def __init__(self, path='', basic_limit=2000, entropy_sample_lines=50000):
+    def __init__(self, path='', basic_limit=200, entropy_sample_lines=50000):
 
         self.numerals = set(string.digits)
         self.punctuation = set(string.punctuation)
@@ -48,7 +48,7 @@ class WikipediaAdjustedSizeCounter(BaseParser):
         for is_real, page in self.generate_pages(data, min_chars):
             if is_real is True:
                 article_count += 1
-                c += len(page)
+                c += sum([len(l) for l in page])
             else:
                 stub_count += 1
         return c, article_count, stub_count
@@ -103,6 +103,7 @@ class WikipediaAdjustedSizeCounter(BaseParser):
     def count(self, data_file):
 
         e, stub_limit = self.count_entropy_from_file(data_file)
+        
         wp_size, article_count, stub_count =\
             self.count_wp_size_from_file(data_file, stub_limit)
         adjusted_size = wp_size * e
@@ -153,17 +154,20 @@ class WikipediaAdjustedSizeCounter_WPExtractor(WikipediaAdjustedSizeCounter):
         return BZ2File(f)
        
     def generate_pages(self, data, min_chars):
-
         page = []
         for l in data:
+            print 159, l
             l = l.strip().decode('utf-8')
             if l[:6] == '</doc>':
+                print 162
                 char_counts = sum(
                     [len(filter(lambda x:x != ' ', [c for c in l]))
                      for l in page])
+                page.append(l)
                 yield char_counts > min_chars, page
                 page = []
             else:    
+                print 170
                 if l[:8] == '<doc id=' or len(l) == 0:
                     continue
                 page.append(l) 
@@ -202,7 +206,10 @@ class WPIncubatorAdjustedSizeCounter(WikipediaAdjustedSizeCounter_WPExtractor):
 
         lines_dict = self.get_dict_of_data()
         for lang in lines_dict:
+            if lang != 'enm':
+                continue
             lines = lines_dict[lang]
+            print lines
             d = self.count(lines) 
             d['wp_code'] = lang
             yield d
@@ -211,7 +218,7 @@ def main():
 
     fn = sys.argv[1]
     a = WPIncubatorAdjustedSizeCounter(fn)
-    for d in a.parse_all():
+    for d in a.parse():
         print d
 
 if __name__ == "__main__":
