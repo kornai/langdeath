@@ -27,6 +27,7 @@ from ld.parsers.list_of_wikipedia_parser import WikipediaListOfLanguagesParser
 from ld.parsers.wikipedia_incubators_parser import WikipediaIncubatorsParser
 from ld.parsers.wpsize_counter import WikipediaAdjustedSizeCounter
 from ld.parsers.endangered_parser import EndangeredParser
+from ld.parsers.tsv_parser import L2Parser
 
 
 class ParserAggregator(object):
@@ -41,16 +42,17 @@ class ParserAggregator(object):
         la_parser = (LanguageArchivesOnlineParser() if not la_dump_dir
                      else LanguageArchivesOfflineParser(la_dump_dir))
         dbpedia_parser = DbpediaParserAggregator(basedir=dbpedia_res_dir)
+        l2_parser = L2Parser(res_dir + "/" + "ethnologue_l2")
 
         self.parsers = [ParseISO639_3(), MacroWPParser(), dbpedia_parser,
-                        eth_parser, CrubadanParser(), la_parser,
+                        eth_parser, l2_parser, CrubadanParser(), la_parser,
                         WalsInfoParser(), IndigenousParser(),
                         WikipediaListOfLanguagesParser(),
                         WikipediaIncubatorsParser(),
                         WikipediaAdjustedSizeCounter(wpdumps_dir),
                         EndangeredParser(), OmniglotParser(), FirefoxParser(),
                         SoftwareSupportParser(res_dir)]
-        #self.parsers = [OmniglotParser()]
+        #self.parsers = []
 
         self.parsers_todo = [OmniglotParser(), SoftwareSupportParser(res_dir),
                              FirefoxParser()]
