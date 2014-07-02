@@ -1,9 +1,8 @@
-from base_parsers import OfflineParser
+from base_parsers import OnlineParser
 import re
-import sys
 from utils import get_html
 
-class UnescoAtlasParser(OfflineParser):
+class UnescoAtlasParser(OnlineParser):
 
     def __init__(self, url=
                  'http://www.unesco.org/culture/languages-atlas' +
