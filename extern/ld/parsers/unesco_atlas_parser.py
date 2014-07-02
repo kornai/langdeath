@@ -1,13 +1,15 @@
 from base_parsers import OfflineParser
 import re
 import sys
-
+from utils import get_html
 
 class UnescoAtlasParser(OfflineParser):
 
-    def __init__(self, fn):
+    def __init__(self, url=
+                 'http://www.unesco.org/culture/languages-atlas' +
+                 '/resources/data.php?link=unesco_atlas_languages_limited_dataset.xml'):
 
-        self.fh = open(fn)
+        self.url = url
         self.compile_regexes()
 
     def compile_regexes(self):
@@ -24,8 +26,8 @@ class UnescoAtlasParser(OfflineParser):
     def generate_dictionaries(self):
 
         d = {}
-        l = self.fh.readline()
-        for l in self.fh:
+        html = get_html(self.url)
+        for l in html.split('\n')[1:]:
             if l[:7] in ['<RECORD', '</RECOR']:
                 continue
             category, info = self.html_tag_pattern.match(l).groups()
@@ -44,7 +46,7 @@ class UnescoAtlasParser(OfflineParser):
 
 def main():
 
-    a = UnescoAtlasParser(sys.argv[1])
+    a = UnescoAtlasParser()
     for d in a.parse():
         print d
 
