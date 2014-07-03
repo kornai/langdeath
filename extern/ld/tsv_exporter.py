@@ -1,7 +1,7 @@
 import sys
 
 from dld.models import Language
-from ld.parsers.endangered_utils import aggregate_category
+from ld.parsers.endangered_utils import aggregate_category, geometric_mean
 
 default_eth_status = 7.7
 na = "n/a"
@@ -27,7 +27,7 @@ def hunspell_status_norm(value):
 
 
 def export_to_tsv(ofstream):
-    header = ["sil", "eth_pop", "cru_docs", "cru_words",
+    header = ["sil", "l1", "l2", "cru_docs", "cru_words",
               "cru_chars", "cru_splchk", "cru_wt", "cru_udhr", "omni",
               "la_primary_texts_online", "la_primary_texts_all",
               "la_lang_descr_online", "la_lang_descr_all",
@@ -44,7 +44,7 @@ def export_to_tsv(ofstream):
               "indi_tweets", "firefox_lpack", "firefox_dict",
               "wp_articles", "wp_total", "wp_edits", "wp_admins", "wp_users",
               "wp_active_users", "wp_images", "wp_depth", "wp_inc",
-              "wp_real_articles", "wp_adjusted_size",
+              "wp_real_articles", "wp_adjusted_size", "wp_real_ratio",
               "eth_status", "endangered_aggregated_status"]
 
     ofstream.write("#{0}\n".format("\t".join(header)))
@@ -54,7 +54,20 @@ def export_to_tsv(ofstream):
 
         data.append(lang.sil)
 
-        data.append(num_norm(lang.eth_population))
+        l1s = [l1 for l1 in lang.speakers.filter(l_type="L1").all()
+               if l1.src != "aggregate" and l1.num is not None]
+        if len(l1s) == 0:
+            l1 = na
+        else:
+            l1 = geometric_mean([l.num + 1 for l in l1s])
+        data.append(l1)
+        l2s = [l2 for l2 in lang.speakers.filter(l_type="L2").all()
+               if l2.src != "aggregate" and l2.num is not None]
+        if len(l2s) == 0:
+            l2 = na
+        else:
+            l2 = l2s[0].num
+        data.append(l2)
 
         data.append(num_norm(lang.cru_docs))
         data.append(num_norm(lang.cru_words))
@@ -112,6 +125,10 @@ def export_to_tsv(ofstream):
         data.append(bool_norm(lang.wp_inc))
         data.append(num_norm(lang.wp_real_articles))
         data.append(num_norm(lang.wp_adjusted_size))
+        try:
+            data.append(num_norm(lang.wp_real_articles/lang.wp_articles))
+        except TypeError:
+            data.append(na)
 
         eth_statuses = lang.endangered_levels.filter(src="ethnologue").all()
         if len(eth_statuses) == 0:
@@ -119,7 +136,7 @@ def export_to_tsv(ofstream):
         else:
             eth_status = eth_statuses[0].level
             eth_status = float(
-                eth_status.replace("a", "").replace("b", ""))
+                eth_status.replace("a", ".0").replace("b", ".5"))
         data.append(eth_status)
 
         end_statuses = lang.endangered_levels.all()
