@@ -127,29 +127,6 @@ def train_filtered_models(needed_feats, events):
             filtered_events.append((filtered_c, o))
     return orig_train(filtered_events)
 
-def preproc(n, f):
-
-    if f == 'n/a':
-        return 'n/a'
-    if f == 'True':
-        return 1
-    if f == 'False':
-        return 0
-    f = float(f)
-    if n in set(['eth_pop', 'cru_docs', 'cru_words', 'cru_chars', 
-                 'la_primary_texts_online', 'la_primary_texts_all',
-                 'la_lang_descr_online', 'lang.la_lang_descr_all',
-                 'la_lex_res_online', 'indi_tweets', 'indi_words', 
-                 'la_oth_res_about_all', 'la_oth_res_about_online', 
-                 'la_oth_res_in_all', 'la_oth_res_in_online', 
-                 'indi_users', 'indi_posts', 'indi_blogs', 'la_lex_res_all', 
-                 'la_res_about_online', 'la_res_about_all', 'la_res_in_all',
-                 'wp_articles', 'wp_total', 'wp_edits', 'wp_admins', 
-                 'wp_users', 'wp_active_users', 'wp_images', 'wp_depth', 
-                  'wp_real_articles', 'wp_adjusted_size']):
-        return log(f + 1)
-    return f
-
 def get_features(ff):
 
     features = defaultdict(list)
@@ -159,7 +136,6 @@ def get_features(ff):
         name, feats = l.strip().split('\t')[0], l.strip().split('\t')[1:]
         for i, f in enumerate(feats):
             n = name_dict[i]
-            f = preproc(n, f)
             if f == 'n/a':
                 continue
             features[name].append((n, f))
