@@ -1,165 +1,81 @@
-import re
+import csv
+import json
+
+from utils import get_html
 
 from base_parsers import OnlineParser
 from ld.langdeath_exceptions import ParserException
-from utils import get_html, replace_html_formatting
-
-
-def add_champion(d):
-    c = d['crucode']
-    s = d['sil']
-    if c != s:
-        if len(c) == 2:
-            # WP code, it's okay, no need
-            pass
-        elif len(c) > 3 and "-" in c:
-            d['champion'] = d['sil']
-            d['sil'] = d['crucode']
-        else:
-            d['sil'] = d['crucode']
-    del d['crucode']
-
 
 class CrubadanParser(OnlineParser):
 
     def __init__(self):
-
-        self.url = 'http://borel.slu.edu/crubadan/stadas.html'
-        # keys that we didn't use yet:
-        # Classification, Polluters, Contact(s), Update, Close to
-        self.needed_keys = {
-            'ISO 639-3': "sil",
-            'Name (English)': 'name',
-            'Name (Native)': 'native_name',
-            'Alternate names': 'alt_names',
-            'Docs': 'cru_docs',
-            'Words': 'cru_words',
-            'Characters': 'cru_characters',
-            'Country': 'country',
-            'FLOSS SplChk': 'cru_floss_splchk',
-            'WT': 'cru_watchtower',
-            'UDHR': 'cru_udhr',
-            'Code': 'crucode',
-            'WP': 'other_codes'
+        self.needed_keys = {'m_iso_639_3_code': 'sil',
+                            'name_english': 'name',
+                            'm_bcp_47_code': 'crucode',
+                            'm_documents_crawled': 'cru_docs',
+                            'm_words': 'cru_words',
+                            'm_language_name_native': 'native_name',
+                            'altnames': 'alt_names'
         }
+        url1 = 'http://crubadan.org/writingsystems.csv?sEcho=1&iSortingCols=1&iSortCol_0=0&sSortDir_0=asc'    #nopep8
+        self.script_url = 'http://crubadan.org/writingsystems.csv?sEcho=1&iSortingCols=1&iSortCol_0=4&sSortDir_0=asc&sSearch_4='    #nopep8
+        self.get_scripts(url1)
+ 
+    def get_scripts(self, url1):
+        html = get_html(url1)
+        self.scripts = set([])
+        for relevant_dict in self.get_relevant_dict(html):
+            self.scripts.add(relevant_dict['script'].lower().strip('\n'))
 
-    def generate_rows(self, tabular):
+    def get_relevant_dict(self, html):
+        reader = csv.reader(html.encode('utf-8').split('\n'))
+        line = reader.next()
+        json_i = None
+        for i, h in enumerate(line):
+            if h == 'jsondata':
+                json_i = i
+                break
+        while line:
+            line = reader.next()
+            if line != []:
+                yield json.loads(line[json_i])
 
-        try:
-            pattern = self.get_row_pattern()
-            m = pattern.search(tabular)
-            while m is not None:
-                row, rest = m.groups()
-                yield row
-                m = pattern.search(rest)
-        except Exception as e:
-            raise ParserException(
-                '{0} in CrubadanParser.generate_rows'
-                .format(type(e)))
-
-    def get_tabular(self, html):
-
-        try:
-            pattern = re.compile('<table border.*?>(.*?)</table>', re.DOTALL)
-            m = pattern.search(html)
-            return m.groups()[0]
-        except Exception as e:
-            raise ParserException(
-                '{0} in CrubadanParser.get_tabular'.format(type(e)))
-
-    def split_row(self, row):
-
-        try:
-            row = row.replace('\n', '')
-            row = replace_html_formatting(row)
-            return [item.replace('</td> ', '')
-                    for item in re.split('<td.*?>', row)[1:]]
-        except Exception as e:
-            raise ParserException(
-                '{0} in CrubadanParser.split_row'
-                .format(type(e)))
-
-    def get_row_dict(self, column_titles, cells):
-
-        try:
-            d = {}
-            for i in xrange(len(column_titles)):
-                key = column_titles[i]
-                if key in ["Docs", "Words", "Characters"]:
-                    try:
-                        value = int(cells[i])
-                    except ValueError:
-                        value = None
-                elif key == "Alternate names":
-                    if cells[i] == "-":
-                        value = []
-                    else:
-                        value = [s.strip() for s in cells[i].split(",")]
-                elif key in ["FLOSS SplChk", "WT", "UDHR"]:
-                    v = cells[i]
-                    if v == "-" or v == "no":
-                        value = False
-                    else:
-                        value = True
-                else:
-                    value = (cells[i] if cells[i] != "-" else None)
-                if key == "WP":
-                    if value is None:
-                        # not every language has wp code
-                        continue
-
-                    value = {"wiki": value}
-
-                if key in self.needed_keys:
-                    d[self.needed_keys[key]] = value
-
-            add_champion(d)
-
-            return d
-
-        except Exception as e:
-            raise ParserException(
-                '{0} in CrubadanParser.get_row_dict'
-                .format(type(e)))
-
-    def get_row_pattern(self):
-        return re.compile('<tr>(.*?)</tr>[\n]{0,1}(<tr>.*)', re.DOTALL)
-
-    def strip_header(self, tabular_):
-        pattern = self.get_row_pattern()
-        try:
-            header, rest = pattern.search(tabular_).groups()
-            return header, rest
-        except Exception as e:
-            raise ParserException(
-                '{0} in CrubadanParser.strip_header'
-                .format(type(e)))
-
-    def generate_dictionaries(self, string):
-
-        tabular_ = self.get_tabular(string)
-        headline, tabular = self.strip_header(tabular_)
-        column_titles = self.split_row(headline)
-        for row in self.generate_rows(tabular):
-            cells = self.split_row(row)
-            row_dict = self.get_row_dict(column_titles, cells)
-            yield row_dict
+    def generate_script_dicts(self):
+        for s in self.scripts:
+            html = get_html('{0}{1}'.format(self.script_url, s))
+            for d in self.get_relevant_dict(html):
+                yield d
 
     def parse(self):
-
-        html = get_html(self.url)
-        for dict_ in self.generate_dictionaries(html):
-            if dict_['sil'] == "agp":
-                # it's not real data, duplicated row with wrong sil
-                continue
-            yield dict_
+        for dict_ in self.generate_script_dicts():
+            d = {}
+            for k in dict_:
+                if k not in self.needed_keys:
+                    continue
+                v = dict_[k].strip('\n')
+                if k in ['m_documents_crawled', 'm_words']:
+                    try:
+                        v = int(v)
+                    except:
+                        v = None
+                if k in ['altnames']:
+                    if v == 'None':
+                        v = []
+                    else:
+                        v = [i.strip() for i in v.split(',')]
+                if k in ['m_language_name_native']:
+                    if v == '(Unknown)':
+                        continue
+                d[self.needed_keys[k]] = v
+            yield d    
 
 
 def main():
 
     parser = CrubadanParser()
     for d in parser.parse():
-        print repr(d)
+            print repr(d['native_name'])
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     main()
+
