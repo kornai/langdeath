@@ -55,7 +55,6 @@ class ParserAggregator(object):
                         EndangeredParser(), OmniglotParser(), FirefoxParser(),
                         SoftwareSupportParser(res_dir),
                         wpinc_adj_parser]
-        self.parsers = [WikipediaIncubatorsParser()]
         self.parsers = [wpinc_adj_parser]
 
         self.parsers_todo = [OmniglotParser(), SoftwareSupportParser(res_dir),
@@ -69,6 +68,7 @@ class ParserAggregator(object):
                                       EthnologueOnlineParser,
                                       LanguageArchivesOfflineParser,
                                       LanguageArchivesOnlineParser])
+        self.new_lang_list = []
 
     def run(self):
         for parser in self.parsers:
@@ -96,11 +96,10 @@ class ParserAggregator(object):
                 best = candidates[0]
                 self.lang_db.update_lang_data(best, lang)
             elif len(candidates) == 0:
+                self.new_langs.add(repr(lang)) 
                 if type(self.parser) in self.trusted_parsers:
                     self.lang_db.add_new_language(lang)
                 else:
-                    self.unknown_langs.add(lang['sil'] if 'sil' in lang
-                                           else repr(lang))
                     msg = "{0} parser produced a language with data" \
                         + " {1} that seems to be a new language, but" \
                         + " this parser is not a trusted parser"
@@ -116,7 +115,11 @@ class ParserAggregator(object):
     def call_parser(self, parser):
         c = 0
         self.parser = parser
-        self.unknown_langs = set()
+        self.new_langs = set()
+        if type(self.parser) in self.trusted_parsers:
+             new_lang_label = 'New lang'
+        else:
+            new_lang_label = 'Not found'
         try:
             for lang in self.choose_parse_call(parser)():
                 c += 1
@@ -127,8 +130,10 @@ class ParserAggregator(object):
 
         except ParserException as e:
             logging.exception(e)
-        if len(self.unknown_langs) > 0:
-            logging.error("Unknown_langs: {0}".format(self.unknown_langs))
+        if len(self.new_langs) > 0:
+            logging.error("{0}: {1}, ".format(new_lang_label, len(self.new_langs)))
+        self.new_lang_list.append((type(self.parser), new_lang_label,
+                                   self.new_langs)) 
 
         transaction.commit()
 
@@ -137,6 +142,9 @@ def main():
     logging.basicConfig(level=logging.INFO)
     pa = ParserAggregator(*sys.argv[1:])
     pa.run()
+    import cPickle
+    f = open('new_languages_list', 'w')
+    cPickle.dump(pa.new_lang_list, f)
 
 if __name__ == "__main__":
     main()
