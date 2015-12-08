@@ -69,9 +69,6 @@ class CrubadanParser(OnlineParser):
                 d[self.needed_keys[k]] = v
             yield d    
 
-    def generate_json_lists(self):
-        raise NotImplementedError
-
 
 def main():
 
