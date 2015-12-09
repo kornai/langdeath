@@ -46,7 +46,7 @@ class IndigenousParser(OnlineParser):
         d = {}
         for row in self.get_rows(html):
             # add row data based on header into a dict
-            data = dict([(self.needed_keys[h[i]], row[i]) for i in
+            data = dict([(self.needed_keys[h[i]], row[i].strip()) for i in
                          xrange(len(row) - 1) if h[i] in self.needed_keys])
             #data['code'] = row[-1]
             d[row[-1]] = data
