@@ -18,7 +18,7 @@ class EthnologueBaseParser(BaseParser):
             'Country': 'country',
             'Language Status': 'endangered_level',
             'Population': 'speakers',
-            'Alternate Names': 'alt_name'
+            'Alternate Names': 'alt_names'
         }
 
     def strip_nonstring(self, string):
