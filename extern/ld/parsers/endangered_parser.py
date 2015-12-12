@@ -41,7 +41,7 @@ class EndangeredParser(OfflineParser):
             'Codes.dialect_varieties': 'dialects',
         }
         self.needed_fields_html = {
-            'ALSO KNOWN AS': 'altname',
+            'ALSO KNOWN AS': 'alt_names',
             'LANGUAGE CODE': 'sil',
             'CODE AUTHORITY': 'iso_type',
             'VARIANTS & DIALECTS': 'dialects',
