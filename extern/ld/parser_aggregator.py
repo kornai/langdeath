@@ -66,7 +66,6 @@ class ParserAggregator(object):
                                    WikipediaListOfLanguagesParser])
         self.parsers_needs_sil = set([EthnologueOfflineParser,
                                       EthnologueOnlineParser,
-                                      LanguageArchivesOfflineParser,
                                       LanguageArchivesOnlineParser])
         self.new_lang_list = []
 
