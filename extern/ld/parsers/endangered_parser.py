@@ -41,7 +41,7 @@ class EndangeredParser(OfflineParser):
             'Codes.dialect_varieties': 'dialects',
         }
         self.needed_fields_html = {
-            'ALSO KNOWN AS': 'altname',
+            'ALSO KNOWN AS': 'alt_names',
             'LANGUAGE CODE': 'sil',
             'CODE AUTHORITY': 'iso_type',
             'VARIANTS & DIALECTS': 'dialects',
@@ -58,12 +58,21 @@ class EndangeredParser(OfflineParser):
     def parse_all(self):
         for id_ in self.ids:
             logging.debug('Parsing: {0}'.format(id_))
-            csv_data = self.download_and_parse_csv(id_)
+            #csv_data = self.download_and_parse_csv(id_)
+            csv_data = {}
             html_data = self.download_and_parse_html(id_)
-            d = self.merge_dicts(csv_data, html_data)
-            d['id'] = id_
-            self.aggregate_numbers(d)
+            d = {}
+            for k in html_data:
+                if k[1] == 'sil':
+                    d[k[1]] = ';'.join(html_data[k])
+                else:    
+                    d[k[1]] = html_data[k]
+            d['id'] = id_    
             yield d
+            #d = self.merge_dicts(csv_data, html_data)
+            #d['id'] = id_
+            #self.aggregate_numbers(d)
+            #yield d
 
     def aggregate_numbers(self, d):
         speakers = [i[2] for i in d.get('speakers', [])]
@@ -89,7 +98,8 @@ class EndangeredParser(OfflineParser):
             sleep(self.timeout)
 
     def download_and_parse_html(self, id_):
-        offline_path = path.join(self.offline_dir, id_ + '.html')
+        #offline_path = path.join(self.offline_dir, id_ + '.html')
+        offline_path = path.join(self.offline_dir, id_)
         if path.exists(offline_path):
             with open(offline_path) as f:
                 text = self.html_parser.unescape(f.read().decode('utf8'))
@@ -180,12 +190,13 @@ class EndangeredParser(OfflineParser):
 
     def setup_handlers(self):
         url_fields = [
-            'ALSO KNOWN AS',
+            
             'CLASSIFICATION',
             'ORTHOGRAPHY',
             'ADDITIONAL COMMENTS',
         ]
         simple_fields = [
+            'ALSO KNOWN AS',
             'CODE AUTHORITY',
             'LANGUAGE CODE',
         ]
@@ -211,8 +222,8 @@ class EndangeredParser(OfflineParser):
         lang_sect = filter(lambda x: 'Language metadata' in x,
                            text.split('<section>'))
         lang_data.update(self.get_lang_info(lang_sect[0]))
-        self.add_by_source(lang_data, text)
-        self.add_location_info(lang_data, text)
+        #self.add_by_source(lang_data, text)
+        #self.add_location_info(lang_data, text)
         return lang_data
 
     def add_location_info(self, lang_data, text):
@@ -395,5 +406,7 @@ class EndangeredParser(OfflineParser):
 
 if __name__ == '__main__':
     from sys import argv
-    p = EndangeredParser(argv[1], argv[2])
-    p.parse_or_load()
+    p = EndangeredParser(id_fn=argv[1], offline_dir=argv[2])
+    for d in p.parse_or_load():
+        if 'sil' not in d or len(d['sil'].split(';')) != 1:
+            print d
