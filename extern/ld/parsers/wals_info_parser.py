@@ -14,7 +14,7 @@ class WalsInfoParser(OnlineParser):
             "latitude": "latitude",
             "iso_codes": "sil",
             "name": "name",
-            "ascii_name": "alt_name",
+            "ascii_name": "alt_names",
             "samples_100": "wals_samples_100",
             "samples_200": "wals_samples_200"
         }

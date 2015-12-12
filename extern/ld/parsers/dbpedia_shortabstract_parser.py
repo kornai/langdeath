@@ -61,7 +61,7 @@ class DbpediaShortAbstractsParser(DbpediaNTBaseParser):
         patterns['words_to_remove3'] = \
                 re.compile('|'.join(['([^A-Za-z]|^)' + w + '([^A-Za-z]|$)'
                           for w in words_to_remove_from_pattern3]))
-        patterns['alt_name'] = re.compile(
+        patterns['alt_names'] = re.compile(
             u'(^[\u03df-\u09FF\u0A01-\uffff]+)\s([\u0000-\u03DE]+)$|' +
             u'(^[\u0000-\u03DE]+)\s([\u03df-\u09FF\u0A01-\uffff]+)$')
         patterns['first_filter'] = re.compile(
@@ -123,7 +123,7 @@ class DbpediaShortAbstractsParser(DbpediaNTBaseParser):
                                     '', bracket_string)
             for lang in re.split(self.patterns['splitters'], bracket_string):
                 lang = lang.strip()
-                m = self.patterns['alt_name'].search(lang)
+                m = self.patterns['alt_names'].search(lang)
                 if m is not None:
                     for i in m.groups():
                         if i is not None:
@@ -146,7 +146,7 @@ class DbpediaShortAbstractsParser(DbpediaNTBaseParser):
             abstract = lang["<http://www.w3.org/2000/01/rdf-schema#comment>"][0]
             alternatives = self.parse_alternatives(name, abstract)
             if len(alternatives) > 0:
-                yield {u'name': name, u'altname': alternatives}
+                yield {u'name': name, u'alt_names': alternatives}
 
 
 def main():

@@ -12,7 +12,7 @@ class ParseISO639_3(OnlineParser):
     """
     def __init__(self):
         self.lang_dict = defaultdict(dict)
-        self.url = 'http://www-01.sil.org/iso639-3/iso-639-3_Code_Tables_20140203.zip'  # nopep8
+        self.url = 'http://www-01.sil.org/iso639-3/iso-639-3_Code_Tables_20150505.zip'  # nopep8
 
     def parse(self):
         (iso_zip_filen, headers) = urllib.urlretrieve(self.url)
@@ -45,7 +45,7 @@ class ParseISO639_3(OnlineParser):
         Comment     Comment relating to one or more of the columns
         """
         with self.iso_zip_file.open(
-                self.dir_+'iso-639-3_20140203.tab') as main_iso_file:
+                self.dir_+'iso-639-3_20150505.tab') as main_iso_file:
             for line in main_iso_file:
                 sil_code, part2b, part2t, part1, scope, language_type, \
                     ref_name, comment = line.strip('\n\r').split('\t')
@@ -71,7 +71,7 @@ class ParseISO639_3(OnlineParser):
                     individual code element
         """
         with self.iso_zip_file.open(
-            self.dir_+'iso-639-3-macrolanguages_20140203.tab') as macro_file:
+            self.dir_+'iso-639-3-macrolanguages_20150112.tab') as macro_file:
             for line in macro_file:
                 macro, indiv, stat = line.strip('\n\r').split('\t')
                 if stat == 'R':
@@ -90,7 +90,7 @@ class ParseISO639_3(OnlineParser):
         Inverted_Name     The inverted form of this Print_Name form
         """
         with self.iso_zip_file.open(
-                self.dir_+'iso-639-3_Name_Index_20140203.tab') as name_file:
+                self.dir_+'iso-639-3_Name_Index_20150505.tab') as name_file:
             for line in name_file:
                 sil_code, print_name, inverted_name = \
                     line.strip('\n\r').split('\t')
@@ -114,7 +114,7 @@ class ParseISO639_3(OnlineParser):
         Effective date  Te date the retirement became effective
         """
         with self.iso_zip_file.open(
-                self.dir_+'iso-639-3_Retirements_20140203.tab') as old_code_file:
+                self.dir_+'iso-639-3_Retirements_20150112.tab') as old_code_file:
             for line in old_code_file:
                 old_code,  ref_name, ret_reason, change_to, ret_remedy, \
                     effective = line.strip('\n\r').split('\t')
@@ -128,3 +128,12 @@ class ParseISO639_3(OnlineParser):
                     elif change_to not in self.lang_dict:
                         # data error, lcq --> ppr insted of ppr --> lcq
                         continue
+
+def main():
+
+    a = ParseISO639_3()
+    for d in a.parse():
+        print repr(d)
+
+if __name__ == "__main__":
+    main()
