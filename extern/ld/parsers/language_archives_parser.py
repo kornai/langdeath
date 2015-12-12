@@ -77,11 +77,11 @@ class LanguageArchivesBaseParser(BaseParser):
             return []
         return [s.strip() for s in res.groups()[0].split(',')]
 
-    def parse(self, sil_codes):
-        return self.parse_or_load(sil_codes=sil_codes)
+    def get_sil_codes(**kwargs):
+        raise NotImplementedError()
 
-    def parse_all(self, **kwargs):
-        sil_codes = kwargs["sil_codes"]
+    def parse_all(self):
+        sil_codes = self.get_sil_codes() 
         errors = []
         for sil in sil_codes:
             try:
@@ -117,9 +117,15 @@ class LanguageArchivesOnlineParser(OnlineParser, LanguageArchivesBaseParser):
 
         super(LanguageArchivesOnlineParser, self).__init__()
         self.base_url = 'http://www.language-archives.org/language'
+    
+    def get_sil_codes(self):
+        return self.sil_codes
+
+    def parse(self, sil_codes):
+        self.sil_codes = sil_codes
+        return self.parse_or_load()
 
     def get_html(self, sil):
-
         url = '{0}/{1}'.format(self.base_url, sil)
         return get_html(url)
 
@@ -129,13 +135,15 @@ class LanguageArchivesOfflineParser(OfflineParser, LanguageArchivesBaseParser):
     def __init__(self, basedir):
         super(LanguageArchivesOfflineParser, self).__init__()
         self.basedir = basedir
+        
+    def get_sil_codes(self):
+        return [f for f in os.listdir(self.basedir)] 
+
+    def parse(self):
+        return self.parse_or_load()
 
     def get_html(self, sil, encoding='utf-8'):
-        fn = '{0}/{1}'.format(self.basedir, sil)
-        if os.path.exists(fn):
-            return open(fn).read().decode(encoding)
-        else:
-            raise ParserException()
+        return open('{0}/{1}'.format(self.basedir, sil)).read().decode(encoding)
 
 
 def test_online_parser():
@@ -148,9 +156,8 @@ def test_online_parser():
 
 def test_offline_parser():
 
-    sil_codes = [l.strip('\n').split('\t')[0] for l in sys.stdin]
     parser = LanguageArchivesOfflineParser(sys.argv[1])
-    for d in parser.parse(sil_codes):
+    for d in parser.parse():
         print repr(d)
 
 
