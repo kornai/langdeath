@@ -55,15 +55,13 @@ class ParserAggregator(object):
                         EndangeredParser(), OmniglotParser(), FirefoxParser(),
                         SoftwareSupportParser(res_dir),
                         wpinc_adj_parser]
-        self.parsers = [wpinc_adj_parser]
-
+        self.parsers = [wpinc_adj_parser] 
         self.parsers_todo = [OmniglotParser(), SoftwareSupportParser(res_dir),
                              FirefoxParser()]
         self.lang_db = LanguageDB()
         self.trusted_parsers = set([ParseISO639_3, EthnologueOnlineParser,
                                    EthnologueOfflineParser, CrubadanParser,
-                                   MacroWPParser, DbpediaParserAggregator,
-                                   WikipediaListOfLanguagesParser])
+                                   MacroWPParser])
         self.parsers_needs_sil = set([EthnologueOfflineParser,
                                       EthnologueOnlineParser,
                                       LanguageArchivesOnlineParser])
