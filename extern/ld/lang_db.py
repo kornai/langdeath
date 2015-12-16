@@ -37,7 +37,6 @@ class LanguageDB(object):
             self.add_alt_name(data, lang)
         elif name == "champion":
             self.add_champion(data, lang)
-            pass
         elif name == "endangered_level":
             self.add_endangered_levels(data, lang)
         elif name == "speaker" or name == "speakers":
