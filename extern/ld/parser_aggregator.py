@@ -55,9 +55,7 @@ class ParserAggregator(object):
                         EndangeredParser(), OmniglotParser(), FirefoxParser(),
                         SoftwareSupportParser(res_dir),
                         wpinc_adj_parser]
-        self.parsers = [ParseISO639_3(), MacroWPParser(), eth_parser, l2_parser,
-                        CrubadanParser(),la_parser, WalsInfoParser(), dbpedia_parser]
-
+        self.parsers = [wpinc_adj_parser] 
         self.parsers_todo = [OmniglotParser(), SoftwareSupportParser(res_dir),
                              FirefoxParser()]
         self.lang_db = LanguageDB()
