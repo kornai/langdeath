@@ -91,7 +91,7 @@ class DbpediaShortAbstractsParser(DbpediaNTBaseParser):
             l = l.strip('"')
 
             if l != language and l != '' and len(l.split()) < 4 and\
-               l != '{0} language'.format(language):
+               l != u'{0} language'.format(language):
                 found_langs_2.add(l)
 
         return found_langs_2
