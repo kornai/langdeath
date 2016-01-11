@@ -8,6 +8,12 @@ class SoftwareSupportParser(TSV_parser):
     def __init__(self, resdir):
         self.resdir = resdir
 
+    def get_mapping_dict(self, mapping_fn):
+        self.mapping_dict = {}
+        for l in open(mapping_fn):
+            k, v = l.strip('\n').decode('utf-8').split('\t')
+            self.mapping_dict[k] = v
+
     def parse(self):
         parser = TSV_parser()
         langs = defaultdict(lambda: {'mac_input': False,
@@ -45,7 +51,9 @@ class SoftwareSupportParser(TSV_parser):
                         and not lang['hunspell_coverage']):
 
                     del lang['hunspell_coverage']
-
+                lang['name'] = lang['name'].replace('\t', ' ')    
+                if lang['name'] in self.mapping_dict:
+                    lang['name'] = self.mapping_dict[lang['name']]
                 langs[lang['name']].update(lang)
 
         for lang in langs.itervalues():
