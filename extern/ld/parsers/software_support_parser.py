@@ -7,6 +7,7 @@ from tsv_parser import TSV_parser
 class SoftwareSupportParser(TSV_parser):
     def __init__(self, resdir):
         self.resdir = resdir
+        self.get_mapping_dict('{0}/mappings/sofrware'.format(resdir))
 
     def get_mapping_dict(self, mapping_fn):
         self.mapping_dict = {}
