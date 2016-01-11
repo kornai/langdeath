@@ -7,12 +7,12 @@ from tsv_parser import TSV_parser
 class SoftwareSupportParser(TSV_parser):
     def __init__(self, resdir):
         self.resdir = resdir
-        self.get_mapping_dict('{0}/mappings/sofrware'.format(resdir))
+        self.get_mapping_dict('{0}/mappings/software'.format(resdir))
 
     def get_mapping_dict(self, mapping_fn):
         self.mapping_dict = {}
         for l in open(mapping_fn):
-            k, v = l.strip('\n').decode('utf-8').split('\t')
+            k, v = l.strip().decode('utf-8').split('\t')
             self.mapping_dict[k] = v
 
     def parse(self):
