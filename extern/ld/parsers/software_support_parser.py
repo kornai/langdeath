@@ -41,7 +41,12 @@ class SoftwareSupportParser(TSV_parser):
                  1: 'name',
                  2: 'hunspell_status',
                  3: 'hunspell_coverage'
-             }})
+             }}),
+            ('{0}/ubuntu_pack'.format(self.resdir),
+             {"true_key": ['ubuntu_pack']}),
+            ('{0}/ubuntu_input'.format(self.resdir),
+             {"true_key": ['ubuntu_input']}),
+
         ]
         for args in parameters:
             for lang in parser.parse(args[0], **args[1]):
@@ -56,7 +61,7 @@ class SoftwareSupportParser(TSV_parser):
                 if lang['name'] in self.mapping_dict:
                     lang['name'] = self.mapping_dict[lang['name']]
                 langs[lang['name']].update(lang)
-
+        
         for lang in langs.itervalues():
             yield lang
 

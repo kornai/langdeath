@@ -47,6 +47,8 @@ class Language(models.Model):
     mac_input_partial = models.BooleanField(default=False)
     microsoft_pack = models.BooleanField(default=False)
     win10_input_method = models.BooleanField(default=False)
+    ubuntu_pack = models.BooleanField(default=False)
+    ubuntu_input = models.BooleanField(default=False)
     office13_if_pack = models.BooleanField(default=False)
     office13_lp = models.BooleanField(default=False)
     hunspell_status = models.CharField(max_length=100, blank=True)
