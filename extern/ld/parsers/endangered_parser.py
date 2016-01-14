@@ -11,7 +11,7 @@ import re
 
 from endangered_utils import geometric_mean, normalize_number
 
-logging.getLogger().setLevel(logging.DEBUG)
+logging.getLogger().setLevel(logging.INFO)
 
 
 class EndangeredParser(OfflineParser):
@@ -56,6 +56,7 @@ class EndangeredParser(OfflineParser):
         return self.parse_or_load()
 
     def parse_all(self):
+        print 59
         for id_ in self.ids:
             logging.debug('Parsing: {0}'.format(id_))
             #csv_data = self.download_and_parse_csv(id_)
@@ -222,8 +223,8 @@ class EndangeredParser(OfflineParser):
         lang_sect = filter(lambda x: 'Language metadata' in x,
                            text.split('<section>'))
         lang_data.update(self.get_lang_info(lang_sect[0]))
-        #self.add_by_source(lang_data, text)
-        #self.add_location_info(lang_data, text)
+        self.add_by_source(lang_data, text)
+        self.add_location_info(lang_data, text)
         return lang_data
 
     def add_location_info(self, lang_data, text):
@@ -258,8 +259,8 @@ class EndangeredParser(OfflineParser):
         for sect, source in self.get_sections(part, 1):
             for field, fd_type in self.get_fields_from_subsection(sect):
                 lang_data[(source, fd_type)] = field
-            for field, fd_type in self.get_subfields_from_subsection(sect):
-                lang_data[(source, fd_type)] = field
+            #for field, fd_type in self.get_subfields_from_subsection(sect):
+            #    lang_data[(source, fd_type)] = field
 
     def get_subfields_from_subsection(self, section):
         fields = section.split('<dt')
@@ -406,7 +407,7 @@ class EndangeredParser(OfflineParser):
 
 if __name__ == '__main__':
     from sys import argv
-    p = EndangeredParser(id_fn=argv[1], offline_dir=argv[2])
-    for d in p.parse_or_load():
-        if 'sil' not in d or len(d['sil'].split(';')) != 1:
-            print d
+    #p = EndangeredParser(id_fn=argv[1], offline_dir=argv[2])
+    p = EndangeredParser('/mnt/store/home/pajkossy/endangered/list_of_files', '/mnt/store/home/pajkossy/endangered/')
+    for d in p.parse():
+        print d
