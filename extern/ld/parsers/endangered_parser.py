@@ -29,7 +29,7 @@ class EndangeredParser(OfflineParser):
         self.setup_handlers()
         self.offline_dir = offline_dir
         self.location_sep_re = re.compile(r'[,;]', re.UNICODE)
-        self.set_fields = set(['altname', 'dialects', 'family', 'other_langs', 'scripts', 'places'])
+        self.set_fields = set(['alt_names', 'dialects', 'family', 'other_langs', 'scripts', 'places'])
         self.fields_to_unify = set(['iso_type', 'sil', 'name'])
         self.to_triplet = set(['endangered_level', 'speakers'])
         self.multiply_records = set(['location'])
@@ -56,24 +56,15 @@ class EndangeredParser(OfflineParser):
         return self.parse_or_load()
 
     def parse_all(self):
-        print 59
         for id_ in self.ids:
             logging.debug('Parsing: {0}'.format(id_))
-            #csv_data = self.download_and_parse_csv(id_)
+            csv_data = self.download_and_parse_csv(id_)
             csv_data = {}
             html_data = self.download_and_parse_html(id_)
-            d = {}
-            for k in html_data:
-                if k[1] == 'sil':
-                    d[k[1]] = ';'.join(html_data[k])
-                else:    
-                    d[k[1]] = html_data[k]
-            d['id'] = id_    
+            d = self.merge_dicts(csv_data, html_data)
+            d['id'] = id_
+            self.aggregate_numbers(d)
             yield d
-            #d = self.merge_dicts(csv_data, html_data)
-            #d['id'] = id_
-            #self.aggregate_numbers(d)
-            #yield d
 
     def aggregate_numbers(self, d):
         speakers = [i[2] for i in d.get('speakers', [])]
@@ -162,7 +153,9 @@ class EndangeredParser(OfflineParser):
         return lang_data
 
     def add_values_from_dict(self, src, tgt, to_unify):
+        print tgt
         for (source, key), val in src.iteritems():
+            print key
             if key in self.set_fields:
                 if type(val) == unicode:
                     tgt[key].add(val)
@@ -179,6 +172,7 @@ class EndangeredParser(OfflineParser):
                 for v in val:
                     tgt[key].add((source, v[0], v[1]))
             else:
+                print 174, key, type(key), tgt[key],type(val), val
                 tgt[key].add((source, val))
 
     def add_unifiable_fields(self, data, to_unify):
