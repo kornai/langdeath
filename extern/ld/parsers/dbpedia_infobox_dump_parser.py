@@ -26,10 +26,17 @@ class DbpediaRawInfoboxParser(DbpediaNTBaseParser):
         d['name'] = lang['name']
         lang = dict((k.split("/")[-1].rstrip(">"), v)
                      for k, v in lang.iteritems())
+        if 'glotto' in lang and lang['glotto'] != [u'none']:
+            d['other_codes'] = {}
+            d['other_codes']['glotto'] = ';'.join(sorted(lang['glotto']))
+        if 'linglist' in lang and lang['linglist'] != [u'none']:
+            if 'other_codes' not in d:
+                d['other_codes'] = {}
+            d['other_codes']['linglist'] = ';'.join(sorted(lang['linglist']))
         if (len(lang.get('lc', [])) > 0 and
                 len(lang.get('lc', [])) == len(lang.get('ld', []))):
-
             d['lc_ld'] = zip(lang['lc'], lang['ld'])
+        if 'other_codes' in d or 'lc_ld' in d:
             yield d
 
     def parse(self):

@@ -34,7 +34,10 @@ class WalsInfoParser(OnlineParser):
             sils = [s.strip() for s in cd["sil"].split(",")]
             for sil in sils:
                 new_d = dict(cd)
-                new_d["sil"] = sil
+                if sil != '':
+                    new_d["sil"] = sil
+                else:
+                    del new_d["sil"]
                 yield new_d
 
     def parse(self):
