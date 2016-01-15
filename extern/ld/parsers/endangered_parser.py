@@ -153,9 +153,7 @@ class EndangeredParser(OfflineParser):
         return lang_data
 
     def add_values_from_dict(self, src, tgt, to_unify):
-        print tgt
         for (source, key), val in src.iteritems():
-            print key
             if key in self.set_fields:
                 if type(val) == unicode:
                     tgt[key].add(val)
@@ -172,7 +170,6 @@ class EndangeredParser(OfflineParser):
                 for v in val:
                     tgt[key].add((source, v[0], v[1]))
             else:
-                print 174, key, type(key), tgt[key],type(val), val
                 tgt[key].add((source, val))
 
     def add_unifiable_fields(self, data, to_unify):
@@ -403,5 +400,6 @@ if __name__ == '__main__':
     from sys import argv
     #p = EndangeredParser(id_fn=argv[1], offline_dir=argv[2])
     p = EndangeredParser('/mnt/store/home/pajkossy/endangered/list_of_files', '/mnt/store/home/pajkossy/endangered/')
-    for d in p.parse():
+    for d in p.parse_or_load():
         print d
+        
