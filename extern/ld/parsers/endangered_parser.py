@@ -59,11 +59,10 @@ class EndangeredParser(OfflineParser):
         for id_ in self.ids:
             logging.debug('Parsing: {0}'.format(id_))
             csv_data = self.download_and_parse_csv(id_)
-            csv_data = {}
             html_data = self.download_and_parse_html(id_)
             d = self.merge_dicts(csv_data, html_data)
             d['id'] = id_
-            self.aggregate_numbers(d)
+            #self.aggregate_numbers(d)
             yield d
 
     def aggregate_numbers(self, d):
@@ -400,6 +399,12 @@ if __name__ == '__main__':
     from sys import argv
     #p = EndangeredParser(id_fn=argv[1], offline_dir=argv[2])
     p = EndangeredParser('/mnt/store/home/pajkossy/endangered/list_of_files', '/mnt/store/home/pajkossy/endangered/')
+    #p = EndangeredParser('/home/pajkossy/Proj/langdeath/8556_list', '/mnt/store/home/pajkossy/endangered/')
     for d in p.parse_or_load():
-        print d
+        sil = d['sil']
+        if type(sil) == set:
+            sil = ''.join(list(sil))
+        print d    
+        #if sil == '1ot':
+        #print sil.encode('utf-8') +'\t' + d['name'].encode('utf-8')
         
