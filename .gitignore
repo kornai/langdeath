@@ -2,3 +2,5 @@
 *.pyc
 **/*swp
 langdeath.db.sqlite3
+db.sqlite3
+virtualenv/
