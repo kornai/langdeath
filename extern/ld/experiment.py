@@ -91,16 +91,14 @@ def train_orig_models(c_f, v_f, h_f, m_f, contexts, seed_path):
 
 def get_top_feats(saved_model_file):
 
-    top_feats_set = set([])
     top_feats = []
     p = sub.Popen(['python', 'maxentRig.py', '1000'],stdout=sub.PIPE,
                   stderr=sub.PIPE, stdin=sub.PIPE)
     stdoutdata, stderr = p.communicate(input=open(saved_model_file).read())
     for l in stdoutdata.split('\n'):
         f = l.split('\t')[0]
-        if f not in top_feats_set:
+        if f not in top_feats:
             top_feats.append(f)
-            top_feats_set.add(f)
     return top_feats
 
 
@@ -136,9 +134,8 @@ def get_features(ff):
         name, feats = l.strip().split('\t')[0], l.strip().split('\t')[1:]
         for i, f in enumerate(feats):
             n = name_dict[i]
-            if f == 'n/a':
+            if f == '':
                 continue
-            features[name].append((n, f))
             features[name].append((name_dict[i], float(f)))
     return features
 
@@ -194,6 +191,7 @@ def process_seed(c, v, h, m, ff, seed_path):
 
     m_2, m_3a, m_3b, m_4, e_2 ,e_3a, e_3b, e_4, r_2, r_3a, r_3b, r_4 = \
     train_orig_models(c, v, h, m, features, seed_path)
+    print r_2, r_3a, r_3b, r_4
 
     for t in '2', '3a', '3b', '4':
         res['e_{0}'.format(t)]['all'].append(eval('r_{0}'.format(t)))
@@ -204,7 +202,6 @@ def process_seed(c, v, h, m, ff, seed_path):
     fs_3a = get_top_feats('{0}/models/3a_class'.format(seed_path))
     fs_3b = get_top_feats('{0}/models/3b_class'.format(seed_path))
     fs_4 = get_top_feats('{0}/models/4_class'.format(seed_path))
-
     for i in 'fs_2', 'fs_3a', 'fs_3b', 'fs_4':
         write_items(eval(i)[:18], '{0}/selected_feats/{1}_class_sel'
                     .format(seed_path, i[3:]))
@@ -215,7 +212,7 @@ def process_seed(c, v, h, m, ff, seed_path):
                 m, r = train_filtered_models(set(eval(fset_name)
                                                  [:eval(count_name)]),
                                               eval(task_name))
-
+                print r, task_name, fset_name, count_name
                 label(m, langs, features,
                       '{0}/labelings/{1}_class_{2}_from_{3}_sel'.format(
                         seed_path, task_name[2:], count_name, fset_name[3:]))
@@ -231,8 +228,8 @@ def random_select_seed_2(c_f, v_f, h_f, m_f):
     random.shuffle(m_f)
     c = sorted(c_f[:10])
     c_2 = sorted(c_f[11:])
-    h = sorted(h_f[:9])
-    h_2 = sorted(h_f[10:])
+    h = sorted(h_f[:8])
+    h_2 = sorted(h_f[9:])
     v = sorted(v_f[:40])
     v_2 = sorted(v_f[40:])
     m = sorted(m_f[:75])

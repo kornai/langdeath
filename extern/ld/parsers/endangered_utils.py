@@ -89,6 +89,7 @@ date_after_re = re.compile(r'^~?\s*(\d+)\s*\(', re.UNICODE)
 num_re = re.compile(r'^~?\s*(\d+)\??\+?$', re.UNICODE)
 
 category_map = {
+    'Safe': 8,
     'At risk': 6,
     'Vulnerable': 5,
     'Threatened': 4,
@@ -110,7 +111,7 @@ def aggregate_category(fields):
         if not int(conf) == 0:
             not_zero += 1
     if len(fields) == 0:
-        return 0, 0
+        return 'n/a', 'n/a'
     if not_zero == 0:
         return sum(i[0] for i in categories) / float(len(categories)), 0
     avg = float(avg) / not_zero
