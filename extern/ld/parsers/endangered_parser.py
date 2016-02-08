@@ -397,14 +397,5 @@ class EndangeredParser(OfflineParser):
 
 if __name__ == '__main__':
     from sys import argv
-    #p = EndangeredParser(id_fn=argv[1], offline_dir=argv[2])
-    p = EndangeredParser('/mnt/store/home/pajkossy/endangered/list_of_files', '/mnt/store/home/pajkossy/endangered/')
-    #p = EndangeredParser('/home/pajkossy/Proj/langdeath/8556_list', '/mnt/store/home/pajkossy/endangered/')
-    for d in p.parse_or_load():
-        sil = d['sil']
-        if type(sil) == set:
-            sil = ''.join(list(sil))
-        print d    
-        #if sil == '1ot':
-        #print sil.encode('utf-8') +'\t' + d['name'].encode('utf-8')
-        
+    p = EndangeredParser(id_fn=argv[1], offline_dir=argv[2])
+    p.parse_or_load()
