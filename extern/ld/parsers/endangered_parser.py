@@ -11,7 +11,7 @@ import re
 
 from endangered_utils import geometric_mean, normalize_number
 
-logging.getLogger().setLevel(logging.DEBUG)
+logging.getLogger().setLevel(logging.INFO)
 
 
 class EndangeredParser(OfflineParser):
@@ -29,7 +29,7 @@ class EndangeredParser(OfflineParser):
         self.setup_handlers()
         self.offline_dir = offline_dir
         self.location_sep_re = re.compile(r'[,;]', re.UNICODE)
-        self.set_fields = set(['altname', 'dialects', 'family', 'other_langs', 'scripts', 'places'])
+        self.set_fields = set(['alt_names', 'dialects', 'family', 'other_langs', 'scripts', 'places'])
         self.fields_to_unify = set(['iso_type', 'sil', 'name'])
         self.to_triplet = set(['endangered_level', 'speakers'])
         self.multiply_records = set(['location'])
@@ -62,7 +62,7 @@ class EndangeredParser(OfflineParser):
             html_data = self.download_and_parse_html(id_)
             d = self.merge_dicts(csv_data, html_data)
             d['id'] = id_
-            self.aggregate_numbers(d)
+            #self.aggregate_numbers(d)
             yield d
 
     def aggregate_numbers(self, d):
@@ -89,7 +89,8 @@ class EndangeredParser(OfflineParser):
             sleep(self.timeout)
 
     def download_and_parse_html(self, id_):
-        offline_path = path.join(self.offline_dir, id_ + '.html')
+        #offline_path = path.join(self.offline_dir, id_ + '.html')
+        offline_path = path.join(self.offline_dir, id_)
         if path.exists(offline_path):
             with open(offline_path) as f:
                 text = self.html_parser.unescape(f.read().decode('utf8'))
@@ -180,12 +181,13 @@ class EndangeredParser(OfflineParser):
 
     def setup_handlers(self):
         url_fields = [
-            'ALSO KNOWN AS',
+            
             'CLASSIFICATION',
             'ORTHOGRAPHY',
             'ADDITIONAL COMMENTS',
         ]
         simple_fields = [
+            'ALSO KNOWN AS',
             'CODE AUTHORITY',
             'LANGUAGE CODE',
         ]
@@ -247,8 +249,8 @@ class EndangeredParser(OfflineParser):
         for sect, source in self.get_sections(part, 1):
             for field, fd_type in self.get_fields_from_subsection(sect):
                 lang_data[(source, fd_type)] = field
-            for field, fd_type in self.get_subfields_from_subsection(sect):
-                lang_data[(source, fd_type)] = field
+            #for field, fd_type in self.get_subfields_from_subsection(sect):
+            #    lang_data[(source, fd_type)] = field
 
     def get_subfields_from_subsection(self, section):
         fields = section.split('<dt')
@@ -395,5 +397,5 @@ class EndangeredParser(OfflineParser):
 
 if __name__ == '__main__':
     from sys import argv
-    p = EndangeredParser(argv[1], argv[2])
+    p = EndangeredParser(id_fn=argv[1], offline_dir=argv[2])
     p.parse_or_load()
