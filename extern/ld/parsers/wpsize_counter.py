@@ -194,6 +194,9 @@ class WPIncubatorAdjustedSizeCounter(WikipediaAdjustedSizeCounter_WPExtractor):
             if len(page) < 2:
                 continue
             title = page[0]
+            type_ = title.split('/')[0]
+            if type_ != 'Wp':
+                continue
             lang = title.split('/')[1]
             for l in page:
                 d[lang].append(l.encode('utf-8'))
