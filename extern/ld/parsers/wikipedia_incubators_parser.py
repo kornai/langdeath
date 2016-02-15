@@ -75,7 +75,7 @@ class WikipediaIncubatorsParser(OnlineParser):
                 .format(type(e)))
 
     def get_wp_tabular(self, tabular_):
-        pattern = re.compile('<span class=.*?>Wikipedia</span>.*?(<td.*?)' +
+        pattern = re.compile('<span class=.*?>Wikipedia</span>.*?(<tr.*?)' +
                              '<tr>[\n]{0,1}<td.*?editsection', re.DOTALL)
         try:
             wp_tabular = pattern.search(tabular_).groups()[0]
