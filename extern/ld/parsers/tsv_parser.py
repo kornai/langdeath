@@ -46,7 +46,7 @@ class EthnologueDumpParser(TSV_parser):
     def __init__(self, fn):
         super(TSV_parser, self).__init__()
         self.fn = fn
-
+    
     def parse(self):
         field_target = {0: "sil", 1: "name", 4: "country", 8: "speakers",
                         15: "endangered_level"}
@@ -66,7 +66,7 @@ def main():
 
      a =  EthnologueDumpParser(sys.argv[1])
      for d in a.parse():
-         print repr(d)
+         pass
 
 if __name__ == '__main__':
     main()
