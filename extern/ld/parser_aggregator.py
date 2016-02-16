@@ -28,7 +28,7 @@ from ld.parsers.wikipedia_incubators_parser import WikipediaIncubatorsParser
 from ld.parsers.wpsize_counter import WikipediaAdjustedSizeCounter, \
     WPIncubatorAdjustedSizeCounter
 from ld.parsers.endangered_parser import EndangeredParser
-from ld.parsers.tsv_parser import L2Parser
+from ld.parsers.tsv_parser import L2Parser, EthnologueDumpParser
 
 
 class ParserAggregator(object):
@@ -38,8 +38,7 @@ class ParserAggregator(object):
     """
     def __init__(self, eth_dump_dir='', la_dump_dir='', dbpedia_res_dir='',
                  wpdumps_dir='', wpinc_dump_fn='', res_dir='extern/ld/res'):
-        eth_parser = (EthnologueOnlineParser() if not eth_dump_dir
-                      else EthnologueOfflineParser(eth_dump_dir))
+        eth_parser = EthnologueDumpParser(eth_dump_dir)
         la_parser = (LanguageArchivesOnlineParser() if not la_dump_dir
                      else LanguageArchivesOfflineParser(la_dump_dir))
         dbpedia_parser = DbpediaParserAggregator(basedir=dbpedia_res_dir)
@@ -56,7 +55,7 @@ class ParserAggregator(object):
                         EndangeredParser(), OmniglotParser(), FirefoxParser(firefox_mapping),
                         SoftwareSupportParser(res_dir),
                         wpinc_adj_parser]
-        self.parsers = [wpinc_adj_parser] 
+        self.parsers = [wpinc_adj_parser]
         self.parsers_todo = [OmniglotParser(), SoftwareSupportParser(res_dir),
                              FirefoxParser(firefox_mapping)]
         self.lang_db = LanguageDB()

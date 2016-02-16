@@ -1,5 +1,5 @@
 from base_parsers import OfflineParser
-
+import sys
 
 class TSV_parser(OfflineParser):
     def parse(self, filen, field_target=None, true_key=None, encoding="utf-8"):
@@ -39,3 +39,36 @@ class L2Parser(TSV_parser):
         for res in super(L2Parser, self).parse(self.fn, field_target):
             res["speakers"] = [("ethnologue", "L2", res["speakers"])]
             yield res
+
+
+class EthnologueDumpParser(TSV_parser):
+
+    def __init__(self, fn):
+        super(TSV_parser, self).__init__()
+        self.fn = fn
+    
+    def parse(self):
+        field_target = {0: "sil", 1: "name", 4: "country", 8: "speakers",
+                        15: "endangered_level"}
+        header = True
+        for res in super(EthnologueDumpParser, self).parse(
+            self.fn, field_target):
+            if header:
+                header = False
+                continue
+            res["speakers"] = [("ethnologue", "L1", res["speakers"] if
+                                res["speakers"] != '' else 0)]
+            res["endangered_level"] = [("ethnologue", res["endangered_level"],
+                                        None)]
+            yield res
+
+def main():
+
+     a =  EthnologueDumpParser(sys.argv[1])
+     for d in a.parse():
+         pass
+
+if __name__ == '__main__':
+    main()
+         
+
