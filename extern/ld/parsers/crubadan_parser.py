@@ -11,11 +11,14 @@ class CrubadanParser(OnlineParser):
     def __init__(self):
         self.needed_keys = {'m_iso_639_3_code': 'sil',
                             'name_english': 'name',
-                            'm_bcp_47_code': 'crucode',
+                            'm_bcp_47_code': 'other_codes',
                             'm_documents_crawled': 'cru_docs',
                             'm_words': 'cru_words',
                             'm_language_name_native': 'native_name',
-                            'altnames': 'alt_names'
+                            'altnames': 'alt_names',
+                            'watchtower': 'cru_watchtower',
+                            'udhr': 'cru_udhr',
+                            'speller': 'cru_floss_splchk'
         }
         url1 = 'http://crubadan.org/writingsystems.csv?sEcho=1&iSortingCols=1&iSortCol_0=0&sSortDir_0=asc'    #nopep8
         self.script_url = 'http://crubadan.org/writingsystems.csv?sEcho=1&iSortingCols=1&iSortCol_0=4&sSortDir_0=asc&sSearch_4='    #nopep8
@@ -66,6 +69,13 @@ class CrubadanParser(OnlineParser):
                 if k in ['m_language_name_native']:
                     if v == '(Unknown)':
                         continue
+                if k in ['watchtower', 'udhr', 'speller']:    
+                    if v in ['(Unknown)', '-', 'no']:
+                        v = False
+                    else:
+                        v = True
+                if k == 'm_bcp_47_code':        
+                    v = {'bcp_47': v}
                 d[self.needed_keys[k]] = v
             yield d    
 
@@ -74,7 +84,8 @@ def main():
 
     parser = CrubadanParser()
     for d in parser.parse():
-            print repr(d['native_name'])
+        print repr(d)
+            #print repr(d['native_name'])
 
 if __name__ == '__main__':
     main()
