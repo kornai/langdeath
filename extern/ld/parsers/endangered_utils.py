@@ -178,8 +178,6 @@ def normalize_number(num):
             return math.floor(0.9 * n)
         elif g[0] == '>':
             return math.floor(1.1 * n)
-        else:
-            print num, 'H'
     if num.strip().lower() in zeros:
         return 1
     elif num.strip().lower() in unknown:
@@ -198,8 +196,6 @@ def normalize_number(num):
             return math.floor(0.9 * n)
         elif g[0] == '>':
             return math.floor(1.1 * n)
-        else:
-            print num, 'K'
     elif 'few dozen' in num:
         return 30
     elif 'few hundred' in num:
@@ -225,8 +221,6 @@ def normalize_number(num):
             return math.floor(0.9 * n)
         elif g[0] == '>':
             return math.floor(1.1 * n)
-        else:
-            print num, 'M'
     else:
         stderr.write('Unmatched {0}\n'.format(num.encode('utf8')))
 
