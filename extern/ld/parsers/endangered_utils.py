@@ -85,9 +85,10 @@ few = set([
     'few signers',
 ])
 interval_re = re.compile(ur'~?(\d+)\s*[-\u2013]\s*(\d+)', re.UNICODE)
-date_after_re = re.compile(r'^~?\s*(\d+)\s*\(', re.UNICODE)
-num_re = re.compile(r'^~?\s*(\d+)\??\+?$', re.UNICODE)
-
+date_after_re = re.compile(r'^(~|(>|<))?\s*(\d+)\s*\(', re.UNICODE)
+num_re = re.compile(r'^(~|(>|<))?\s*(\d+)\??\+?$', re.UNICODE)
+one_number_in_line_re = re.compile(
+    r'^[^0-9]*?(~|(>|<))?\s*(\d+)\??\+?[^0-9]*$', re.UNICODE)
 category_map = {
     'Safe': 8,
     'At risk': 6,
@@ -153,10 +154,19 @@ def geometric_mean(numbers):
 
 
 def normalize_number(num):
+    
     if num_re.match(num):
-        n = int(num_re.match(num).group(1))
-        return n if n > 0 else 1
-    elif num.strip().lower() in zeros:
+        g = num_re.match(num).groups()
+        n = int(g[2])
+        if g[0] in [None, '~']:
+            return n if n > 0 else 1
+        elif g[0] == '<':
+            return math.floor(0.9 * n)
+        elif g[0] == '>':
+            return math.floor(1.1 * n)
+        else:
+            print num, 'H'
+    if num.strip().lower() in zeros:
         return 1
     elif num.strip().lower() in unknown:
         return 30
@@ -166,7 +176,16 @@ def normalize_number(num):
         m = interval_re.match(num)
         return geometric_mean2(int(m.group(1)), int(m.group(2)))
     elif date_after_re.match(num):
-        return int(date_after_re.match(num).group(1))
+        g = date_after_re.match(num).groups()
+        n = int(g[2])
+        if g[0] in [None, '~']:
+            return n if n > 0 else 1
+        elif g[0] == '<':
+            return math.floor(0.9 * n)
+        elif g[0] == '>':
+            return math.floor(1.1 * n)
+        else:
+            print num, 'K'
     elif 'few dozen' in num:
         return 30
     elif 'few hundred' in num:
@@ -183,9 +202,28 @@ def normalize_number(num):
         return 5
     elif num in speaker_num_map:
         return speaker_num_map[num]
+    elif one_number_in_line_re.match(num):
+        g = one_number_in_line_re.match(num).groups()
+        n = int(g[2])
+        if g[0] in [None, '~']:
+            return n if n > 0 else 1
+        elif g[0] == '<':
+            return math.floor(0.9 * n)
+        elif g[0] == '>':
+            return math.floor(1.1 * n)
+        else:
+            print num, 'M'
     else:
         stderr.write('Unmatched {0}\n'.format(num.encode('utf8')))
 
 
 def geometric_mean2(n1, n2):
     return math.sqrt(n1 * n2)
+
+def main():
+    import sys
+    for l in open(sys.argv[1]):
+        print '{}\t{}'.format(l.strip(), normalize_number(l.strip()))
+
+if __name__ == '__main__':
+            main()
