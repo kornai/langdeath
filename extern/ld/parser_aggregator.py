@@ -25,7 +25,7 @@ from ld.parsers.dbpedia_parser_aggregator import DbpediaParserAggregator
 from ld.parsers.firefox_parser import FirefoxParser
 from ld.parsers.list_of_wikipedia_parser import WikipediaListOfLanguagesParser
 from ld.parsers.wikipedia_incubators_parser import WikipediaIncubatorsParser
-from ld.parsers.wpsize_counter import WikipediaAdjustedSizeCounter, \
+from ld.parsers.wpsize_counter import WikipediaAdjustedSizeCounter_WPExtractor, \
     WPIncubatorAdjustedSizeCounter
 from ld.parsers.endangered_parser import EndangeredParser
 from ld.parsers.tsv_parser import L2Parser, EthnologueDumpParser
@@ -53,7 +53,7 @@ class ParserAggregator(object):
                         WalsInfoParser(), IndigenousParser(),
                         WikipediaListOfLanguagesParser(),
                         WikipediaIncubatorsParser(),
-                        WikipediaAdjustedSizeCounter(wpdumps_dir),
+                        WikipediaAdjustedSizeCounter_WPExtractor(wpdumps_dir),
                         endangered_parser, OmniglotParser(),
                         FirefoxParser(firefox_mapping),
                         SoftwareSupportParser(res_dir), wpinc_adj_parser]
