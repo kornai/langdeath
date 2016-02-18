@@ -220,7 +220,7 @@ class EndangeredParser(OfflineParser):
         lang_sect = filter(lambda x: 'Language metadata' in x,
                            text.split('<section>'))
         lang_data.update(self.get_lang_info(lang_sect[0]))
-        self.add_by_source(lang_data, text, lang_data[('html', 'name')])
+        self.add_by_source(lang_data, text)
         self.add_location_info(lang_data, text)
         return lang_data
 
@@ -252,7 +252,7 @@ class EndangeredParser(OfflineParser):
                 logging.warning('Unable to parse location field: '\
                                 + fd.encode('utf8'))
 
-    def add_by_source(self, lang_data, text, name):
+    def add_by_source(self, lang_data, text):
         try:
             part = text.split(
                 '<h4>Language information by source')[1].split(
@@ -260,7 +260,7 @@ class EndangeredParser(OfflineParser):
         except IndexError:
             return
         for sect, source in self.get_sections(part, 1):
-            for field, fd_type in self.get_fields_from_subsection(sect, name):
+            for field, fd_type in self.get_fields_from_subsection(sect):
                 lang_data[(source, fd_type)] = field
             #for field, fd_type in self.get_subfields_from_subsection(sect):
             #    lang_data[(source, fd_type)] = field
@@ -302,7 +302,7 @@ class EndangeredParser(OfflineParser):
                 '</p>').lstrip(u'\u201c').strip()
             yield section, source
 
-    def get_fields_from_subsection(self, section, name):
+    def get_fields_from_subsection(self, section):
         
         if '<ul' not in section:
             return
