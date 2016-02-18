@@ -25,7 +25,7 @@ from ld.parsers.dbpedia_parser_aggregator import DbpediaParserAggregator
 from ld.parsers.firefox_parser import FirefoxParser
 from ld.parsers.list_of_wikipedia_parser import WikipediaListOfLanguagesParser
 from ld.parsers.wikipedia_incubators_parser import WikipediaIncubatorsParser
-from ld.parsers.wpsize_counter import WikipediaAdjustedSizeCounter, \
+from ld.parsers.wpsize_counter import WikipediaAdjustedSizeCounter_WPExtractor, \
     WPIncubatorAdjustedSizeCounter
 from ld.parsers.endangered_parser import EndangeredParser
 from ld.parsers.tsv_parser import L2Parser, EthnologueDumpParser
@@ -37,7 +37,8 @@ class ParserAggregator(object):
     two langauges (or any other data) that are possibly the same
     """
     def __init__(self, eth_dump_dir='', la_dump_dir='', dbpedia_res_dir='',
-                 wpdumps_dir='', wpinc_dump_fn='', res_dir='extern/ld/res'):
+                 wpdumps_dir='', wpinc_dump_fn='', res_dir='extern/ld/res',
+                 endangered_dump_dir=''):
         eth_parser = EthnologueDumpParser(eth_dump_dir)
         la_parser = (LanguageArchivesOnlineParser() if not la_dump_dir
                      else LanguageArchivesOfflineParser(la_dump_dir))
@@ -45,16 +46,17 @@ class ParserAggregator(object):
         l2_parser = L2Parser(res_dir + "/" + "ethnologue_l2")
         wpinc_adj_parser = WPIncubatorAdjustedSizeCounter(wpinc_dump_fn)
         firefox_mapping = '{0}/mappings/firefox'.format(res_dir)
-
+        endangered_parser = EndangeredParser('{}/list_of_ids'.format(
+            endangered_dump_dir), endangered_dump_dir)
         self.parsers = [ParseISO639_3(), MacroWPParser(), dbpedia_parser,
                         eth_parser, l2_parser, CrubadanParser(), la_parser,
                         WalsInfoParser(), IndigenousParser(),
                         WikipediaListOfLanguagesParser(),
                         WikipediaIncubatorsParser(),
-                        WikipediaAdjustedSizeCounter(wpdumps_dir),
-                        EndangeredParser(), OmniglotParser(), FirefoxParser(firefox_mapping),
-                        SoftwareSupportParser(res_dir),
-                        wpinc_adj_parser]
+                        WikipediaAdjustedSizeCounter_WPExtractor(wpdumps_dir),
+                        endangered_parser, OmniglotParser(),
+                        FirefoxParser(firefox_mapping),
+                        SoftwareSupportParser(res_dir), wpinc_adj_parser]
         self.parsers = [wpinc_adj_parser]
         self.parsers_todo = [OmniglotParser(), SoftwareSupportParser(res_dir),
                              FirefoxParser(firefox_mapping)]

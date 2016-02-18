@@ -54,6 +54,13 @@ speaker_num_map = {
     'not available': 30,
     '47800 in greenland (1995 m. krauss). 3000 east greenlandic 44000 west greenlandic 800 north greenlandic. population total all countries: 57800': 57800,
     '5800. 725 monolinguals (1990 census). ethnic population: 6300': 6300,
+    'one or two thousand': 1500,
+    'a couple hundred': 400,
+    'only in the hundreds': 200,
+    'language with less than ten speakers or only rememberers':8,
+    'many adults': 50,
+    '3.132': 3132
+
 }
 zeros = set([
     'no known l1 speakers',
@@ -67,6 +74,10 @@ zeros = set([
     'unlikely any speakers remain',
     '"unlikely that any speakers remain."',
     '0 extinct',
+    'no fully competent speakers.',
+    'obsolescent',
+    'obsolescent (i.e. no longer spoken' +\
+    'as an everyday language but a few speakers remember it)'
 ])
 unknown = set([
     'no estimate available',
@@ -83,11 +94,15 @@ few = set([
     'a handful',
     'some',
     'few signers',
+    '? few',
+    '"a few"'
 ])
-interval_re = re.compile(ur'~?(\d+)\s*[-\u2013]\s*(\d+)', re.UNICODE)
-date_after_re = re.compile(r'^~?\s*(\d+)\s*\(', re.UNICODE)
-num_re = re.compile(r'^~?\s*(\d+)\??\+?$', re.UNICODE)
 
+interval_re = re.compile(ur'~?\s*(\d+)\s*[-\u2013~]\s*(\d+)', re.UNICODE)
+date_after_re = re.compile(r'^(~|(>|<))?\s*(\d+)\s*\(', re.UNICODE)
+num_re = re.compile(r'^(~|(>|<))?\s*(\d+)\??\+?$', re.UNICODE)
+one_number_in_line_re = re.compile(
+    r'^[^0-9]*?(~|(>|<))?\s*(\d+)\??\+?[^0-9]*$', re.UNICODE)
 category_map = {
     'Safe': 8,
     'At risk': 6,
@@ -153,10 +168,17 @@ def geometric_mean(numbers):
 
 
 def normalize_number(num):
+    
     if num_re.match(num):
-        n = int(num_re.match(num).group(1))
-        return n if n > 0 else 1
-    elif num.strip().lower() in zeros:
+        g = num_re.match(num).groups()
+        n = int(g[2])
+        if g[0] in [None, '~']:
+            return n if n > 0 else 1
+        elif g[0] == '<':
+            return math.floor(0.9 * n)
+        elif g[0] == '>':
+            return math.floor(1.1 * n)
+    if num.strip().lower() in zeros:
         return 1
     elif num.strip().lower() in unknown:
         return 30
@@ -166,7 +188,14 @@ def normalize_number(num):
         m = interval_re.match(num)
         return geometric_mean2(int(m.group(1)), int(m.group(2)))
     elif date_after_re.match(num):
-        return int(date_after_re.match(num).group(1))
+        g = date_after_re.match(num).groups()
+        n = int(g[2])
+        if g[0] in [None, '~']:
+            return n if n > 0 else 1
+        elif g[0] == '<':
+            return math.floor(0.9 * n)
+        elif g[0] == '>':
+            return math.floor(1.1 * n)
     elif 'few dozen' in num:
         return 30
     elif 'few hundred' in num:
@@ -183,9 +212,26 @@ def normalize_number(num):
         return 5
     elif num in speaker_num_map:
         return speaker_num_map[num]
+    elif one_number_in_line_re.match(num):
+        g = one_number_in_line_re.match(num).groups()
+        n = int(g[2])
+        if g[0] in [None, '~']:
+            return n if n > 0 else 1
+        elif g[0] == '<':
+            return math.floor(0.9 * n)
+        elif g[0] == '>':
+            return math.floor(1.1 * n)
     else:
         stderr.write('Unmatched {0}\n'.format(num.encode('utf8')))
 
 
 def geometric_mean2(n1, n2):
     return math.sqrt(n1 * n2)
+
+def main():
+    import sys
+    for l in open(sys.argv[1]):
+        print '{}\t{}'.format(l.strip(), normalize_number(l.strip()))
+
+if __name__ == '__main__':
+            main()
