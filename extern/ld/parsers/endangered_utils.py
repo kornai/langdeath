@@ -54,6 +54,13 @@ speaker_num_map = {
     'not available': 30,
     '47800 in greenland (1995 m. krauss). 3000 east greenlandic 44000 west greenlandic 800 north greenlandic. population total all countries: 57800': 57800,
     '5800. 725 monolinguals (1990 census). ethnic population: 6300': 6300,
+    'one or two thousand': 1500,
+    'a couple hundred': 400,
+    'only in the hundreds': 200,
+    'language with less than ten speakers or only rememberers':8,
+    'many adults': 50,
+    '3.132': 3132
+
 }
 zeros = set([
     'no known l1 speakers',
@@ -67,6 +74,10 @@ zeros = set([
     'unlikely any speakers remain',
     '"unlikely that any speakers remain."',
     '0 extinct',
+    'no fully competent speakers.',
+    'obsolescent',
+    'obsolescent (i.e. no longer spoken' +\
+    'as an everyday language but a few speakers remember it)'
 ])
 unknown = set([
     'no estimate available',
@@ -83,8 +94,11 @@ few = set([
     'a handful',
     'some',
     'few signers',
+    '? few',
+    '"a few"'
 ])
-interval_re = re.compile(ur'~?(\d+)\s*[-\u2013]\s*(\d+)', re.UNICODE)
+
+interval_re = re.compile(ur'~?\s*(\d+)\s*[-\u2013~]\s*(\d+)', re.UNICODE)
 date_after_re = re.compile(r'^(~|(>|<))?\s*(\d+)\s*\(', re.UNICODE)
 num_re = re.compile(r'^(~|(>|<))?\s*(\d+)\??\+?$', re.UNICODE)
 one_number_in_line_re = re.compile(
