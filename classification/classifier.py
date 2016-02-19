@@ -1,5 +1,6 @@
 import sys
 import logging
+import numpy
 from math import log
 import pandas
 import sqlite3
@@ -30,12 +31,55 @@ class Classifier:
             '{}/log_needed'.format(feat_dir))]
         self.bool_needed = [l.strip() for l in open(
             '{}/bool_needed'.format(feat_dir))]
+        self.individual_defaults = {'eth_status': 7}
 
     def get_df(self, sqlite_fn):
         conk = sqlite3.connect(sqlite_fn)
         self.df = pandas.read_sql("SELECT * FROM dld_language", conk)
-        self.df = self.df.set_index([u'sil'])
+        self.speakers = pandas.read_sql("SELECT * FROM dld_speaker", conk)
+        self.language_speakers =\
+                pandas.read_sql("SELECT * FROM dld_language_speakers", conk)
+        self.endangered_levels = pandas.read_sql(
+            "SELECT * FROM dld_endangeredlevel", conk)
+        self.language_endangered_levels =\
+                pandas.read_sql(
+                    "SELECT * FROM dld_language_endangered_levels", conk)
+        self.df = self.df.set_index([u'id'], drop=False)
+        self.join_speaker_counts()
+        self.join_endangered_levels()
+        self.df = self.df.set_index([u'sil'], drop=False)
+        
+    
+    def join_speaker_counts(self):
+        
+        aggreg = self.language_speakers.set_index('speaker_id')\
+        .join(self.speakers.set_index('id'))
 
+        l2_ag = aggreg.loc[aggreg['l_type'] == 'L2'].groupby(\
+        ['language_id']).aggregate(lambda x: max(x))
+        l2_col = l2_ag.rename(columns={'num': 'L2'})['L2']
+
+        l1_ag = aggreg.loc[aggreg['l_type'] == 'L1']\
+        .loc[aggreg['src'].isin(['ethnologue', 'aggregate'])].\
+        groupby(['language_id']).aggregate(lambda x: numpy.average(x))
+        l1_col = l1_ag.rename(columns={'num': 'L1'})['L1']
+
+        self.df = self.df.join(l1_col).join(l2_col)
+    
+    def join_endangered_levels(self):
+
+        aggreg = self.language_endangered_levels.\
+        set_index('endangeredlevel_id').join(
+            self.endangered_levels.set_index('id'))
+        aggreg = aggreg.set_index('language_id')
+        aggreg['src_is_eth'] = aggreg['src'].map(lambda x:x == 'ethnologue')
+
+        eth_ag = aggreg.loc[aggreg['src_is_eth'] == True]
+        eth_ag['eth_status'] = eth_ag['level'].map(lambda x:float(
+            x.replace("a", ".0").replace("b", ".5").replace('x', '')))
+        eth_col = eth_ag[['eth_status']]
+
+        self.df = self.df.join(eth_col)
 
     def preproc_data(self, train_dir, feat_dir):
         self.numerical_preproc(feat_dir)
@@ -61,13 +105,16 @@ class Classifier:
         self.df[self.log_needed] = self.df[self.log_needed].fillna(0)
         self.df[self.log_needed] = self.df[self.log_needed].applymap(
             lambda x: log(x+1))
+        for feat in self.individual_defaults:
+            self.df[[feat]] = self.df[[feat]].fillna(
+                self.individual_defaults[feat])
 
     def get_train_df(self):
 
         t_data = self.df.loc[self.df['seed_label']=='t'].sample(n=15)
         v_data = self.df.loc[self.df['seed_label']=='v'].sample(n=30)
-        h_data = self.df.loc[self.df['seed_label']=='h'].sample(n=10)
-        s_data = self.df.loc[self.df['seed_label']=='s'].sample(n=50)
+        h_data = self.df.loc[self.df['seed_label']=='h'].sample(n=15)
+        s_data = self.df.loc[self.df['seed_label']=='s'].sample(n=100)
         self.train_df = pandas.concat([t_data, v_data, h_data, s_data])
 
     def train_crossval(self, selector=None):
@@ -82,7 +129,7 @@ class Classifier:
         logging.info('crossval score:{}, average:{}'.format(
             scores, sum(scores)/5))
 
-    def get_selector(self, threshold=1.5):
+    def get_selector(self, threshold=3):
         model = LogisticRegression()
         self.selector = SelectFromModel(model, threshold=threshold)
         self.selector.fit(self.df[self.needed], self.df['seed_label'])
@@ -100,13 +147,14 @@ class Classifier:
         self.df[label].values)))
 
     def train_classify(self, out_fn):
-        self.get_train_df()
-        self.train_crossval()
-        self.train_label(label='exp_full_features')
-        self.get_selector()
-        self.train_crossval(selector=self.selector)
-        self.train_label(selector=self.selector,
-                         label='exp_with_feature_sel')
+        for i in range(50):
+            self.get_train_df()
+            self.train_crossval()
+            self.train_label(label='exp_full_features_{0}'.format(i))
+            self.get_selector()
+            self.train_crossval(selector=self.selector)
+            self.train_label(selector=self.selector,
+                         label='exp_with_feature_sel_{0}'.format(i))
         if out_fn != None:
             logging.info('exporting dataframe to {}'.format(out_fn))  
             self.df.to_csv(out_fn, sep='\t', encoding='utf-8')
