@@ -89,7 +89,7 @@ class LanguageDB(object):
                 data = card_dir_p.sub("\g<1>ern", data)
                 self.add_alt_name(data, lang)
 
-        elif type(data) == list:
+        elif type(data) == list or type(data) == set:
             for d in data:
                 self.add_alt_name(d, lang)
         else:
