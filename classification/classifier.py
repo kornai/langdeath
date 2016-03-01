@@ -1,13 +1,14 @@
 import sys
 import logging
 import pandas
+import random
 from sklearn.linear_model import LogisticRegression
 from sklearn import cross_validation
 from sklearn.feature_selection import SelectFromModel
 
 class Classifier:
 
-    def __init__(self, tsv, exp_count, threshold):
+    def __init__(self, tsv, exp_count, threshold, classcount):
 
         self.df = pandas.read_csv(tsv, sep='\t')
         self.df_res = self.df[['sil']].set_index('sil')
@@ -15,15 +16,32 @@ class Classifier:
         self.all_feats = self.df.drop('seed_label', axis=1)
         self.exp_count = exp_count
         self.thr = threshold
+        self.classes = classcount
+
+    def shuffle_rows(self, df):
+        index = list(df.index)
+        random.shuffle(index)
+        df = df.ix[index]
+        df.reset_index()
+        return df
 
     def get_train_df(self):
-
+        
+        d2 = {'-': '-', 's': 'sh', 'h': 'sh', 'v': 'vt', 't': 'vt'}
+        d3 = {'-': '-', 's': 'sh', 'h': 'sh', 'v': 'v', 't': 't'}
         t_data = self.df[self.df.seed_label == 't'].sample(n=15)
         v_data = self.df[self.df.seed_label == 'v'].sample(n=40)
         h_data = self.df[self.df.seed_label == 'h'].sample(n=15)
         s_data = self.df[self.df.seed_label == 's'].sample(n=80)
-        
         self.train_df = pandas.concat([t_data, v_data, h_data, s_data])
+        if self.classes == 2:
+            self.train_df.seed_label = self.train_df.seed_label.map(
+                lambda x:d2[x])
+            
+        if self.classes == 3:
+            self.train_df.seed_label = self.train_df.seed_label.map(
+                lambda x:d3[x])
+        self.train_df = self.shuffle_rows(self.train_df)    
         self.feats = self.train_df.drop('seed_label', axis=1)
         self.labels = self.train_df.seed_label
         
@@ -44,7 +62,8 @@ class Classifier:
         self.selector = SelectFromModel(model, threshold=threshold)
         self.selector.fit(self.feats, self.labels)
         support = self.selector.get_support(indices=True)
-        print self.df.iloc[:, support].keys()
+        logging.info('selected features:{}'.format(
+            self.df.iloc[:, support].keys()))
 
 
     def train_label(self, selector=None, label='exp'):
@@ -81,10 +100,11 @@ def main():
     preprocessed_tsv = sys.argv[1]
     exp_count = int(sys.argv[2])
     threshold = float(sys.argv[3])
+    classcount = int(sys.argv[4])
     out_fn = None
-    if len(sys.argv) > 4:
-        out_fn = sys.argv[4]
-    a = Classifier(preprocessed_tsv, exp_count, threshold)
+    if len(sys.argv) > 5:
+        out_fn = sys.argv[5]
+    a = Classifier(preprocessed_tsv, exp_count, threshold, classcount)
     a.train_classify(out_fn)
 
 if __name__ == '__main__':
