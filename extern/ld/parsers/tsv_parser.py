@@ -62,11 +62,28 @@ class EthnologueDumpParser(TSV_parser):
                                         None)]
             yield res
 
+
+class UrielParser(OfflineParser):
+
+
+    def __init__(self, fn):
+        self.fn = fn
+    
+    def parse(self):
+        fh = open(self.fn)
+        header = fh.readline()
+        for l in fh:
+            data = l.strip().split(',')
+            sil, values = data[0], data[1:]
+            yield {'sil': sil,
+                   'uriel_feats': len(filter(lambda x: x!= '--', values))}
+
 def main():
 
-     a =  EthnologueDumpParser(sys.argv[1])
+     #a =  EthnologueDumpParser(sys.argv[1])
+     a = UrielParser(sys.argv[1])
      for d in a.parse():
-         pass
+         print d
 
 if __name__ == '__main__':
     main()
