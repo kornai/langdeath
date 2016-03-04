@@ -80,10 +80,9 @@ class UrielParser(OfflineParser):
 
 def main():
 
-     #a =  EthnologueDumpParser(sys.argv[1])
-     a = UrielParser(sys.argv[1])
+     a =  EthnologueDumpParser(sys.argv[1])
      for d in a.parse():
-         print d
+         pass
 
 if __name__ == '__main__':
     main()
