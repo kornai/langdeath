@@ -27,6 +27,7 @@ class Language(models.Model):
     cru_watchtower = models.BooleanField(default=False)
     cru_udhr = models.BooleanField(default=False)
     in_omniglot = models.BooleanField(default=False)
+    uriel_feats = models.IntegerField(blank=True, null=True)
 
     la_primary_texts_online = models.IntegerField(blank=True, null=True)
     la_primary_texts_all = models.IntegerField(blank=True, null=True)
