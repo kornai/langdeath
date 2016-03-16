@@ -62,9 +62,7 @@ class ParserAggregator(object):
         self.parsers_todo = [OmniglotParser(), SoftwareSupportParser(res_dir),
                              FirefoxParser(firefox_mapping)]
         self.lang_db = LanguageDB()
-        self.trusted_parsers = set([ParseISO639_3, EthnologueOnlineParser,
-                                   EthnologueOfflineParser, CrubadanParser,
-                                   MacroWPParser])
+        self.trusted_parsers = set([ParseISO639_3])
         self.parsers_needs_sil = set([EthnologueOfflineParser,
                                       EthnologueOnlineParser,
                                       LanguageArchivesOnlineParser])
