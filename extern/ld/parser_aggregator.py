@@ -58,7 +58,7 @@ class ParserAggregator(object):
                         endangered_parser, OmniglotParser(),
                         FirefoxParser(firefox_mapping),
                         SoftwareSupportParser(res_dir), wpinc_adj_parser]
-        #self.parsers = [wpinc_adj_parser]
+        self.parsers = [wpinc_adj_parser]
         self.parsers_todo = [OmniglotParser(), SoftwareSupportParser(res_dir),
                              FirefoxParser(firefox_mapping)]
         self.lang_db = LanguageDB()
@@ -114,7 +114,7 @@ class ParserAggregator(object):
         except UnknownLanguageException as e:
             return
 
-    #@transaction.commit_manually
+    @transaction.commit_manually
     def call_parser(self, parser):
         c = 0
         self.parser = parser
@@ -138,7 +138,7 @@ class ParserAggregator(object):
             if len(self.new_altnames) > 0 and self.debug_dir != None:
                 self.write_out_new_altnames(self.new_altnames)
 
-     #   transaction.commit()
+        transaction.commit()
 
     
     def  write_out_new_langs(self, list_):
