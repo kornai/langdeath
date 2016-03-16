@@ -38,7 +38,7 @@ class ParserAggregator(object):
     """
     def __init__(self, eth_dump_dir='', la_dump_dir='', dbpedia_res_dir='',
                  wpdumps_dir='', wpinc_dump_fn='', res_dir='extern/ld/res',
-                 endangered_dump_dir='', uriel_dump=''):
+                 endangered_dump_dir='', uriel_dump='', debug_dir=None):
         eth_parser = EthnologueDumpParser(eth_dump_dir)
         la_parser = (LanguageArchivesOnlineParser() if not la_dump_dir
                      else LanguageArchivesOfflineParser(la_dump_dir))
@@ -68,7 +68,7 @@ class ParserAggregator(object):
         self.parsers_needs_sil = set([EthnologueOfflineParser,
                                       EthnologueOnlineParser,
                                       LanguageArchivesOnlineParser])
-        self.new_lang_list = []
+        self.debug_dir = debug_dir
 
     def run(self):
         for parser in self.parsers:
@@ -87,16 +87,19 @@ class ParserAggregator(object):
 
     def add_lang(self, lang):
         try:
+            identifier = self.get_identifier(lang)
             candidates = self.lang_db.get_closest(lang)
             if len(candidates) > 1:
                 tgts = self.lang_db.choose_candidates(lang, candidates)
                 for tgt in tgts:
                     self.lang_db.update_lang_data(tgt, lang)
+                    self.new_altnames.append((identifier, tgt.name))
             elif len(candidates) == 1:
                 best = candidates[0]
                 self.lang_db.update_lang_data(best, lang)
+                self.new_altnames.append((identifier, best.name))
             elif len(candidates) == 0:
-                self.new_langs.add(repr(lang)) 
+                self.new_langs.append(lang) 
                 if type(self.parser) in self.trusted_parsers:
                     self.lang_db.add_new_language(lang)
                 else:
@@ -115,11 +118,8 @@ class ParserAggregator(object):
     def call_parser(self, parser):
         c = 0
         self.parser = parser
-        self.new_langs = set()
-        if type(self.parser) in self.trusted_parsers:
-             new_lang_label = 'New lang'
-        else:
-            new_lang_label = 'Not found'
+        self.new_langs = []
+        self.new_altnames = []
         try:
             for lang in self.choose_parse_call(parser)():
                 c += 1
@@ -131,11 +131,43 @@ class ParserAggregator(object):
         except ParserException as e:
             logging.exception(e)
         if len(self.new_langs) > 0:
-            logging.error("{0}: {1}, ".format(new_lang_label, len(self.new_langs)))
-        self.new_lang_list.append((type(self.parser), new_lang_label,
-                                   self.new_langs)) 
+            logging.error("New langs/not found: {0}, ".format(
+                len(self.new_langs)))
+            if self.debug_dir != None:
+                self.write_out_new_langs(self.new_langs)
+            if len(self.new_altnames) > 0 and self.debug_dir != None:
+                self.write_out_new_altnames(self.new_altnames)
 
         transaction.commit()
+
+    
+    def  write_out_new_langs(self, list_):
+        classname = str(type(self.parser)).split('.')[3].split("'")[0]
+        if type(self.parser) in self.trusted_parsers:
+             new_lang_label = 'new_langs'
+        else:
+            new_lang_label = 'notfound_langs'
+        fh = open('{}/{}.{}'.format(
+            self.debug_dir, classname, new_lang_label), "w")
+        for d in list_:
+            fh.write(
+                u'{}\t{}\n'.format(d.get('sil', ''),
+                                   d.get('name', '')).encode('utf-8'))
+    
+    def write_out_new_altnames(self, new_altnames):
+        classname = str(type(self.parser)).split('.')[3].split("'")[0]
+        fh = open('{}/{}.new_altnames'.format(
+            self.debug_dir, classname), "w")
+        for t in new_altnames:
+            fh.write(u'{}\t{}\n'.format(t[0], t[1]).encode('utf-8'))
+   
+    def get_identifier(self, lang_dict):
+        if 'name' in lang_dict:
+            return lang_dict['name']
+        elif 'sil' in lang_dict:
+            return lang_dict['sil']
+        else:
+            return lang_dict['other_codes']['wiki_inc']
 
 
 def main():
