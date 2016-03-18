@@ -85,17 +85,18 @@ class ParserAggregator(object):
 
     def add_lang(self, lang):
         try:
-            identifier = self.get_identifier(lang)
             candidates = self.lang_db.get_closest(lang)
             if len(candidates) > 1:
                 tgts = self.lang_db.choose_candidates(lang, candidates)
                 for tgt in tgts:
                     self.lang_db.update_lang_data(tgt, lang)
-                    self.new_altnames.append((identifier, tgt.name))
+                    if 'name' in lang and lang['name'] != tgt.name:
+                        self.new_altnames.append((lang['name'], tgt.name))
             elif len(candidates) == 1:
                 best = candidates[0]
                 self.lang_db.update_lang_data(best, lang)
-                self.new_altnames.append((identifier, best.name))
+                if 'name' in lang and lang['name'] != best.name:
+                    self.new_altnames.append((lang['name'], best.name))
             elif len(candidates) == 0:
                 self.new_langs.append(lang) 
                 if type(self.parser) in self.trusted_parsers:
@@ -139,7 +140,7 @@ class ParserAggregator(object):
         transaction.commit()
 
     
-    def  write_out_new_langs(self, list_):
+    def write_out_new_langs(self, list_):
         classname = str(type(self.parser)).split('.')[3].split("'")[0]
         if type(self.parser) in self.trusted_parsers:
              new_lang_label = 'new_langs'
@@ -147,34 +148,44 @@ class ParserAggregator(object):
             new_lang_label = 'notfound_langs'
         fh = open('{}/{}.{}'.format(
             self.debug_dir, classname, new_lang_label), "w")
+        d = list_[0]
+        
+        # header
+        keys = set([])
+        other_codes = set([])
         for d in list_:
-            fh.write(
-                u'{}\t{}\n'.format(d.get('sil', ''),
-                                   d.get('name', '')).encode('utf-8'))
+            if 'other_codes' in d:
+                for k in d['other_codes']:
+                    other_codes.add(k)
+            if 'name' in d:
+                keys.add('name')
+            if 'sil' in d:
+                keys.add('sil')
+        other_codes = list(other_codes)            
+        keys = list(keys)
+
+        fh.write('{}\n'.format('\t'.join(keys + other_codes)))
+        fh.write('\n')
+
+        for d in list_:
+            values = [d.get(k, '') for k in keys]
+            other_values = [d.get('other_codes', {}).get(k, '') for k in other_codes]
+            fh.write(u'{}\n'.format('\t'.join(values + other_values)).encode('utf-8'))
     
     def write_out_new_altnames(self, new_altnames):
         classname = str(type(self.parser)).split('.')[3].split("'")[0]
         fh = open('{}/{}.new_altnames'.format(
             self.debug_dir, classname), "w")
+        # header
+        fh.write(u'{}\t{}\n'.format('new_name', 'merged_to').encode('utf-8'))
+        fh.write('\n')
         for t in new_altnames:
             fh.write(u'{}\t{}\n'.format(t[0], t[1]).encode('utf-8'))
    
-    def get_identifier(self, lang_dict):
-        if 'name' in lang_dict:
-            return lang_dict['name']
-        elif 'sil' in lang_dict:
-            return lang_dict['sil']
-        else:
-            return lang_dict['other_codes']['wiki_inc']
-
-
 def main():
     logging.basicConfig(level=logging.INFO)
     pa = ParserAggregator(*sys.argv[1:])
     pa.run()
-    import cPickle
-    f = open('new_languages_list', 'w')
-    cPickle.dump(pa.new_lang_list, f)
 
 if __name__ == "__main__":
     main()
