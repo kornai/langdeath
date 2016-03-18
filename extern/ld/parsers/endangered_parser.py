@@ -66,8 +66,14 @@ class EndangeredParser(OfflineParser):
 
             d['id'] = id_
             self.aggregate_numbers(d)
+            self.arrange_codes(d)
             yield d
-
+    
+    def arrange_codes(self, d):
+        if 'iso_type' in d and d['iso_type'] == 'LINGUIST List':
+            d['other_codes'] = {'linglist': d['sil']}
+            del d['sil']
+                                
     def aggregate_numbers(self, d):
         speakers = [i[2] for i in d.get('speakers', [])]
         aggr = geometric_mean(speakers)
