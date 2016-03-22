@@ -5,11 +5,18 @@ from base_parsers import OnlineParser
 
 
 class OmniglotHTMLParser(HTMLParser):
-    def __init__(self):
+    def __init__(self, fn):
         HTMLParser.__init__(self)
         self.in_list = False
         self.in_name = False
         self.lang_updates = []
+        self.get_mapping_dict(fn)
+
+    def get_mapping_dict(self, mapping_fn):
+        self.mapping_dict = {}
+        for l in open(mapping_fn):
+            k, v = l.strip().decode('utf-8').split('\t')
+            self.mapping_dict[k] = v
 
     def handle_starttag(self, tag, attrs):
         if tag == 'ol':
@@ -46,15 +53,31 @@ class OmniglotHTMLParser(HTMLParser):
 
 class OmniglotParser(OnlineParser):
 
-    def __init__(self):
+    def __init__(self, fn):
         self.url = 'http://www.omniglot.com/writing/languages.htm'
+        self.fn = fn
 
     def parse(self):
         """
         yields LanguageUpdates of languages listed by Omniglot with in_omniglot
         atrribute set to True
         """
-        html_parser = OmniglotHTMLParser()
+        html_parser = OmniglotHTMLParser(self.fn)
         html_filen, headers = urllib.urlretrieve(self.url)
         html_parser.feed(open(html_filen).read().decode('utf-8'))
-        return iter(html_parser.lang_updates)
+        for d in html_parser.lang_updates:
+            if d['name'] in html_parser.mapping_dict:
+                d['name'] = html_parser.mapping_dict[d['name']]
+            yield d    
+
+
+def main():
+    
+    import sys
+    a = OmniglotParser(sys.argv[1])
+   
+    for d in a.parse():
+        print d
+
+if __name__ == '__main__':
+    main()
