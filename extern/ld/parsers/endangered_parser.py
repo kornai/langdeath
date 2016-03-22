@@ -62,6 +62,9 @@ class EndangeredParser(OfflineParser):
             logging.debug('Parsing: {0}'.format(id_))
             csv_data = self.download_and_parse_csv(id_)
             html_data = self.download_and_parse_html(id_)
+            if ('html', 'sil') in html_data:
+                html_data[('html', 'sil')] =\
+                        [", ".join(html_data[('html', 'sil')])]
             d = self.merge_dicts(csv_data, html_data)
 
             d['id'] = id_
@@ -427,5 +430,5 @@ if __name__ == '__main__':
     from sys import argv
     p = EndangeredParser(id_fn=argv[1], offline_dir=argv[2])
     for d in p.parse_or_load():
-        pass
+        print repr(d)
 
