@@ -49,17 +49,18 @@ class ParserAggregator(object):
         firefox_mapping = '{0}/mappings/firefox'.format(res_dir)
         endangered_parser = EndangeredParser('{}/list_of_ids'.format(
             endangered_dump_dir), endangered_dump_dir)
+        omniglot_parser = OmniglotParser('{0}/mappings/omniglot'.format(res_dir))
         self.parsers = [ParseISO639_3(), MacroWPParser(), uriel_parser, dbpedia_parser,
                         eth_parser, l2_parser, CrubadanParser(), la_parser,
                         WalsInfoParser(), IndigenousParser(),
                         WikipediaListOfLanguagesParser(),
                         WikipediaIncubatorsParser(),
                         WikipediaAdjustedSizeCounter_WPExtractor(wpdumps_dir),
-                        endangered_parser, OmniglotParser(),
+                        endangered_parser, omniglot_parser,
                         FirefoxParser(firefox_mapping),
                         SoftwareSupportParser(res_dir), wpinc_adj_parser]
         self.parsers = [wpinc_adj_parser]
-        self.parsers_todo = [OmniglotParser(), SoftwareSupportParser(res_dir),
+        self.parsers_todo = [omniglot_parser, SoftwareSupportParser(res_dir),
                              FirefoxParser(firefox_mapping)]
         self.lang_db = LanguageDB()
         self.trusted_parsers = set([ParseISO639_3])
