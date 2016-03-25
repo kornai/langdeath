@@ -7,10 +7,17 @@ from utils import get_html, replace_html_formatting
 
 class WikipediaIncubatorsParser(OnlineParser):
 
-    def __init__(self):
+    def __init__(self, resdir):
 
         self.url = 'http://incubator.wikimedia.org/wiki/Incubator:Wikis'
         self.name_pat = re.compile("Wikipedia (.*)(?=\(wp)\(wp/([^\)]*)")
+        self.get_mapping_dict('{0}/mappings/wp_incubator'.format(resdir))
+
+    def get_mapping_dict(self, mapping_fn):
+        self.mapping_dict = {}
+        for l in open(mapping_fn):
+            k, v = l.strip().decode('utf-8').split('\t')
+            self.mapping_dict[k] = v
 
     def generate_rows(self, tabular):
 
@@ -104,13 +111,15 @@ class WikipediaIncubatorsParser(OnlineParser):
             m = self.name_pat.search(s)
             name = m.group(1).strip()
             inc_code = m.group(2).strip()
+            if name in self.mapping_dict:
+                name = self.mapping_dict[name]
             yield {"name": name, "other_codes": {"wiki_inc": inc_code},
                    "wp_inc": True}
 
 
 def main():
-
-    parser = WikipediaIncubatorsParser()
+    import sys
+    parser = WikipediaIncubatorsParser(sys.argv[1])
     for d in parser.parse():
         print repr(d)
 

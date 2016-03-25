@@ -54,9 +54,9 @@ class ParserAggregator(object):
         omniglot_parser = OmniglotParser('{0}/mappings/omniglot'.format(res_dir))
         self.parsers = [ParseISO639_3(), MacroWPParser(), uriel_parser, dbpedia_parser,
                         eth_parser, l2_parser, CrubadanParser(), la_parser,
-                        WalsInfoParser(), IndigenousParser(),
-                        WikipediaListOfLanguagesParser(),
-                        WikipediaIncubatorsParser(),
+                        WalsInfoParser(res_dir), IndigenousParser(res_dir),
+                        WikipediaListOfLanguagesParser(res_dir),
+                        WikipediaIncubatorsParser(res_dir),
                         WikipediaAdjustedSizeCounter_WPExtractor(wpdumps_dir),
                         endangered_parser, omniglot_parser,
                         FirefoxParser(firefox_mapping),

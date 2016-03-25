@@ -7,7 +7,7 @@ from utils import get_html
 
 class WalsInfoParser(OnlineParser):
 
-    def __init__(self):
+    def __init__(self, resdir):
         self.url = "http://wals.info/languoid.geojson?sEcho=1&iSortingCols=1&iSortCol_0=0&sSortDir_0=asc"  # nopep8
         self.needed_keys = {
             "longitude": "longitude",
@@ -18,6 +18,13 @@ class WalsInfoParser(OnlineParser):
             "samples_100": "wals_samples_100",
             "samples_200": "wals_samples_200"
         }
+        self.get_mapping_dict('{0}/mappings/wals'.format(resdir))
+
+    def get_mapping_dict(self, mapping_fn):
+        self.mapping_dict = {}
+        for l in open(mapping_fn):
+            k, v = l.strip().decode('utf-8').split('\t')
+            self.mapping_dict[k] = v
 
     def clean_dict(self, d):
         cd = {}
@@ -44,15 +51,17 @@ class WalsInfoParser(OnlineParser):
         json_data = get_html(self.url)
         data = json.loads(json_data)
         for d in self.generate_dictionaries(data):
+            if d['name'] in self.mapping_dict:
+                d['name'] = self.mapping_dict[d['name']]
             yield d
 
 
 def main():
-
+    import sys
     logging.basicConfig(level=logging.DEBUG)
-    parser = WalsInfoParser()
+    parser = WalsInfoParser(sys.argv[1])
     for d in parser.parse():
-        print u"\t".join((unicode(v) for v in d.values())).encode("utf-8")
+        print d
 
 if __name__ == "__main__":
     main()

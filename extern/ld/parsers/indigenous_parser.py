@@ -7,7 +7,7 @@ blogs_url = "http://indigenoustweets.com/blogs/"
 
 
 class IndigenousParser(OnlineParser):
-    def __init__(self):
+    def __init__(self, resdir):
         self.needed_keys = {
             "Language": "name",
             "code": "code",
@@ -17,7 +17,13 @@ class IndigenousParser(OnlineParser):
             "Users": "indi_users",
             "Tweets": "indi_tweets"
         }
-        pass
+        self.get_mapping_dict('{0}/mappings/indi'.format(resdir))
+
+    def get_mapping_dict(self, mapping_fn):
+        self.mapping_dict = {}
+        for l in open(mapping_fn):
+            k, v = l.strip().decode('utf-8').split('\t')
+            self.mapping_dict[k] = v
 
     def get_header(self, html):
         h = html.split("<thead>")[1].split("</thead>")[0]
@@ -64,11 +70,15 @@ class IndigenousParser(OnlineParser):
         blogs_data = self.html_to_dict(blogs_html)
         self.merge_data(tweets_data, blogs_data)
         for l in tweets_data:
-            yield tweets_data[l]
+            d = tweets_data[l]
+            if d['name'] in self.mapping_dict:
+                d['name'] = self.mapping_dict[d['name']]
+            yield d
 
 
 def main():
-    i = IndigenousParser()
+    import sys
+    i = IndigenousParser(sys.argv[1])
     for d in i.parse():
         print d
 
