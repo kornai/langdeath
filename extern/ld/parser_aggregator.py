@@ -27,6 +27,8 @@ from ld.parsers.list_of_wikipedia_parser import WikipediaListOfLanguagesParser
 from ld.parsers.wikipedia_incubators_parser import WikipediaIncubatorsParser
 from ld.parsers.wpsize_counter import WikipediaAdjustedSizeCounter_WPExtractor, \
     WPIncubatorAdjustedSizeCounter
+from ld.parser_aggregator_utils import write_out_new_langs,\
+        write_out_found_langs, write_out_new_altnames
 from ld.parsers.endangered_parser import EndangeredParser
 from ld.parsers.tsv_parser import L2Parser, EthnologueDumpParser, UrielParser
 
@@ -91,11 +93,13 @@ class ParserAggregator(object):
                 tgts = self.lang_db.choose_candidates(lang, candidates)
                 for tgt in tgts:
                     self.lang_db.update_lang_data(tgt, lang)
+                    self.found_langs.append((lang, [tgt.sil, tgt.lang]))
                     if 'name' in lang and lang['name'] != tgt.name:
                         self.new_altnames.append((lang['name'], tgt.name))
             elif len(candidates) == 1:
                 best = candidates[0]
                 self.lang_db.update_lang_data(best, lang)
+                self.found_langs.append((lang, [best.name, best.sil]))
                 if 'name' in lang and lang['name'] != best.name:
                     self.new_altnames.append((lang['name'], best.name))
             elif len(candidates) == 0:
@@ -120,6 +124,7 @@ class ParserAggregator(object):
         self.parser = parser
         self.new_langs = []
         self.new_altnames = []
+        self.found_langs = []
         try:
             for lang in self.choose_parse_call(parser)():
                 c += 1
@@ -134,55 +139,31 @@ class ParserAggregator(object):
             logging.error("New langs/not found: {0}, ".format(
                 len(self.new_langs)))
             if self.debug_dir != None:
-                self.write_out_new_langs(self.new_langs)
-            if len(self.new_altnames) > 0 and self.debug_dir != None:
-                self.write_out_new_altnames(self.new_altnames)
-
+                if len(self.new_langs) > 0:
+                    write_out_new_langs(
+                        self.new_langs, self.get_out_fn(new=True))
+                if len(self.found_langs) > 0:    
+                    write_out_found_langs(self.found_langs, self.get_out_fn())
+                if len(self.new_altnames) > 0:    
+                    write_out_new_altnames(
+                    self.new_altnames, self.get_out_fn(altnames=True))
         transaction.commit()
-
     
-    def write_out_new_langs(self, list_):
+    def get_out_fn(self, new=False, altnames=False):
         classname = str(type(self.parser)).split('.')[3].split("'")[0]
-        if type(self.parser) in self.trusted_parsers:
-             new_lang_label = 'new_langs'
-        else:
-            new_lang_label = 'notfound_langs'
-        fh = open('{}/{}.{}'.format(
-            self.debug_dir, classname, new_lang_label), "w")
-        d = list_[0]
-        
-        # header
-        keys = set([])
-        other_codes = set([])
-        for d in list_:
-            if 'other_codes' in d:
-                for k in d['other_codes']:
-                    other_codes.add(k)
-            if 'name' in d:
-                keys.add('name')
-            if 'sil' in d:
-                keys.add('sil')
-        other_codes = list(other_codes)            
-        keys = list(keys)
-
-        fh.write('{}\n'.format('\t'.join(keys + other_codes)))
-        fh.write('\n')
-
-        for d in list_:
-            values = [d.get(k, '') for k in keys]
-            other_values = [d.get('other_codes', {}).get(k, '') for k in other_codes]
-            fh.write(u'{}\n'.format('\t'.join(values + other_values)).encode('utf-8'))
+        if new:
+            if type(self.parser) in self.trusted_parsers:
+                new_lang_label = 'new_langs'
+            else:
+                new_lang_label = 'notfound_langs'
+        else:        
+            if altnames:
+                new_lang_label = 'new_altnames'        
+            else:
+                new_lang_label = 'found_langs'
+        return '{}/{}.{}'.format(self.debug_dir, classname, new_lang_label)    
     
-    def write_out_new_altnames(self, new_altnames):
-        classname = str(type(self.parser)).split('.')[3].split("'")[0]
-        fh = open('{}/{}.new_altnames'.format(
-            self.debug_dir, classname), "w")
-        # header
-        fh.write(u'{}\t{}\n'.format('new_name', 'merged_to').encode('utf-8'))
-        fh.write('\n')
-        for t in new_altnames:
-            fh.write(u'{}\t{}\n'.format(t[0], t[1]).encode('utf-8'))
-   
+  
 def main():
     logging.basicConfig(level=logging.INFO)
     pa = ParserAggregator(*sys.argv[1:])
