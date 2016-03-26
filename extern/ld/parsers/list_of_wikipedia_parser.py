@@ -7,7 +7,7 @@ from utils import get_html, replace_html_formatting
 
 class WikipediaListOfLanguagesParser(OnlineParser):
 
-    def __init__(self):
+    def __init__(self, resdir):
 
         self.url = 'http://meta.wikimedia.org/wiki/List_of_Wikipedias'
         self.needed_keys = {
@@ -24,6 +24,13 @@ class WikipediaListOfLanguagesParser(OnlineParser):
             "Depth": "wp_depth"
         }
         self.numnorm = lambda x: re.compile(",([0-9]{3})").sub("\\1", x)
+        self.get_mapping_dict('{0}/mappings/wp_list'.format(resdir))
+
+    def get_mapping_dict(self, mapping_fn):
+        self.mapping_dict = {}
+        for l in open(mapping_fn):
+            k, v = l.strip().decode('utf-8').split('\t')
+            self.mapping_dict[k] = v
 
     def generate_rows(self, tabular):
 
@@ -123,14 +130,18 @@ class WikipediaListOfLanguagesParser(OnlineParser):
             cd = self.clean_dict(dict_)
             if cd["other_codes"]["wiki"] in ["simple", "be-x-old", "arc"]:
                 cd["sil"] = "xxw-{0}".format(cd["other_codes"]["wiki"])
-            yield self.clean_dict(dict_)
+            d = self.clean_dict(dict_)
+            if d['name'] in self.mapping_dict:
+                d['name'] = self.mapping_dict[d['name']]
+            yield d    
 
 
 def main():
-
-    parser = WikipediaListOfLanguagesParser()
+    
+    import sys
+    parser = WikipediaListOfLanguagesParser(sys.argv[1])
     for d in parser.parse():
-        print repr(d)
+        print d
 
 if __name__ == "__main__":
     main()

@@ -70,6 +70,10 @@ class EndangeredParser(OfflineParser):
             d['id'] = id_
             self.aggregate_numbers(d)
             self.arrange_codes(d)
+            if d['sil'] == 'urim':
+                d['sil'] = 'uri'
+            if d['sil'] == 'drh (retired)':
+                d['sil'] = 'drh'
             yield d
     
     def arrange_codes(self, d):

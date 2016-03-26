@@ -75,6 +75,9 @@ class UrielParser(OfflineParser):
         for l in fh:
             data = l.strip().split(',')
             sil, values = data[0], data[1:]
+            # Albanian
+            if sil == 'alb':
+                sil = 'sqi'
             yield {'sil': sil,
                    'uriel_feats': len(filter(lambda x: x!= '--', values))}
 

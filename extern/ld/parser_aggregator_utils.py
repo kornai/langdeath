@@ -32,9 +32,13 @@ def write_out_found_langs(lists, fn):
                  .encode('utf-8'))
 
 def get_lines(list_, keys, other_codes):
-    return [[d.get(k, '') for k in keys] +\
-             [d.get('other_codes', {}).get(k, '') for k in other_codes]
-            for d in list_]
+    all_ = []
+    for d in list_:
+        if 'sil' in d and d['sil'] == set([]):
+            d['sil'] = ''
+        all_.append([d.get(k, '') for k in keys]\
+                + [d.get('other_codes', {}).get(k, '') for k in other_codes])
+    return all_
 
 def get_header(list_):    
     d = list_[0]
