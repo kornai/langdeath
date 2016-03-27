@@ -93,7 +93,7 @@ class ParserAggregator(object):
                 tgts = self.lang_db.choose_candidates(lang, candidates)
                 for tgt in tgts:
                     self.lang_db.update_lang_data(tgt, lang)
-                    self.found_langs.append((lang, [tgt.sil, tgt.name]))
+                    self.found_langs.append((lang, [tgt.name, tgt.sil]))
                     if 'name' in lang and lang['name'] != tgt.name:
                         self.new_altnames.append((lang['name'], tgt.name))
             elif len(candidates) == 1:
