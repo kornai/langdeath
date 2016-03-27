@@ -74,6 +74,8 @@ class EndangeredParser(OfflineParser):
                 d['sil'] = 'uri'
             if d['sil'] == 'drh (retired)':
                 d['sil'] = 'drh'
+            if d['sil'] == set([]):
+                del d['sil']
             yield d
     
     def arrange_codes(self, d):
