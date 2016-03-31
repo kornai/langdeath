@@ -23,7 +23,7 @@ class Preproc:
         self.t_set = [l.strip() for l in open('{}/t'.format(self.train_dir))]
         self.v_set = [l.strip() for l in open('{}/v'.format(self.train_dir))]
         self.h_set = [l.strip() for l in open('{}/h'.format(self.train_dir))]
-        self.s_set = [l.strip() for l in open('{}/s_3900'.format(self.\
+        self.s_set = [l.strip() for l in open('{}/s'.format(self.\
                                                                  train_dir))]
     
     def get_feat_set(self):
@@ -34,8 +34,8 @@ class Preproc:
             '{}/log_needed'.format(self.feat_dir))]
         self.bool_needed = [l.strip() for l in open(
             '{}/bool_needed'.format(self.feat_dir))]
-        self.individual_defaults = {'eth_status': 7,
-                                    'endangered_aggregated_status': 5}
+        self.individual_defaults = {'eth_status': '7',
+                                    'endangered_aggregated_status': '5'}
 
     def get_df(self):
         conn = sqlite3.connect(self.sqlite_fn)
@@ -82,26 +82,25 @@ class Preproc:
     
     def join_ethnologue_levels(self, aggreg):
         aggreg['src_is_ethnologue'] = aggreg['src'] == 'ethnologue'
+        aggreg["eth_status"] = (aggreg['level'].map(
+            lambda x:x.replace("a", ".0").replace(
+                "b", ".5").replace('x', '')))
         eth_aggreg = aggreg[aggreg['src_is_ethnologue'] == True]
-        aggreg["eth_status"] = 7.
-        eth_aggreg.loc[:,'eth_status'] = (eth_aggreg['level'].map(
-            lambda x:float(x.replace("a", ".0").replace(
-            "b", ".5").replace('x', ''))))
         eth_tojoin = eth_aggreg[["language_id", "eth_status"]]
 
         self.df = self.df.merge(eth_tojoin, left_on="id",
                                 right_on="language_id", how="left")
 
     def join_end_endangered_levels(self, aggreg):
-        category_map = {'Safe': 8,
-                         'At risk': 6,
-                         'Vulnerable': 5,
-                         'Threatened': 4,
-                         'Endangered': 3,
-                         'Severely endangered': 2,
-                         'Critically endangered': 1,
-                         'Dormant': 0,
-                         'Awakening': 0,
+        category_map = {'Safe': '8',
+                         'At risk': '6',
+                         'Vulnerable': '5',
+                         'Threatened': '4',
+                         'Endangered': '3',
+                         'Severely endangered': '2',
+                         'Critically endangered': '1',
+                         'Dormant': '0',
+                         'Awakening': '0',
                        }
         end_aggreg = aggreg.loc[aggreg['src_is_ethnologue'] == False]
         gr = end_aggreg.groupby("language_id")
@@ -132,7 +131,7 @@ class Preproc:
 
     def numerical_preproc(self):
         
-        self.df[self.bool_needed] = self.df[self.bool_needed].fillna(0)
+        self.df[self.bool_needed] = self.df[self.bool_needed].fillna(int(0))
         self.df[self.log_needed] = self.df[self.log_needed].fillna(0)
         self.df[self.log_needed] = self.df[self.log_needed].applymap(
             lambda x: log(x+1))
@@ -154,12 +153,11 @@ def main():
         level=logging.INFO,
         format="%(asctime)s : " +
         "%(module)s (%(lineno)s) - %(levelname)s - %(message)s")
-    fn = '/home/pajkossy/Proj/langdeath/langdeath.db.sqlite3'
+    fn = '/home/pajkossy/Proj/langdeath/langdeath.db.sqlite3.bu'
     train_data_dir = '/home/pajkossy/Proj/langdeath/classification/seed_data/'
     feat_data_dir = '/home/pajkossy/Proj/langdeath/classification/feat_data/'
     a = Preproc(fn, train_data_dir, feat_data_dir)
     a.preproc_data()
-    print a.df[a.needed + ['seed_label']].keys()
 
 if __name__ == "__main__":
     main()
