@@ -48,7 +48,7 @@ Sindhi (Devanagari)	Sindhi
 Serbian (Latin, Serbia)	Serbian
 Yoruba (Nigeria)	Yoruba
 French (Switzerland)	French
-Belgian (Comma)	Belgian
+Belgian (Comma)	Dutch
 Lao (Laos)	Lao
 Igbo (Nigeria)	Igbo
 isiXhosa (South Africa)	isiXhosa
@@ -115,7 +115,7 @@ Georgian (Georgia)	Georgian
 Persian (Standard)	Persian
 Divehi Typewriter	Divehi
 Russian - Mnemonic	Russian
-Belgian (Period)	Belgian
+Belgian (Period)	Dutch
 Mongolian (Mongolian Script - Legacy)	Mongolian
 Nepali (Federal Democratic Republic of Nepal)	Nepali
 Slovenian (Slovenia)	Slovenian
@@ -129,7 +129,7 @@ Português (Brasil)	Portuguese
 Sundanese (Latin)	Sundanese
 Bulgarian (phonetic layout)	Bulgarian
 Georgian (QWERTY)	Georgian
-United States-Dvorak for right hand	Engish
+United States-Dvorak for right hand	English
 Czech Programmers	Czech
 ਪੰਜਾਬੀ	Punjabi
 Portuguese (Brasil)	Portuguese
@@ -142,7 +142,7 @@ Bangla (India)	Bangla
 Pashto (Afghanistan)	Pashto
 Croatian (Croatia)	Croatian
 Arabic (102)	Arabic
-Português (Portugal)	Portoguese
+Português (Portugal)	Portuguese
 Kyrgyz Cyrillic	Kyrgyz
 Norwegian with Sami	Norwegian
 Romanian (Standard)	Romanian
@@ -170,7 +170,7 @@ United States-Dvorak for left hand	English
 Luxembourgish (Luxembourg)	Luxembourgish
 Tifinagh (Full)	Tifinagh
 Azerbaijani (Latin)	Azerbaijani
-Odia (India)	Odia
+Odia (India)	Oriya
 Inuktitut (Latin, Canada)	Inuktitut
 Malay (Malaysia)	Malay
 Tajik (Cyrillic)	Tajik
@@ -241,14 +241,12 @@ Bahasa Melayu (Malaysia)	Malay
 Bashkirian	Bashkir
 Chinese (PRC)	Chinese
 CloGaelach	Irish
-Engish	English
 Faeroese	Faroese
 Japanise	Japanese
-Lietuvių	Lithuania
+Lietuvių	Lithuanin
 Malay (Arabic)	Malay
 Odia	Oriya
 Osmanya	Somali
-Portoguese	Portuguese
 Thai Kedmanee	Thai
 Thai Kedmanee (non-ShiftLock)	Thai
 Thai Pattachote (non-ShiftLock)	Thai
@@ -256,6 +254,7 @@ USA - ClassmatePC	English
 Uzbek (Arabic)	Uzbek
 Simple English	English
 Simplified Chinese	Chinese
-Canadian Multilingual	Engish   
+Canadian Multilingual	English   
 Canadian Multilingual Standard	English
-Belgian	Dutch  
+Belgian	Dutch
+Lezgian	Lezghian
