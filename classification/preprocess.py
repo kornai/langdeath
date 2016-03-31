@@ -23,8 +23,8 @@ class Preproc:
         self.t_set = [l.strip() for l in open('{}/t'.format(self.train_dir))]
         self.v_set = [l.strip() for l in open('{}/v'.format(self.train_dir))]
         self.h_set = [l.strip() for l in open('{}/h'.format(self.train_dir))]
-        self.s_set = [l.strip() for l in open('{}/s'.format(self.\
-                                                                 train_dir))]
+        self.s_set = [l.strip() for l in open('{}/s'.format(self.train_dir))]
+        self.g_set = [l.strip() for l in open('{}/g'.format(self.train_dir))]
     
     def get_feat_set(self):
 
@@ -121,6 +121,7 @@ class Preproc:
                                                   else 'h' if x in self.h_set
                                                   else 'v' if x in self.v_set
                                                   else 't' if x in self.t_set
+                                                  else 'g' if x in self.g_set
                                                   else '-')
         
         #self.df['seed_label_2class'] = self.df.seed_label\
