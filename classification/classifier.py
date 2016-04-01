@@ -2,6 +2,7 @@ import sys
 import logging
 import pandas
 import random
+from collections import defaultdict, Counter
 from sklearn.linear_model import LogisticRegression
 from sklearn import cross_validation
 from sklearn.feature_selection import SelectFromModel
@@ -89,6 +90,21 @@ class Classifier:
         self.df_res[label] = model.predict(all_data)
         logging.info('labelings:\n{}'.format(pandas.value_counts(
         self.df_res[label].values)))
+    
+    def map_values(self, d):
+
+        d2 = defaultdict(int)
+        for k in d:
+            if k in ['s', 'h', 'sh']:
+                d2['-'] += d[k]
+            else:
+                d2['+'] += d[k]
+        if d2['-'] < 3:
+            return 'living'
+        if d2['+'] < 3:
+            return 'still'
+        else:
+            return 'borderline'
 
     def train_classify(self, out_fn):
         for i in range(self.exp_count):
@@ -101,9 +117,13 @@ class Classifier:
             if crossval_res > self.limit:
                 self.train_label(selector=self.selector,
                          label='exp_with_feature_sel_{0}'.format(i))
+        self.df_res['status'] = self.df_res.apply(lambda x:Counter(x),
+                                                  axis=1).apply(self.map_values)
         if out_fn != None:
             logging.info('exporting dataframe to {}'.format(out_fn))  
             self.df_res.to_csv(out_fn, sep='\t', encoding='utf-8')
+      
+            
 
 def main():
     
