@@ -10,7 +10,8 @@ import numpy
 
 class Classifier:
 
-    def __init__(self, tsv, exp_count, classcount, limit):
+    def __init__(self, tsv, exp_count, classcount, limit, logger,
+                out_fn):
 
         self.df = pandas.read_csv(tsv, sep='\t')
         series = ['crossval_res'] + self.df['sil'].tolist()
@@ -20,6 +21,8 @@ class Classifier:
         self.exp_count = exp_count
         self.classes = classcount
         self.limit = limit
+        self.logger = logger
+        self.out_fn = out_fn
 
     def shuffle_rows(self, df):
         index = list(df.index)
@@ -63,11 +66,11 @@ class Classifier:
         train_data = self.feats
         if selector is not None:
             train_data = selector.transform(train_data)
-            logging.info('number of feats after selection: {}'.format(
+            logging.debug('number of feats after selection: {}'.format(
                 train_data.shape[1]))
         scores = cross_validation.cross_val_score(
             model, train_data, self.labels, cv=5)
-        logging.info('crossval score:{}, average:{}'.format(
+        logging.debug('crossval score:{}, average:{}'.format(
             scores, sum(scores)/5))
         return sum(scores)/5
 
@@ -76,7 +79,7 @@ class Classifier:
         self.selector = SelectFromModel(selector_model)
         self.selector.fit(self.feats, self.labels)
         support = self.selector.get_support(indices=True)
-        logging.info('selected features:{}'.format(
+        logging.debug('selected features:{}'.format(
             self.df.iloc[:, support].keys()))
 
 
@@ -90,7 +93,7 @@ class Classifier:
             all_data = selector.transform(self.all_feats)
         model.fit(train_data, self.labels)
         self.df_res[label] = [crossval_res] +  list(model.predict(all_data))
-        logging.info('labelings:\n{}'.format(pandas.value_counts(
+        self.logger.debug('labelings:\n{}'.format(pandas.value_counts(
         self.df_res[label].values)))
     
     def map_values(self, d):
@@ -108,7 +111,7 @@ class Classifier:
         else:
             return 'borderline'
 
-    def train_classify(self, out_fn):
+    def train_classify(self):
         for i in range(self.exp_count):
             self.get_train_df()
             crossval_res = self.train_crossval()
@@ -120,36 +123,58 @@ class Classifier:
                          label='exp_with_feature_sel_{0}'.format(i))
         self.df_res['status'] = self.df_res.apply(lambda x:Counter(x),
                                                   axis=1).apply(self.map_values)
-        #best = self.df_res.loc[:, self.df_res['crossval_res'] > self.limit]
         needed = self.df_res.iloc[0] > self.limit
         needed_list = numpy.where(needed.tolist())[0].tolist()
-        best = self.df_res.iloc[:, needed_list]
-        self.df_res['status_best'] = best.apply(lambda x:Counter(x), axis=1).apply(self.map_values)
-        if out_fn != None:
-            print self.df_res.status.value_counts()
-            print best.shape
-            print self.df_res.status_best.value_counts()
-            logging.info('exporting dataframe to {}'.format(out_fn))  
-            self.df_res.to_csv(out_fn, sep='\t', encoding='utf-8')
+        self.best = self.df_res.iloc[:, needed_list]
+        self.df_res['status_best'] = self.best.apply(lambda x:Counter(x), axis=1)\
+                .apply(self.map_values)
+        self.log_stats()
+    
+    def log_stats(self):
+        
+        crossval_res_all = pandas.to_numeric(self.df_res.iloc[0, :-2])
+        crossval_res_best = pandas.to_numeric(self.best.iloc[0, :-2])
+        self.logger.info('Crossvalidation results (all):\n{}'.\
+                         format(crossval_res_all.describe()))
+        self.logger.info(('Statuses based on all labelings:\n{}')\
+                         .format(self.df_res.status.value_counts()))
+        self.logger.info('Crossvalidation results (filtered by limit {1}):\n{0}'.\
+                         format(crossval_res_best.describe(), self.limit))
+        self.logger.info(('Statuses based on best labelings:\n{}')\
+                         .format(self.df_res.status_best.value_counts()))
+        self.logger.info('exporting dataframe to {}'.format(self.out_fn))
+        self.df_res.to_csv(self.out_fn, sep='\t', encoding='utf-8')
 
       
-            
+def get_logger():
+    
+    logger = logging.getLogger()
+    logger.setLevel(logging.DEBUG)
+    formatter = logging.Formatter("%(asctime)s : " +
+                    "%(module)s (%(lineno)s) - %(levelname)s - %(message)s")
+    handler = logging.FileHandler('classifier.log')
+    handler.setLevel(logging.DEBUG)
+    handler.setFormatter(formatter)
+    logger.addHandler(handler)
+    streamhandler = logging.StreamHandler()
+    streamhandler.setLevel(logging.INFO)
+    logger.addHandler(streamhandler)
+    return logger
+
 
 def main():
     
-    logging.basicConfig(
-        level=logging.INFO,
-        format="%(asctime)s : " +
-        "%(module)s (%(lineno)s) - %(levelname)s - %(message)s")
+    logger = get_logger()
+
+
     preprocessed_tsv = sys.argv[1]
     exp_count = int(sys.argv[2])
     classcount = int(sys.argv[3])
     limit = float(sys.argv[4])
-    out_fn = None
-    if len(sys.argv) > 5:
-        out_fn = sys.argv[5]
-    a = Classifier(preprocessed_tsv, exp_count, classcount, limit)
-    a.train_classify(out_fn)
+    out_fn = sys.argv[5]
+    a = Classifier(preprocessed_tsv, exp_count, classcount, limit, logger,
+                  out_fn)
+    a.train_classify()
 
 if __name__ == '__main__':
     main()
