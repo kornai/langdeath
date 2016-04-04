@@ -1,4 +1,3 @@
-import sys
 import logging
 import pandas
 import random
@@ -7,6 +6,7 @@ from sklearn.linear_model import LogisticRegression
 from sklearn import cross_validation
 from sklearn.feature_selection import SelectFromModel
 import numpy
+import argparse
 
 class Classifier:
 
@@ -146,13 +146,13 @@ class Classifier:
         self.df_res.to_csv(self.out_fn, sep='\t', encoding='utf-8')
 
       
-def get_logger():
+def get_logger(fn):
     
     logger = logging.getLogger()
     logger.setLevel(logging.DEBUG)
     formatter = logging.Formatter("%(asctime)s : " +
                     "%(module)s (%(lineno)s) - %(levelname)s - %(message)s")
-    handler = logging.FileHandler('classifier.log')
+    handler = logging.FileHandler(fn)
     handler.setLevel(logging.DEBUG)
     handler.setFormatter(formatter)
     logger.addHandler(handler)
@@ -161,17 +161,39 @@ def get_logger():
     logger.addHandler(streamhandler)
     return logger
 
+def get_args():
+
+    parser = argparse.ArgumentParser()
+    parser.add_argument('-i', "--input_tsv", help="data file in tsv format",
+                       default="preproc.tsv")
+    parser.add_argument("-e", "--experiment_count", type=int,
+                        help="number of experiments with random seed sets",
+                        default=100)
+    parser.add_argument("-c", "--class_counts", type=int, default=2,
+                        choices=[1, 2, 3, 4, 5],
+                        help="2 - still/living, 3 - still/vital/thriving,"+
+                        "4 - still/historic/vital, thriving" +
+                        "5 - still/historic/thriving/vital/global")
+    parser.add_argument("-t", "--threshold", type=float, default=0.9, 
+                       help="lower limit on cross-validation accuracy for counting" +
+                        "statistics on 'filtered' labelings")
+    parser.add_argument("-o", "--output_fn", default="labeled.tsv",
+                       help="file for writing labelings")
+    parser.add_argument("-l", "--log_file", default="classifier.log",
+                       help="file for logging")
+    return parser.parse_args()
+
+
 
 def main():
     
-    logger = get_logger()
-
-
-    preprocessed_tsv = sys.argv[1]
-    exp_count = int(sys.argv[2])
-    classcount = int(sys.argv[3])
-    limit = float(sys.argv[4])
-    out_fn = sys.argv[5]
+    args = get_args()
+    logger = get_logger(args.log_file)
+    preprocessed_tsv = args.input_tsv
+    exp_count = args.experiment_count
+    classcount = args.class_counts
+    limit = args.threshold
+    out_fn = args.output_fn
     a = Classifier(preprocessed_tsv, exp_count, classcount, limit, logger,
                   out_fn)
     a.train_classify()

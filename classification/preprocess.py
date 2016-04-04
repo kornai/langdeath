@@ -3,12 +3,12 @@ from math import log
 from collections import Counter
 import pandas
 import sqlite3
+import argparse
 
 class Preproc:
 
-    def __init__(self, sqlite_fn, train_dir, feat_dir, 
-                 preprocessed_fn='preproc.tsv',
-                 joined_fn='joined.tsv'):
+    def __init__(self, sqlite_fn, train_dir, feat_dir,
+                 joined_fn, preprocessed_fn):
         self.sqlite_fn = sqlite_fn
         self.preprocessed_fn = preprocessed_fn
         self.joined_fn = joined_fn
@@ -124,11 +124,6 @@ class Preproc:
                                                   else 'g' if x in self.g_set
                                                   else '-')
         
-        #self.df['seed_label_2class'] = self.df.seed_label\
-        #        .map(lambda x:
-        #             'sh' if x == 'm' or x == 'h'
-        #             else 'tv' if x == 't' or x == 'v'
-        #             else '-')     
 
     def numerical_preproc(self):
         
@@ -147,17 +142,36 @@ class Preproc:
         self.add_labels()
         self.df[self.needed + ['seed_label']].\
                 to_csv(self.preprocessed_fn, sep='\t', encoding='utf-8')
-        
+    
+def get_args():
+    parser = argparse.ArgumentParser()
+    parser.add_argument('-d', '--data', help='data file (sqlite file)',
+                        default='../langdeath.db.sqlite3')
+    parser.add_argument('-t', '--train_data_dir', default='seed_data',
+                        help='directory containing s, h, v, t, g files' +\
+                        'for training')
+    parser.add_argument('-f', '--feat_data_dir', default='feat_data',
+                        help='directory containing features listed for' +\
+                        'normalization')
+    parser.add_argument('-o', '--out_fn', help='output file name',
+                        default='preproc.tsv')
+    parser.add_argument('-j', '--joined_fn', help='intermediate file name',
+                        default='joined.tsv')
+    return parser.parse_args()
+
 def main():
     
     logging.basicConfig(
         level=logging.INFO,
         format="%(asctime)s : " +
         "%(module)s (%(lineno)s) - %(levelname)s - %(message)s")
-    fn = '/home/pajkossy/Proj/langdeath/langdeath.db.sqlite3.bu'
-    train_data_dir = '/home/pajkossy/Proj/langdeath/classification/seed_data/'
-    feat_data_dir = '/home/pajkossy/Proj/langdeath/classification/feat_data/'
-    a = Preproc(fn, train_data_dir, feat_data_dir)
+    args = get_args() 
+    fn = args.data
+    train_data_dir = args.train_data_dir
+    feat_data_dir = args.feat_data_dir
+    out_fn = args.out_fn
+    joined_fn = args.joined_fn
+    a = Preproc(fn, train_data_dir, feat_data_dir, joined_fn, out_fn)
     a.preproc_data()
 
 if __name__ == "__main__":
