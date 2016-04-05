@@ -139,15 +139,15 @@ class ParserAggregator(object):
         if len(self.new_langs) > 0:
             logging.error("New langs/not found: {0}, ".format(
                 len(self.new_langs)))
-            if self.debug_dir != None:
-                if len(self.new_langs) > 0:
-                    write_out_new_langs(
-                        self.new_langs, self.get_out_fn(new=True))
-                if len(self.found_langs) > 0:    
-                    write_out_found_langs(self.found_langs, self.get_out_fn())
-                if len(self.new_altnames) > 0:    
-                    write_out_new_altnames(
-                    self.new_altnames, self.get_out_fn(altnames=True))
+        if self.debug_dir != None:
+            if len(self.new_langs) > 0:
+                write_out_new_langs(
+                    self.new_langs, self.get_out_fn(new=True))
+            if len(self.found_langs) > 0:    
+                write_out_found_langs(self.found_langs, self.get_out_fn())
+            if len(self.new_altnames) > 0:
+                write_out_new_altnames(
+                self.new_altnames, self.get_out_fn(altnames=True))
         transaction.commit()
     
     def get_out_fn(self, new=False, altnames=False):
