@@ -27,6 +27,7 @@ from ld.parsers.list_of_wikipedia_parser import WikipediaListOfLanguagesParser
 from ld.parsers.wikipedia_incubators_parser import WikipediaIncubatorsParser
 from ld.parsers.wpsize_counter import WikipediaAdjustedSizeCounter_WPExtractor, \
     WPIncubatorAdjustedSizeCounter
+from ld.parsers.google_translate_parser import GoogleTranslateParser
 from ld.parser_aggregator_utils import write_out_new_langs,\
         write_out_found_langs, write_out_new_altnames
 from ld.parsers.endangered_parser import EndangeredParser
@@ -55,13 +56,13 @@ class ParserAggregator(object):
         self.parsers = [ParseISO639_3(), MacroWPParser(), uriel_parser, dbpedia_parser,
                         eth_parser, l2_parser, CrubadanParser(), la_parser,
                         WalsInfoParser(res_dir), IndigenousParser(res_dir),
+                        GoogleTranslateParser(res_dir),
                         WikipediaListOfLanguagesParser(res_dir),
                         WikipediaIncubatorsParser(res_dir),
                         WikipediaAdjustedSizeCounter_WPExtractor(wpdumps_dir),
                         endangered_parser, omniglot_parser,
                         FirefoxParser(firefox_mapping),
                         SoftwareSupportParser(res_dir), wpinc_adj_parser]
-        self.parsers = [wpinc_adj_parser]
         self.parsers_todo = [omniglot_parser, SoftwareSupportParser(res_dir),
                              FirefoxParser(firefox_mapping)]
         self.lang_db = LanguageDB()
