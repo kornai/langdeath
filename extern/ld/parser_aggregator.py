@@ -1,5 +1,8 @@
 import logging
+import os
 import sys
+from argparse import ArgumentParser
+import re
 
 from django.db import transaction
 
@@ -39,41 +42,93 @@ class ParserAggregator(object):
     the results, call any extra methods that will be required to merge
     two langauges (or any other data) that are possibly the same
     """
-    def __init__(self, eth_dump_dir='', la_dump_dir='', dbpedia_res_dir='',
-                 wpdumps_dir='', wpinc_dump_fn='', res_dir='extern/ld/res',
-                 endangered_dump_dir='', uriel_dump='', debug_dir=None):
-        eth_parser = EthnologueDumpParser(eth_dump_dir)
-        la_parser = (LanguageArchivesOnlineParser() if not la_dump_dir
-                     else LanguageArchivesOfflineParser(la_dump_dir))
-        uriel_parser = UrielParser(uriel_dump)
-        dbpedia_parser = DbpediaParserAggregator(basedir=dbpedia_res_dir)
-        l2_parser = L2Parser(res_dir + "/" + "ethnologue_l2")
-        wpinc_adj_parser = WPIncubatorAdjustedSizeCounter(wpinc_dump_fn)
-        firefox_mapping = '{0}/mappings/firefox'.format(res_dir)
-        endangered_parser = EndangeredParser('{}/list_of_ids'.format(
-            endangered_dump_dir), endangered_dump_dir)
-        omniglot_parser = OmniglotParser('{0}/mappings/omniglot'.format(res_dir))
+    
+    def __init__(self, data_dump_dir, log_dir, pickle_dir, classname_to_fn):
+        
+        pickles, dump_dir = self.check_dirs(
+            data_dump_dir, classname_to_fn, pickle_dir)
+        res_dir = '{}/res'.format(os.path.dirname(sys.argv[0]))
+        # initializing parsers which need data dumps
+        parser_names = [
+            'EthnologueDumpParser','LanguageArchivesOfflineParser',
+            'UrielParser', 'DbpediaParserAggregator',
+            'WikipediaAdjustedSizeCounter_WPExtractor',
+            'WPIncubatorAdjustedSizeCounter',
+            'EndangeredParser']
+        eth_parser, la_parser, uriel_parser, dbpedia_parser,\
+        wp_adjusted_parser, wpinc_adj_parser, endangered_parser = \
+                self.init_dump_based_parsers(pickles, dump_dir, parser_names)
+        #initializing all parsers
         self.parsers = [ParseISO639_3(), MacroWPParser(), uriel_parser, dbpedia_parser,
-                        eth_parser, l2_parser, CrubadanParser(), la_parser,
+                        eth_parser, L2Parser(res_dir + "/" + "ethnologue_l2"),
+                        CrubadanParser(), la_parser,
                         WalsInfoParser(res_dir), IndigenousParser(res_dir),
                         GoogleTranslateParser(res_dir),
                         WikipediaListOfLanguagesParser(res_dir),
                         WikipediaIncubatorsParser(res_dir),
-                        WikipediaAdjustedSizeCounter_WPExtractor(wpdumps_dir),
-                        endangered_parser, omniglot_parser,
-                        FirefoxParser(firefox_mapping),
+                        wp_adjusted_parser,
+                        endangered_parser, OmniglotParser(
+                            '{0}/mappings/omniglot'.format(res_dir)),
+                        FirefoxParser('{0}/mappings/firefox'.format(res_dir)),
                         SoftwareSupportParser(res_dir), wpinc_adj_parser]
-        self.parsers_todo = [omniglot_parser, SoftwareSupportParser(res_dir),
-                             FirefoxParser(firefox_mapping)]
+        self.parsers = filter(lambda x:x != None, self.parsers)
         self.lang_db = LanguageDB()
         self.trusted_parsers = set([ParseISO639_3])
         self.parsers_needs_sil = set([EthnologueOfflineParser,
                                       EthnologueOnlineParser,
                                       LanguageArchivesOnlineParser])
-        self.debug_dir = debug_dir
+        self.debug_dir = log_dir
+        self.pickle_dir = pickle_dir
 
+    def check_dirs(self, data_dump_dir, classname_to_fn, pickle_dir):
+        
+        dump_dir = {}
+        pickle_fns = os.listdir(pickle_dir)
+        pickled_pattern = re.compile('(.*?).pickle')
+        pickled = []
+        for f in pickle_fns:
+            matched = pickled_pattern.match(f)
+            if matched != None:
+                base = matched.groups()[0]
+                logging.info('Parser {} will only load {}/{}'.format(
+                    base, pickle_dir, f))
+                pickled.append(base)
+        files = os.listdir(data_dump_dir)
+        for k, v in classname_to_fn.iteritems():
+            if v in files:
+                dump_dir[k] = '{}/{}'.format(data_dump_dir, v)
+            elif v not in pickled:
+                logging.info("Parser {} has no input, so it'll get skipped".format(
+                base))
+        return pickled, dump_dir
+    
+    def init_dump_based_parsers(self, pickles, dump_dir, parser_names):
+        dummy_fn = 'dummy_fn'
+        initialized_parsers = []
+        for classname in parser_names:
+            if classname in pickles:
+                initialized_parsers.append(eval(classname)(dummy_fn))
+            elif classname in dump_dir:
+                if classname == 'EndangeredParser':
+                    list_of_ids, endangered_dump_dir =\
+                            dump_dir['EndangeredParser']
+                    initialized_parsers.append(
+                        EndangeredParser(list_of_ids, endangered_dump_dir))    
+                else:
+                    initialized_parsers.append(eval(classname)(
+                        dump_dir[classname]))
+            else:
+                if classname == 'LanguageArchivesOfflineParser':
+                    initialized_parsers.append(
+                        LanguageArchivesOnlineParser())
+                else:    
+                    initialized_parsers.append(None)
+        return initialized_parsers
+
+        
     def run(self):
         for parser in self.parsers:
+            parser.pickle_dir = self.pickle_dir
             self.call_parser(parser)
 
     def choose_parse_call(self, parser):
@@ -164,10 +219,26 @@ class ParserAggregator(object):
                 new_lang_label = 'found_langs'
         return '{}/{}.{}'.format(self.debug_dir, classname, new_lang_label)    
     
-  
+
+def get_args():
+    parser = ArgumentParser()
+    parser.add_argument('-d', '--data_dump_dir', help='directory of data dumps')
+    parser.add_argument('-p', '--pickle_dir', help='directory of pickles')
+    parser.add_argument('-l', '--log_dir', default='.',
+                        help='directory for log files')
+    parser.add_argument('-f', '--filename_mappings',
+                        default='extern/ld/res/dump_filenames',
+                        help='file mapping parser classnames to dumps')
+    return parser.parse_args()
+
+
 def main():
     logging.basicConfig(level=logging.INFO)
-    pa = ParserAggregator(*sys.argv[1:])
+    args = get_args()
+    classname_to_fn = dict([l.strip().split('\t')
+                           for l in open(args.filename_mappings)])
+    pa = ParserAggregator(args.data_dump_dir, args.pickle_dir, args.log_dir,
+                          args.pickle_dir, classname_to_fn)
     pa.run()
 
 if __name__ == "__main__":
