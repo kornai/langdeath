@@ -15,6 +15,11 @@ class DbpediaParserAggregator(OfflineParser):
         self.shortabstract_parser = DbpediaShortAbstractsParser(basedir)
 
     def parse(self):
+        
+        self.raw_infobox_parser.pickle_dir = self.pickle_dir
+        self.properties_parser.pickle_dir = self.pickle_dir
+        self.shortabstract_parser.pickle_dir = self.pickle_dir
+
         i_res = list(self.raw_infobox_parser.parse())
         sa_res = list(self.shortabstract_parser.parse())
         p_res = list(self.properties_parser.parse())
@@ -50,7 +55,7 @@ def main():
     bd = sys.argv[1]
     p = DbpediaParserAggregator(bd)
     for d in p.parse():
-        print d
+            print d
 
 if __name__ == "__main__":
     main()
