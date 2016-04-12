@@ -56,8 +56,9 @@ class ParserAggregator(object):
             'WPIncubatorAdjustedSizeCounter',
             'EndangeredParser']
         eth_parser, la_parser, uriel_parser, dbpedia_parser,\
-        wp_adjusted_parser, wpinc_adj_parser, endangered_parser = \
-                self.init_dump_based_parsers(pickles, dump_dir, parser_names)
+                wp_adjusted_parser, wpinc_adj_parser, endangered_parser = \
+                self.init_dump_based_parsers(pickles, dump_dir, parser_names,
+                                             res_dir)
         #initializing all parsers
         self.parsers = [ParseISO639_3(), MacroWPParser(), uriel_parser, dbpedia_parser,
                         eth_parser, L2Parser(res_dir + "/" + "ethnologue_l2"),
@@ -102,7 +103,7 @@ class ParserAggregator(object):
                 base))
         return pickled, dump_dir
     
-    def init_dump_based_parsers(self, pickles, dump_dir, parser_names):
+    def init_dump_based_parsers(self, pickles, dump_dir, parser_names, res_dir):
         dummy_fn = 'dummy_fn'
         initialized_parsers = []
         for classname in parser_names:
@@ -110,10 +111,11 @@ class ParserAggregator(object):
                 initialized_parsers.append(eval(classname)(dummy_fn))
             elif classname in dump_dir:
                 if classname == 'EndangeredParser':
-                    list_of_ids, endangered_dump_dir =\
+                    endangered_dump_dir =\
                             dump_dir['EndangeredParser']
                     initialized_parsers.append(
-                        EndangeredParser(list_of_ids, endangered_dump_dir))    
+                        EndangeredParser('{}/endangered_ids'.format(res_dir),
+                                         endangered_dump_dir))   
                 else:
                     initialized_parsers.append(eval(classname)(
                         dump_dir[classname]))
@@ -237,7 +239,7 @@ def main():
     args = get_args()
     classname_to_fn = dict([l.strip().split('\t')
                            for l in open(args.filename_mappings)])
-    pa = ParserAggregator(args.data_dump_dir, args.pickle_dir, args.log_dir,
+    pa = ParserAggregator(args.data_dump_dir, args.log_dir,
                           args.pickle_dir, classname_to_fn)
     pa.run()
 
