@@ -25,7 +25,6 @@ class BaseParser(object):
         fn = pickle_fn if pickle_fn else self.pickle_fn
         if hasattr(self, 'pickle_dir'):
             fn = '{}/{}'.format(self.pickle_dir, fn)
-        print fn, path.exists(fn)    
         if path.exists(fn):
             with open(fn, 'rb') as f:
                 for res in cPickle.load(f):
