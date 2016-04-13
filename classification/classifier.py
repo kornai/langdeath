@@ -96,7 +96,7 @@ class Classifier:
         self.logger.debug('labelings:\n{}'.format(pandas.value_counts(
         self.df_res[label].values)))
     
-    def map_values(self, d):
+    def map_borderline_values(self, d):
 
         d2 = defaultdict(int)
         for k in d:
@@ -111,6 +111,14 @@ class Classifier:
         else:
             return 'borderline'
 
+    def map_stable_values(self, d):
+
+        sort_values = sorted(d.iteritems(), key=lambda x:x[1], reverse=True)
+        if sort_values[0][1] > sum(d.itervalues()) * 0.9:
+            return sort_values[0][0]
+        else:
+            return '-' 
+
     def train_classify(self):
         for i in range(self.exp_count):
             self.get_train_df()
@@ -122,26 +130,34 @@ class Classifier:
             self.train_label(crossval_res=crossval_res, selector=self.selector,
                          label='exp_with_feature_sel_{0}'.format(i))
         self.df_res['status'] = self.df_res.apply(lambda x:Counter(x),
-                                                  axis=1).apply(self.map_values)
+                                                  axis=1).apply(self.map_borderline_values)
+        self.df_res['stable'] = self.df_res.apply(lambda x:Counter(x),
+                                                  axis=1).apply(self.map_stable_values)
         needed = self.df_res.iloc[0] > self.limit
         needed_list = numpy.where(needed.tolist())[0].tolist()
         self.best = self.df_res.iloc[:, needed_list]
         self.df_res['status_best'] = self.best.apply(lambda x:Counter(x), axis=1)\
-                .apply(self.map_values)
+                .apply(self.map_borderline_values)
+        self.df_res['stable_best'] = self.best.apply(lambda x:Counter(x), axis=1)\
+                .apply(self.map_stable_values)
         self.log_stats()
     
     def log_stats(self):
         
-        crossval_res_all = pandas.to_numeric(self.df_res.iloc[0, :-2])
-        crossval_res_best = pandas.to_numeric(self.best.iloc[0, :-2])
+        crossval_res_all = pandas.to_numeric(self.df_res.iloc[0, :-4])
+        crossval_res_best = pandas.to_numeric(self.best.iloc[0, :-4])
         self.logger.info('Crossvalidation results (all):\n{}'.\
                          format(crossval_res_all.describe()))
         self.logger.info(('Statuses based on all labelings:\n{}')\
                          .format(self.df_res.status.value_counts()))
+        self.logger.info(('Stable languages based on all labelings:\n{}')\
+                        .format(self.df_res.stable.value_counts()))
         self.logger.info('Crossvalidation results (filtered by limit {1}):\n{0}'.\
                          format(crossval_res_best.describe(), self.limit))
         self.logger.info(('Statuses based on best labelings:\n{}')\
                          .format(self.df_res.status_best.value_counts()))
+        self.logger.info(('Stable languages based on best labelings:\n{}')\
+                        .format(self.df_res.stable_best.value_counts()))
         self.logger.info('exporting dataframe to {}'.format(self.out_fn))
         self.df_res.to_csv(self.out_fn, sep='\t', encoding='utf-8')
 
