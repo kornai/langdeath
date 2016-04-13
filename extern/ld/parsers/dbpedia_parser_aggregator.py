@@ -55,7 +55,7 @@ def main():
     bd = sys.argv[1]
     p = DbpediaParserAggregator(bd)
     for d in p.parse():
-            print d
+        print d
 
 if __name__ == "__main__":
     main()
