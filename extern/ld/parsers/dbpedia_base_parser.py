@@ -6,11 +6,11 @@ from base_parsers import OfflineParser
 class DbpediaNTBaseParser(OfflineParser):
     def __init__(self, basedir):
         self.basedir = basedir
+
+    def parse_languages(self):
         needed_fn = 'dbpedia_ontology_languages'
         self.needed_titles = set([l.strip('\n')
             for l in open('{0}/{1}'.format(self.basedir, needed_fn))])
-
-    def parse_languages(self):
         actual_lang = {}
         for l in self.fh:
             if l[0] == "#":
