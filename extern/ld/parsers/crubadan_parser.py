@@ -20,9 +20,8 @@ class CrubadanParser(OnlineParser):
                             'udhr': 'cru_udhr',
                             'speller': 'cru_floss_splchk'
         }
-        url1 = 'http://crubadan.org/writingsystems.csv?sEcho=1&iSortingCols=1&iSortCol_0=0&sSortDir_0=asc'    #nopep8
+        self.url1 = 'http://crubadan.org/writingsystems.csv?sEcho=1&iSortingCols=1&iSortCol_0=0&sSortDir_0=asc'    #nopep8
         self.script_url = 'http://crubadan.org/writingsystems.csv?sEcho=1&iSortingCols=1&iSortCol_0=4&sSortDir_0=asc&sSearch_4='    #nopep8
-        self.get_scripts(url1)
  
     def get_scripts(self, url1):
         html = get_html(url1)
@@ -50,6 +49,10 @@ class CrubadanParser(OnlineParser):
                 yield d
 
     def parse(self):
+        return self.parse_or_load()
+
+    def parse_all(self):
+        self.get_scripts(self.url1)
         for dict_ in self.generate_script_dicts():
             d = {}
             for k in dict_:
