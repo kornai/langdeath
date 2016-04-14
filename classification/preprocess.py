@@ -3,12 +3,12 @@ from math import log
 from collections import Counter
 import pandas
 import sqlite3
+import argparse
 
 class Preproc:
 
-    def __init__(self, sqlite_fn, train_dir, feat_dir, 
-                 preprocessed_fn='preproc.tsv',
-                 joined_fn='joined.tsv'):
+    def __init__(self, sqlite_fn, train_dir, feat_dir,
+                 joined_fn, preprocessed_fn):
         self.sqlite_fn = sqlite_fn
         self.preprocessed_fn = preprocessed_fn
         self.joined_fn = joined_fn
@@ -23,8 +23,8 @@ class Preproc:
         self.t_set = [l.strip() for l in open('{}/t'.format(self.train_dir))]
         self.v_set = [l.strip() for l in open('{}/v'.format(self.train_dir))]
         self.h_set = [l.strip() for l in open('{}/h'.format(self.train_dir))]
-        self.s_set = [l.strip() for l in open('{}/s_3900'.format(self.\
-                                                                 train_dir))]
+        self.s_set = [l.strip() for l in open('{}/s'.format(self.train_dir))]
+        self.g_set = [l.strip() for l in open('{}/g'.format(self.train_dir))]
     
     def get_feat_set(self):
 
@@ -34,8 +34,8 @@ class Preproc:
             '{}/log_needed'.format(self.feat_dir))]
         self.bool_needed = [l.strip() for l in open(
             '{}/bool_needed'.format(self.feat_dir))]
-        self.individual_defaults = {'eth_status': 7,
-                                    'endangered_aggregated_status': 5}
+        self.individual_defaults = {'eth_status': '7',
+                                    'endangered_aggregated_status': '5'}
 
     def get_df(self):
         conn = sqlite3.connect(self.sqlite_fn)
@@ -82,26 +82,25 @@ class Preproc:
     
     def join_ethnologue_levels(self, aggreg):
         aggreg['src_is_ethnologue'] = aggreg['src'] == 'ethnologue'
+        aggreg["eth_status"] = (aggreg['level'].map(
+            lambda x:x.replace("a", ".0").replace(
+                "b", ".5").replace('x', '')))
         eth_aggreg = aggreg[aggreg['src_is_ethnologue'] == True]
-        aggreg["eth_status"] = 7.
-        eth_aggreg.loc[:,'eth_status'] = (eth_aggreg['level'].map(
-            lambda x:float(x.replace("a", ".0").replace(
-            "b", ".5").replace('x', ''))))
         eth_tojoin = eth_aggreg[["language_id", "eth_status"]]
 
         self.df = self.df.merge(eth_tojoin, left_on="id",
                                 right_on="language_id", how="left")
 
     def join_end_endangered_levels(self, aggreg):
-        category_map = {'Safe': 8,
-                         'At risk': 6,
-                         'Vulnerable': 5,
-                         'Threatened': 4,
-                         'Endangered': 3,
-                         'Severely endangered': 2,
-                         'Critically endangered': 1,
-                         'Dormant': 0,
-                         'Awakening': 0,
+        category_map = {'Safe': '8',
+                         'At risk': '6',
+                         'Vulnerable': '5',
+                         'Threatened': '4',
+                         'Endangered': '3',
+                         'Severely endangered': '2',
+                         'Critically endangered': '1',
+                         'Dormant': '0',
+                         'Awakening': '0',
                        }
         end_aggreg = aggreg.loc[aggreg['src_is_ethnologue'] == False]
         gr = end_aggreg.groupby("language_id")
@@ -122,17 +121,13 @@ class Preproc:
                                                   else 'h' if x in self.h_set
                                                   else 'v' if x in self.v_set
                                                   else 't' if x in self.t_set
+                                                  else 'g' if x in self.g_set
                                                   else '-')
         
-        #self.df['seed_label_2class'] = self.df.seed_label\
-        #        .map(lambda x:
-        #             'sh' if x == 'm' or x == 'h'
-        #             else 'tv' if x == 't' or x == 'v'
-        #             else '-')     
 
     def numerical_preproc(self):
         
-        self.df[self.bool_needed] = self.df[self.bool_needed].fillna(0)
+        self.df[self.bool_needed] = self.df[self.bool_needed].fillna(int(0))
         self.df[self.log_needed] = self.df[self.log_needed].fillna(0)
         self.df[self.log_needed] = self.df[self.log_needed].applymap(
             lambda x: log(x+1))
@@ -147,19 +142,37 @@ class Preproc:
         self.add_labels()
         self.df[self.needed + ['seed_label']].\
                 to_csv(self.preprocessed_fn, sep='\t', encoding='utf-8')
-        
+    
+def get_args():
+    parser = argparse.ArgumentParser()
+    parser.add_argument('-d', '--data', help='data file (sqlite file)',
+                        default='../langdeath.db.sqlite3')
+    parser.add_argument('-t', '--train_data_dir', default='seed_data',
+                        help='directory containing s, h, v, t, g files' +\
+                        'for training')
+    parser.add_argument('-f', '--feat_data_dir', default='feat_data',
+                        help='directory containing features listed for' +\
+                        'normalization')
+    parser.add_argument('-o', '--out_fn', help='output file name',
+                        default='preproc.tsv')
+    parser.add_argument('-j', '--joined_fn', help='intermediate file name',
+                        default='joined.tsv')
+    return parser.parse_args()
+
 def main():
     
     logging.basicConfig(
         level=logging.INFO,
         format="%(asctime)s : " +
         "%(module)s (%(lineno)s) - %(levelname)s - %(message)s")
-    fn = '/home/pajkossy/Proj/langdeath/langdeath.db.sqlite3'
-    train_data_dir = '/home/pajkossy/Proj/langdeath/classification/seed_data/'
-    feat_data_dir = '/home/pajkossy/Proj/langdeath/classification/feat_data/'
-    a = Preproc(fn, train_data_dir, feat_data_dir)
+    args = get_args() 
+    fn = args.data
+    train_data_dir = args.train_data_dir
+    feat_data_dir = args.feat_data_dir
+    out_fn = args.out_fn
+    joined_fn = args.joined_fn
+    a = Preproc(fn, train_data_dir, feat_data_dir, joined_fn, out_fn)
     a.preproc_data()
-    print a.df[a.needed + ['seed_label']].keys()
 
 if __name__ == "__main__":
     main()

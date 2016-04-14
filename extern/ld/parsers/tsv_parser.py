@@ -48,6 +48,9 @@ class EthnologueDumpParser(TSV_parser):
         self.fn = fn
     
     def parse(self):
+        return self.parse_or_load()
+
+    def parse_all(self):
         field_target = {0: "sil", 1: "name", 4: "country", 8: "speakers",
                         15: "endangered_level"}
         header = True
@@ -68,8 +71,11 @@ class UrielParser(OfflineParser):
 
     def __init__(self, fn):
         self.fn = fn
-    
+
     def parse(self):
+        return self.parse_or_load()
+    
+    def parse_all(self):
         fh = open(self.fn)
         header = fh.readline()
         for l in fh:
