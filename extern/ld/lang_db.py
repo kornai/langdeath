@@ -129,7 +129,13 @@ class LanguageDB(object):
 
     def add_champion(self, data, lang):
         chs = Language.objects.filter(sil=data)
-        if len(chs) != 1:
+        
+        if len(chs) == 0:
+            msg = "champion code {}".format(lang.sil)
+            msg += " is not in database, so this champion doesn't get added"
+            raise LangdeathException(msg)
+
+        if len(chs) > 1:
             msg = "champion field {0} is not deterministic".format(chs)
             msg += " for lang {0} with sil {1}".format(lang.sil, data)
             raise LangdeathException(msg)
@@ -206,33 +212,31 @@ class LanguageDB(object):
 
         if "sil" in lang:
             languages = Language.objects.filter(sil=lang['sil'])
-            return languages
+            return languages, 'sil'
 
         if "other_codes" in lang:
             for src, code in lang["other_codes"].iteritems():
                 languages = Language.objects.filter(code__code_name=src,
                                                     code__code=code)
                 if len(languages) > 0:
-                    return languages
+                    return languages, 'other_codes'
 
         if "name" in lang:
             languages = Language.objects.filter(name=lang['name'])
             if len(languages) > 0:
-                return languages
+                return languages, 'name'
 
             # native name
             languages = Language.objects.filter(native_name=lang['name'])
             if len(languages) > 0:
-                return languages
+                return languages, 'native_name'
 
             # try with alternative names
             languages = Language.objects.filter(
                 alt_name__name=normalize_alt_name(lang['name']))
-            logging.info('Altname match: {0}: {1}'.format(
-                repr(lang['name']), repr(languages)))
-            return languages
+            return languages, 'altname'
 
-        return []
+        return [], None
 
     def choose_candidates(self, lang, l):
         """TODO later proper candidate selection"""

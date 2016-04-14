@@ -146,23 +146,20 @@ class ParserAggregator(object):
 
     def add_lang(self, lang):
         try:
-            candidates = self.lang_db.get_closest(lang)
+            candidates, clue = self.lang_db.get_closest(lang)
             if len(candidates) > 1:
                 tgts = self.lang_db.choose_candidates(lang, candidates)
                 for tgt in tgts:
                     self.lang_db.update_lang_data(tgt, lang)
-                    self.found_langs.append((lang, [tgt.name, tgt.sil]))
-                    if 'name' in lang and lang['name'] != tgt.name:
-                        self.new_altnames.append((lang['name'], tgt.name))
+                    self.add_data_to_loglists(lang, tgt.name, clue)
             elif len(candidates) == 1:
                 best = candidates[0]
                 self.lang_db.update_lang_data(best, lang)
-                self.found_langs.append((lang, [best.name, best.sil]))
-                if 'name' in lang and lang['name'] != best.name:
-                    self.new_altnames.append((lang['name'], best.name))
+                self.add_data_to_loglists(lang, best.name, clue)
             elif len(candidates) == 0:
                 self.new_langs.append(lang) 
                 if type(self.parser) in self.trusted_parsers:
+                    pass
                     self.lang_db.add_new_language(lang)
                 else:
                     msg = "{0} parser produced a language with data" \
@@ -175,6 +172,15 @@ class ParserAggregator(object):
             return
         except UnknownLanguageException as e:
             return
+                    
+    def add_data_to_loglists(self, lang, name, clue):
+        self.found_langs.append((lang, [name, clue]))
+        if 'alt_names' in lang:
+            a_l = lang['alt_names']
+            if type(a_l) in [str, unicode]:
+                a_l = [a_l]
+            for a_n in a_l:
+                self.new_altnames.append((a_n, lang.get('name', ''), name))
 
     @transaction.commit_manually
     def call_parser(self, parser):
@@ -216,7 +222,7 @@ class ParserAggregator(object):
                 new_lang_label = 'notfound_langs'
         else:        
             if altnames:
-                new_lang_label = 'new_altnames'        
+                new_lang_label = 'altnames'        
             else:
                 new_lang_label = 'found_langs'
         return '{}/{}.{}'.format(self.debug_dir, classname, new_lang_label)    

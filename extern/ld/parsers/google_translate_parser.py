@@ -49,8 +49,8 @@ class GoogleTranslateParser(OnlineParser):
     
 
 def main():
-
-    parser = GoogleTranslateParser()
+    import sys
+    parser = GoogleTranslateParser(sys.argv[1])
     for d in parser.parse():
         print d
 

@@ -19,9 +19,7 @@ class EndangeredParser(OfflineParser):
     def __init__(self, id_fn=None, offline_dir=''):
         self.base_url = 'http://www.endangeredlanguages.com/lang/'
         self.ids = list()
-        if id_fn:
-            with open(id_fn) as f:
-                self.ids = [l.strip() for l in f]
+        self.id_fn = id_fn
         self.lang_data = defaultdict(lambda: defaultdict(dict))
         self.html_parser = HTMLParser()
         self.sil_id_map = open('sil_id.map', 'w')
@@ -58,6 +56,9 @@ class EndangeredParser(OfflineParser):
         return self.parse_or_load()
 
     def parse_all(self):
+        
+        with open(self.id_fn) as f:
+                self.ids = [l.strip() for l in f]
         for id_ in self.ids:
             logging.debug('Parsing: {0}'.format(id_))
             csv_data = self.download_and_parse_csv(id_)
