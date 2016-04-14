@@ -129,7 +129,13 @@ class LanguageDB(object):
 
     def add_champion(self, data, lang):
         chs = Language.objects.filter(sil=data)
-        if len(chs) != 1:
+        
+        if len(chs) == 0:
+            msg = "champion code {}".format(lang.sil)
+            msg += " is not in database, so this champion doesn't get added"
+            raise LangdeathException(msg)
+
+        if len(chs) > 1:
             msg = "champion field {0} is not deterministic".format(chs)
             msg += " for lang {0} with sil {1}".format(lang.sil, data)
             raise LangdeathException(msg)
@@ -230,7 +236,7 @@ class LanguageDB(object):
                 alt_name__name=normalize_alt_name(lang['name']))
             return languages, 'altname'
 
-        return []
+        return [], None
 
     def choose_candidates(self, lang, l):
         """TODO later proper candidate selection"""
