@@ -20,7 +20,7 @@ def write_out_found_langs(lists, fn):
     header_list, value_lists = get_data(list_)
     fh = open(fn, 'w')
     keys, other_codes = get_header(list_)
-    merged_to_header = ['lang_merged_name', 'lang_merged_sil']
+    merged_to_header = ['lang_merged_name', 'merged_by']
     fh.write('{}\n'.format('\t'.join(keys + other_codes +
                                     merged_to_header)))
     fh.write('\n')
@@ -57,7 +57,8 @@ def get_header(list_):
 def write_out_new_altnames(new_altnames, fn):
     fh = open(fn, 'w')
     # header
-    fh.write(u'{}\t{}\n'.format('new_name', 'merged_to').encode('utf-8'))
+    fh.write(u'{}\t{}\t{}\n'.format('altname', 'altname_of', 'merged_to')\
+             .encode('utf-8'))
     fh.write('\n')
     for t in new_altnames:
-        fh.write(u'{}\t{}\n'.format(t[0], t[1]).encode('utf-8'))
+        fh.write(u'{}\t{}\t{}\n'.format(t[0], t[1], t[2]).encode('utf-8'))
