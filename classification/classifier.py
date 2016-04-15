@@ -40,10 +40,10 @@ class Classifier:
         d4 = {'-': '-', 's': 's', 'h': 'h', 'v': 'v', 't': 'tg',
               'g':'tg'}
         g_data = self.df[self.df.seed_label == 'g'].sample(n=2)
-        t_data = self.df[self.df.seed_label == 't'].sample(n=15)
-        v_data = self.df[self.df.seed_label == 'v'].sample(n=15)
-        h_data = self.df[self.df.seed_label == 'h'].sample(n=15)
-        s_data = self.df[self.df.seed_label == 's'].sample(n=30)
+        t_data = self.df[self.df.seed_label == 't'].sample(n=20)
+        v_data = self.df[self.df.seed_label == 'v'].sample(n=20)
+        h_data = self.df[self.df.seed_label == 'h'].sample(n=20)
+        s_data = self.df[self.df.seed_label == 's'].sample(n=80)
         self.train_df = pandas.concat([g_data, t_data, v_data, h_data, s_data])
         if self.classes == 2:
             self.train_df.seed_label = self.train_df.seed_label.map(
@@ -75,7 +75,7 @@ class Classifier:
         return sum(scores)/5
 
     def get_selector(self):
-        selector_model = LogisticRegression(penalty='l1')
+        selector_model = LogisticRegression(penalty='l1', C=0.1)
         self.selector = SelectFromModel(selector_model)
         self.selector.fit(self.feats, self.labels)
         support = self.selector.get_support(indices=True)
@@ -104,9 +104,10 @@ class Classifier:
                 d2['-'] += d[k]
             else:
                 d2['+'] += d[k]
-        if d2['-'] < 3:
+        all_ = d2['+'] + d2['-']        
+        if d2['+'] > 0.95 * all_:
             return 'living'
-        if d2['+']  < 3:
+        if d2['-']  > 0.95 * all_:
             return 'still'
         else:
             return 'borderline'
@@ -114,7 +115,7 @@ class Classifier:
     def map_stable_values(self, d):
 
         sort_values = sorted(d.iteritems(), key=lambda x:x[1], reverse=True)
-        if sort_values[0][1] > sum(d.itervalues()) * 0.9:
+        if sort_values[0][1] > sum(d.itervalues()) * 0.95:
             return sort_values[0][0]
         else:
             return '-' 
@@ -146,18 +147,20 @@ class Classifier:
         
         crossval_res_all = pandas.to_numeric(self.df_res.iloc[0, :-4])
         crossval_res_best = pandas.to_numeric(self.best.iloc[0, :-4])
-        self.logger.info('Crossvalidation results (all):\n{}'.\
+        self.logger.debug('Crossvalidation results (all):\n{}'.\
                          format(crossval_res_all.describe()))
-        self.logger.info(('Statuses based on all labelings:\n{}')\
-                         .format(self.df_res.status.value_counts()))
-        self.logger.info(('Stable languages based on all labelings:\n{}')\
-                        .format(self.df_res.stable.value_counts()))
+        self.logger.debug(('Statuses based on all labelings:\n{}')\
+                          .format(self.df_res.status[1:].value_counts()))
+        self.logger.debug(('Stable languages based on all labelings:\n{}')\
+                          .format(self.df_res.stable[1:].value_counts()))
         self.logger.info('Crossvalidation results (filtered by limit {1}):\n{0}'.\
                          format(crossval_res_best.describe(), self.limit))
-        self.logger.info(('Statuses based on best labelings:\n{}')\
-                         .format(self.df_res.status_best.value_counts()))
-        self.logger.info(('Stable languages based on best labelings:\n{}')\
-                        .format(self.df_res.stable_best.value_counts()))
+        self.logger.info(('Statuses based on labelings' +
+                          '(where crossvalidation exceeds limit):\n{}')\
+                         .format(self.df_res.status_best[1:].value_counts()))
+        self.logger.info(('Stable languages based on labelings' +
+                          '(where crossvalidation exceeds limit):\n{}')\
+                         .format(self.df_res.stable_best[1:].value_counts()))
         self.logger.info('exporting dataframe to {}'.format(self.out_fn))
         self.df_res.to_csv(self.out_fn, sep='\t', encoding='utf-8')
 
@@ -180,8 +183,9 @@ def get_logger(fn):
 def get_args():
 
     parser = argparse.ArgumentParser()
-    parser.add_argument('-i', "--input_tsv", help="data file in tsv format",
-                       default="preproc.tsv")
+    parser.add_argument("input_tsv", help="data file in tsv format")
+    parser.add_argument("output_fn",
+                       help="file for writing labelings")
     parser.add_argument("-e", "--experiment_count", type=int,
                         help="number of experiments with random seed sets",
                         default=100)
@@ -193,8 +197,6 @@ def get_args():
     parser.add_argument("-t", "--threshold", type=float, default=0.9, 
                        help="lower limit on cross-validation accuracy for counting" +
                         "statistics on 'filtered' labelings")
-    parser.add_argument("-o", "--output_fn", default="labeled.tsv",
-                       help="file for writing labelings")
     parser.add_argument("-l", "--log_file", default="classifier.log",
                        help="file for logging")
     return parser.parse_args()
