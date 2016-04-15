@@ -46,11 +46,11 @@ Usage
     extracted using WikiExtractor
     (see http://attardi.github.io/wikiextractor/)
 
-    - : ,a wikipedia incubator dump, extracted using WikiExtractor.
+    WP_incubator_20151226.bz2: a wikipedia incubator dump, extracted using WikiExtractor.
     
     -endangered_html_20151211_csv20160114: html sites of http://www.endangeredlanguages.com/lang/${LANGUAGE_CODE}
         If empty, the parser itself downloads the data
-    uriel_v0_2_features_avg.csv: 
+    -uriel_v0_2_features_avg.csv: from uriel typological database, http://www.cs.cmu.edu/~dmortens/uriel.html 
 
 
 1. Prior to running the parsers:
@@ -77,8 +77,31 @@ Usage
 
 3. To export the data into tsv, run python preprocess.py from the classifier directory.
    (see python preprocess.py --help)
+   This script exports langdeath.db.sqlite and preprocesses it for classification.
+   It produces two files, 'joined.tsv'(result of merging several data tables) and 'preproc.tsv'
+   (plus some preprocessings, e.g. N/A filling). This letter, preprc.tsv has to be given to the classifier script as input.
 
 4. To perform the classification experiments using the exported data, run python classifier.py from the classifier directory. 
    (see python classifier.py --help for listing the options)
-   After 
+   
+positional arguments:
+  input_tsv             data file in tsv format
+  output_fn             file for writing labelings
 
+optional arguments:
+  -h, --help            show this help message and exit
+  -e EXPERIMENT_COUNT, --experiment_count EXPERIMENT_COUNT
+                        number of experiments with random seed sets
+  -c {1,2,3,4,5}, --class_counts {1,2,3,4,5}
+                        2 - still/living, 3 - still/vital/thriving,4 -
+                        still/historic/vital, thriving5 -
+                        still/historic/thriving/vital/global
+  -t THRESHOLD, --threshold THRESHOLD
+                        lower limit on cross-validation accuracy for
+                        counting statistics on 'filtered' labelings
+  -l LOG_FILE, --log_file LOG_FILE
+                        file for logging
+
+After running the experiments some simple statistics will be printed, containing the number of languages labeled
+consistently to the same class ('stable'), and the count of the languages of the broader statuses 'living',
+'still', and 'borderline'. The status of the individual languages get written in the output_fn.  
