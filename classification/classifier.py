@@ -39,7 +39,7 @@ class Classifier:
               'g':'tg'}
         d4 = {'-': '-', 's': 's', 'h': 'h', 'v': 'v', 't': 'tg',
               'g':'tg'}
-        g_data = self.df[self.df.seed_label == 'g'].sample(n=2)
+        g_data = self.df[self.df.seed_label == 'g'].sample(n=5)
         t_data = self.df[self.df.seed_label == 't'].sample(n=20)
         v_data = self.df[self.df.seed_label == 'v'].sample(n=20)
         h_data = self.df[self.df.seed_label == 'h'].sample(n=20)
