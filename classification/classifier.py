@@ -205,7 +205,7 @@ def get_args():
                         "statistics on 'filtered' labelings")
     parser.add_argument("-l", "--log_file", default="classifier.log",
                        help="file for logging")
-    parser.add_argument('-s', '--status', default=False, help='use status features')
+    parser.add_argument('-s', '--status', action="store_true", help='use status features')
     return parser.parse_args()
 
 
