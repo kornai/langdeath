@@ -35,7 +35,7 @@ class Preproc:
         self.bool_needed = [l.strip() for l in open(
             '{}/bool_needed'.format(self.feat_dir))]
         self.individual_defaults = {'eth_status': '7',
-                                    'endangered_aggregated_status': '5'}
+                                    'endangered_aggregated_status': '0'}
 
     def get_df(self):
         conn = sqlite3.connect(self.sqlite_fn)
@@ -92,16 +92,17 @@ class Preproc:
                                 right_on="language_id", how="left")
 
     def join_end_endangered_levels(self, aggreg):
-        category_map = {'Safe': '8',
-                         'At risk': '6',
+        category_map = {'Safe': '0',
+                         'At risk': '4',
                          'Vulnerable': '5',
-                         'Threatened': '4',
-                         'Endangered': '3',
-                         'Severely endangered': '2',
-                         'Critically endangered': '1',
-                         'Dormant': '0',
-                         'Awakening': '0',
+                         'Threatened': '6',
+                         'Endangered': '7',
+                         'Severely endangered': '8',
+                         'Critically endangered': '8',
+                         'Dormant': '9',
+                         'Awakening': '7',
                        }
+
         end_aggreg = aggreg.loc[aggreg['src_is_ethnologue'] == False]
         gr = end_aggreg.groupby("language_id")
         end_top_level = gr.agg({"level": lambda x: Counter(x).\

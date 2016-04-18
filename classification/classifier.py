@@ -11,18 +11,24 @@ import argparse
 class Classifier:
 
     def __init__(self, tsv, exp_count, classcount, limit, logger,
-                out_fn):
+                out_fn, status_use):
 
         self.df = pandas.read_csv(tsv, sep='\t')
         series = ['crossval_res'] + self.df['sil'].tolist()
         self.df_res = pandas.DataFrame(index=series)
         self.df = self.df.set_index(u'sil')
+        if not status_use:
+            self.df = self.df.drop('eth_status', axis=1)\
+                    .drop('endangered_aggregated_status', axis=1)
+            logging.info('Dropping status features')
         self.all_feats = self.df.drop('seed_label', axis=1)
         self.exp_count = exp_count
         self.classes = classcount
         self.limit = limit
         self.logger = logger
         self.out_fn = out_fn
+        self.status_use = status_use
+
 
     def shuffle_rows(self, df):
         index = list(df.index)
@@ -39,7 +45,7 @@ class Classifier:
               'g':'tg'}
         d4 = {'-': '-', 's': 's', 'h': 'h', 'v': 'v', 't': 'tg',
               'g':'tg'}
-        g_data = self.df[self.df.seed_label == 'g'].sample(n=2)
+        g_data = self.df[self.df.seed_label == 'g'].sample(n=5)
         t_data = self.df[self.df.seed_label == 't'].sample(n=20)
         v_data = self.df[self.df.seed_label == 'v'].sample(n=20)
         h_data = self.df[self.df.seed_label == 'h'].sample(n=20)
@@ -94,7 +100,7 @@ class Classifier:
         model.fit(train_data, self.labels)
         self.df_res[label] = [crossval_res] +  list(model.predict(all_data))
         self.logger.debug('labelings:\n{}'.format(pandas.value_counts(
-        self.df_res[label].values)))
+            self.df_res[label].values[1:])))
     
     def map_borderline_values(self, d):
 
@@ -123,24 +129,26 @@ class Classifier:
     def train_classify(self):
         for i in range(self.exp_count):
             self.get_train_df()
-            crossval_res = self.train_crossval()
-            self.train_label(crossval_res=crossval_res,
-                             label='exp_full_features_{0}'.format(i))
             self.get_selector()
             crossval_res = self.train_crossval(selector=self.selector)
             self.train_label(crossval_res=crossval_res, selector=self.selector,
                          label='exp_with_feature_sel_{0}'.format(i))
-        self.df_res['status'] = self.df_res.apply(lambda x:Counter(x),
+        status_series = self.df_res.apply(lambda x:Counter(x),
                                                   axis=1).apply(self.map_borderline_values)
-        self.df_res['stable'] = self.df_res.apply(lambda x:Counter(x),
+        stable_series = self.df_res.apply(lambda x:Counter(x),
                                                   axis=1).apply(self.map_stable_values)
         needed = self.df_res.iloc[0] > self.limit
         needed_list = numpy.where(needed.tolist())[0].tolist()
         self.best = self.df_res.iloc[:, needed_list]
-        self.df_res['status_best'] = self.best.apply(lambda x:Counter(x), axis=1)\
+        status_best_series = self.best.apply(lambda x:Counter(x), axis=1)\
                 .apply(self.map_borderline_values)
-        self.df_res['stable_best'] = self.best.apply(lambda x:Counter(x), axis=1)\
+        
+        stable_best_series = self.best.apply(lambda x:Counter(x), axis=1)\
                 .apply(self.map_stable_values)
+        self.df_res['status'] = status_series
+        self.df_res['stable'] = stable_series
+        self.df_res['status_best'] = status_best_series
+        self.df_res['stable_best'] = stable_best_series
         self.log_stats()
     
     def log_stats(self):
@@ -199,6 +207,7 @@ def get_args():
                         "statistics on 'filtered' labelings")
     parser.add_argument("-l", "--log_file", default="classifier.log",
                        help="file for logging")
+    parser.add_argument('-s', '--status', action="store_true", help='use status features')
     return parser.parse_args()
 
 
@@ -212,8 +221,9 @@ def main():
     classcount = args.class_counts
     limit = args.threshold
     out_fn = args.output_fn
+    status_usage = args.status
     a = Classifier(preprocessed_tsv, exp_count, classcount, limit, logger,
-                  out_fn)
+                  out_fn, status_usage)
     a.train_classify()
 
 if __name__ == '__main__':
