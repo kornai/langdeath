@@ -94,7 +94,7 @@ class Classifier:
         model.fit(train_data, self.labels)
         self.df_res[label] = [crossval_res] +  list(model.predict(all_data))
         self.logger.debug('labelings:\n{}'.format(pandas.value_counts(
-        self.df_res[label].values)))
+            self.df_res[label].values[1:])))
     
     def map_borderline_values(self, d):
 
