@@ -129,24 +129,26 @@ class Classifier:
     def train_classify(self):
         for i in range(self.exp_count):
             self.get_train_df()
-            crossval_res = self.train_crossval()
-            self.train_label(crossval_res=crossval_res,
-                             label='exp_full_features_{0}'.format(i))
             self.get_selector()
             crossval_res = self.train_crossval(selector=self.selector)
             self.train_label(crossval_res=crossval_res, selector=self.selector,
                          label='exp_with_feature_sel_{0}'.format(i))
-        self.df_res['status'] = self.df_res.apply(lambda x:Counter(x),
+        status_series = self.df_res.apply(lambda x:Counter(x),
                                                   axis=1).apply(self.map_borderline_values)
-        self.df_res['stable'] = self.df_res.apply(lambda x:Counter(x),
+        stable_series = self.df_res.apply(lambda x:Counter(x),
                                                   axis=1).apply(self.map_stable_values)
         needed = self.df_res.iloc[0] > self.limit
         needed_list = numpy.where(needed.tolist())[0].tolist()
         self.best = self.df_res.iloc[:, needed_list]
-        self.df_res['status_best'] = self.best.apply(lambda x:Counter(x), axis=1)\
+        status_best_series = self.best.apply(lambda x:Counter(x), axis=1)\
                 .apply(self.map_borderline_values)
-        self.df_res['stable_best'] = self.best.apply(lambda x:Counter(x), axis=1)\
+        
+        stable_best_series = self.best.apply(lambda x:Counter(x), axis=1)\
                 .apply(self.map_stable_values)
+        self.df_res['status'] = status_series
+        self.df_res['stable'] = stable_series
+        self.df_res['status_best'] = status_best_series
+        self.df_res['stable_best'] = stable_best_series
         self.log_stats()
     
     def log_stats(self):
