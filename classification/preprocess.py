@@ -137,7 +137,8 @@ class Preproc:
     def preproc_data(self):
         
         self.get_df()
-        self.df.to_csv(self.joined_fn, sep='\t', encoding='utf-8')
+        if self.joined_fn != None:
+            self.df.to_csv(self.joined_fn, sep='\t', encoding='utf-8')
         self.numerical_preproc()
         self.add_labels()
         self.df[self.needed + ['seed_label']].\
@@ -145,18 +146,16 @@ class Preproc:
     
 def get_args():
     parser = argparse.ArgumentParser()
-    parser.add_argument('-d', '--data', help='data file (sqlite file)',
+    parser.add_argument('data', help='data file (sqlite file)',
                         default='../langdeath.db.sqlite3')
+    parser.add_argument('out_fn', help='output file name')
     parser.add_argument('-t', '--train_data_dir', default='seed_data',
                         help='directory containing s, h, v, t, g files' +\
                         'for training')
     parser.add_argument('-f', '--feat_data_dir', default='feat_data',
                         help='directory containing features listed for' +\
                         'normalization')
-    parser.add_argument('-o', '--out_fn', help='output file name',
-                        default='preproc.tsv')
-    parser.add_argument('-j', '--joined_fn', help='intermediate file name',
-                        default='joined.tsv')
+    parser.add_argument('-j', '--joined_fn', help='intermediate file name')
     return parser.parse_args()
 
 def main():
