@@ -11,18 +11,24 @@ import argparse
 class Classifier:
 
     def __init__(self, tsv, exp_count, classcount, limit, logger,
-                out_fn):
+                out_fn, status_use):
 
         self.df = pandas.read_csv(tsv, sep='\t')
         series = ['crossval_res'] + self.df['sil'].tolist()
         self.df_res = pandas.DataFrame(index=series)
         self.df = self.df.set_index(u'sil')
+        if not status_use:
+            self.df = self.df.drop('eth_status', axis=1)\
+                    .drop('endangered_aggregated_status', axis=1)
+            logging.info('Dropping status features')
         self.all_feats = self.df.drop('seed_label', axis=1)
         self.exp_count = exp_count
         self.classes = classcount
         self.limit = limit
         self.logger = logger
         self.out_fn = out_fn
+        self.status_use = status_use
+
 
     def shuffle_rows(self, df):
         index = list(df.index)
@@ -199,6 +205,7 @@ def get_args():
                         "statistics on 'filtered' labelings")
     parser.add_argument("-l", "--log_file", default="classifier.log",
                        help="file for logging")
+    parser.add_argument('-s', '--status', default=False, help='use status features')
     return parser.parse_args()
 
 
@@ -212,8 +219,9 @@ def main():
     classcount = args.class_counts
     limit = args.threshold
     out_fn = args.output_fn
+    status_usage = args.status
     a = Classifier(preprocessed_tsv, exp_count, classcount, limit, logger,
-                  out_fn)
+                  out_fn, status_usage)
     a.train_classify()
 
 if __name__ == '__main__':
