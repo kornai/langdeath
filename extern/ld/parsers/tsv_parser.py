@@ -65,6 +65,23 @@ class EthnologueDumpParser(TSV_parser):
                                         None)]
             yield res
 
+class EthnologueMacroParser(TSV_parser):
+
+    def __init__(self, fn):
+        super(TSV_parser, self).__init__()
+        self.fn = fn
+    
+    def parse(self):
+        field_target = {0: "sil", 1: "speakers",
+                        2: "endangered_level"}
+        for res in super(EthnologueMacroParser, self).parse(
+            self.fn, field_target):
+            res["speakers"] = [("ethnologue", "L1", res["speakers"] if
+                                res["speakers"] != '' else 0)]
+            res["endangered_level"] = [("ethnologue", res["endangered_level"],
+                                        None)]
+            yield res
+
 
 class UrielParser(OfflineParser):
 
@@ -89,9 +106,9 @@ class UrielParser(OfflineParser):
 
 def main():
 
-     a =  EthnologueDumpParser(sys.argv[1])
+     a =  EthnologueMacroParser(sys.argv[1])
      for d in a.parse():
-         pass
+         print d
 
 if __name__ == '__main__':
     main()
