@@ -34,7 +34,8 @@ from ld.parsers.google_translate_parser import GoogleTranslateParser
 from ld.parser_aggregator_utils import write_out_new_langs,\
         write_out_found_langs, write_out_new_altnames
 from ld.parsers.endangered_parser import EndangeredParser
-from ld.parsers.tsv_parser import L2Parser, EthnologueDumpParser, UrielParser
+from ld.parsers.tsv_parser import L2Parser, EthnologueDumpParser, UrielParser,\
+        EthnologueMacroParser
 
 
 class ParserAggregator(object):
@@ -61,7 +62,8 @@ class ParserAggregator(object):
                                              res_dir)
         #initializing all parsers
         self.parsers = [ParseISO639_3(), MacroWPParser(), uriel_parser, dbpedia_parser,
-                        eth_parser, L2Parser(res_dir + "/" + "ethnologue_l2"),
+                        eth_parser, EthnologueMacroParser(res_dir + "/" + "ethnologue_macro"), 
+                        L2Parser(res_dir + "/" + "ethnologue_l2"),
                         CrubadanParser(), la_parser,
                         WalsInfoParser(res_dir), IndigenousParser(res_dir),
                         GoogleTranslateParser(res_dir),
