@@ -36,6 +36,7 @@ from ld.parser_aggregator_utils import write_out_new_langs,\
 from ld.parsers.endangered_parser import EndangeredParser
 from ld.parsers.tsv_parser import L2Parser, EthnologueDumpParser, UrielParser,\
         EthnologueMacroParser
+from ld.parsers.bible_org_parser import BiblesParser
 
 
 class ParserAggregator(object):
@@ -67,6 +68,7 @@ class ParserAggregator(object):
                         CrubadanParser(), la_parser,
                         WalsInfoParser(res_dir), IndigenousParser(res_dir),
                         GoogleTranslateParser(res_dir),
+                        BiblesParser(),
                         WikipediaListOfLanguagesParser(res_dir),
                         WikipediaIncubatorsParser(res_dir),
                         wp_adjusted_parser,
