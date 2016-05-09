@@ -21,7 +21,7 @@ class BiblesParser(OnlineParser):
     def parse(self):
         html = get_html(self.url)
         for lang, code in self.generate_pairs(html):
-            yield {'name': lang, 'sil': code}
+            yield {'name': lang, 'sil': code, 'on_bible_org': True}
 
 def main():
     bp = BiblesParser()
