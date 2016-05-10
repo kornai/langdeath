@@ -3,10 +3,11 @@ import pandas
 import random
 from collections import defaultdict, Counter
 from sklearn.linear_model import LogisticRegression
-from sklearn import cross_validation
 from sklearn.feature_selection import SelectFromModel
 import numpy
 import argparse
+from sklearn.cross_validation import KFold
+from sklearn.metrics import accuracy_score
 
 class Classifier:
 
@@ -68,17 +69,35 @@ class Classifier:
         self.labels = self.train_df.seed_label
         
     def train_crossval(self, selector=None):
-        model = LogisticRegression()
         train_data = self.feats
         if selector is not None:
             train_data = selector.transform(train_data)
             logging.debug('number of feats after selection: {}'.format(
                 train_data.shape[1]))
-        scores = cross_validation.cross_val_score(
-            model, train_data, self.labels, cv=5)
-        logging.debug('crossval score:{}, average:{}'.format(
-            scores, sum(scores)/5))
+        scores = self.get_scores(train_data)    
+
+        logging.debug('crossval score:average:{}'.format(
+            sum(scores)/5))
         return sum(scores)/5
+
+    def get_scores(self, train_data):
+        model = LogisticRegression()
+        scores = []
+        kf = KFold(len(train_data), n_folds=5)
+        for i, (train, test) in enumerate(kf):
+            m = model
+            m.fit(train_data[train], self.labels[train])
+            predicted = m.predict(train_data[test])
+            sc = accuracy_score(predicted, self.labels[test])
+            error_indeces = (predicted != self.labels[test]).as_matrix()
+            debug_df = pandas.DataFrame({'gold': self.labels[test][error_indeces],
+                                         'predicted': predicted[error_indeces]})
+            logging.debug('crossval score {}: {}'.format(i, sc))
+            if not debug_df.empty:
+                logging.debug('errors in classification:\n{}'.format(debug_df))
+            scores.append(sc)
+        return scores
+        
 
     def get_selector(self):
         selector_model = LogisticRegression(penalty='l1', C=0.1)
