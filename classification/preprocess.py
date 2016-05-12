@@ -203,8 +203,6 @@ class Preproc:
         self.numerical_preproc()
         self.add_labels()
         needed = self.needed + ['seed_label']
-        [x + '_indi' for x in self.macro_needed] +  ['seed_label']
-
         self.df[needed].\
                 to_csv(self.preprocessed_fn, sep='\t', encoding='utf-8')
     
