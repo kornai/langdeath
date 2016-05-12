@@ -15,7 +15,7 @@ class LanguageDB(object):
         self.languages = []
         self.spec_fields = set(["other_codes", "country", "name", "alt_names",
                                 "champion", "speaker", "speakers",
-                                "endangered_level", "location"])
+                                "endangered_level", "location", "macrolangs"])
 
     def add_attr(self, name, data, lang):
         if name in self.spec_fields:
@@ -43,6 +43,8 @@ class LanguageDB(object):
             self.add_speakers(data, lang)
         elif name == "location":
             self.add_location(data, lang)
+        elif name == "macrolangs":
+            self.add_macrolang(data, lang)
 
     def add_name(self, data, lang):
         if lang.name == "":
@@ -143,6 +145,14 @@ class LanguageDB(object):
         ch.save(), lang.save()
         lang.champion = ch
         ch.save(), lang.save()
+
+    def add_macrolang(self, data, lang):
+        d = list(data)[0] 
+        mls = Language.objects.filter(sil=d)
+        ml = mls[0]
+        ml.save(), lang.save()
+        lang.macrolang = ml
+        ml.save(), lang.save()
 
     def add_endangered_levels(self, data, lang):
         for src, level, conf in data:

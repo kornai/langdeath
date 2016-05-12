@@ -17,7 +17,8 @@ class Language(models.Model):
     iso_type = models.CharField(max_length=100, blank=True)
     champion = models.ForeignKey('Language', blank=True, null=True,
                                  related_name='sublang')
-
+    macrolang = models.ForeignKey('Language', blank=True, null=True,
+                                  related_name='sublang2')
     eth_population = models.IntegerField(blank=True, null=True)
 
     cru_docs = models.IntegerField(blank=True, null=True)

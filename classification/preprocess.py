@@ -1,14 +1,14 @@
 import logging
 from math import log
 from collections import Counter
-import pandas
+from pandas import read_sql
 import sqlite3
 import argparse
 
 class Preproc:
 
     def __init__(self, sqlite_fn, train_dir, feat_dir,
-                 joined_fn, preprocessed_fn):
+                 joined_fn, preprocessed_fn, macro_feats, indi_feats):
         self.sqlite_fn = sqlite_fn
         self.preprocessed_fn = preprocessed_fn
         self.joined_fn = joined_fn
@@ -16,8 +16,9 @@ class Preproc:
         self.feat_dir = feat_dir
         self.get_seed_sets()
         self.get_feat_set()
+        self.macro_feats = macro_feats
+        self.indi_feats = indi_feats
 
-    
     def get_seed_sets(self):
 
         self.t_set = [l.strip() for l in open('{}/t'.format(self.train_dir))]
@@ -34,23 +35,25 @@ class Preproc:
             '{}/log_needed'.format(self.feat_dir))]
         self.bool_needed = [l.strip() for l in open(
             '{}/bool_needed'.format(self.feat_dir))]
+        self.macro_needed = [l.strip() for l in open(
+            '{}/macro_needed'.format(self.feat_dir))]
         self.individual_defaults = {'eth_status': '7',
                                     'endangered_aggregated_status': '0'}
 
     def get_df(self):
         conn = sqlite3.connect(self.sqlite_fn)
-        self.df = pandas.read_sql("SELECT * FROM dld_language", conn)
-        self.speakers = pandas.read_sql("SELECT * FROM dld_speaker", conn)
+        self.df = read_sql("SELECT * FROM dld_language", conn)
+        self.speakers = read_sql("SELECT * FROM dld_speaker", conn)
         self.language_speakers =\
-                pandas.read_sql("SELECT * FROM dld_language_speakers", conn)
-        self.endangered_levels = pandas.read_sql(
+                read_sql("SELECT * FROM dld_language_speakers", conn)
+        self.endangered_levels = read_sql(
             "SELECT * FROM dld_endangeredlevel", conn)
         self.language_endangered_levels =\
-                pandas.read_sql(
+                read_sql(
                     "SELECT * FROM dld_language_endangered_levels", conn)
         self.join_speaker_counts()
         self.join_endangered_levels()
-        self.df = self.df.set_index([u'sil'])
+        self.df = self.df.set_index([u'sil'], drop=False)
         
     
     def join_speaker_counts(self):
@@ -114,7 +117,64 @@ class Preproc:
         self.df = self.df.merge(
                 end_top_level[["endangered_aggregated_status"]],
                 left_on="id", right_index=True, how="left")
+
+    def add_cols_needed_sets(self, merged_cols, label='macro'):
+        
+        bool_needed_macrocol = filter(lambda x:x[:-(len(label) + 1)]
+                                      in self.bool_needed, merged_cols)
+        log_needed_macrocol = filter(lambda x:x[:-(len(label) + 1)]
+                                     in self.log_needed, merged_cols)
+        self.bool_needed += bool_needed_macrocol
+        self.log_needed += log_needed_macrocol
+        if label == 'indi':
+            self.bool_needed_indi = bool_needed_macrocol
+            self.log_needed_indi = log_needed_macrocol
+        self.needed += bool_needed_macrocol
+        self.needed += log_needed_macrocol
+
     
+    def group_indi(self, merged_indi):
+
+        f = dict([(k, max) for k in self.bool_needed_indi] +
+                 [(k, sum) for k in self.log_needed_indi])
+        return merged_indi.groupby('id_macro').agg(f)
+
+
+    def add_macro_feats(self, merged):
+        macro_cols = ['id_indi'] + filter(
+            lambda x:x[-6:] == '_macro' and x[:-6] in self.macro_needed,
+            merged.columns)
+        merged_macro = merged[macro_cols]
+        self.add_cols_needed_sets(macro_cols)
+        self.df = self.df.merge(
+            merged_macro, how='outer', left_on='id', right_on='id_indi')
+
+
+    def add_indi_feats(self, merged):
+        indi_cols = ['id_macro'] + filter(
+            lambda x:x[-5:] == '_indi' and x[:-5] in self.macro_needed,
+            merged.columns)
+        merged_indi = merged[indi_cols]
+        self.add_cols_needed_sets(indi_cols, label='indi')
+        merged_indi_grouped = self.group_indi(merged_indi)
+        self.df = self.df.merge(
+            merged_indi_grouped, how='outer', left_on='id', right_index=True)
+        
+    
+    def add_macrolang_feats(self):
+        
+        if self.macro_feats or self.indi_feats: 
+            merged = self.df.merge(self.df,
+                               left_on='macrolang_id', right_on='id',
+                               how='inner', suffixes=('_indi', '_macro'))
+            if self.macro_feats:
+                self.add_macro_feats(merged)
+            if self.indi_feats:
+                self.add_indi_feats(merged)
+        self.df = self.df.drop('macrolang_id', axis=1)
+        self.needed.remove('macrolang_id')
+        self.df = self.df.set_index('sil')
+
     def add_labels(self):
         
         self.df['seed_label'] = self.df.index.map(lambda x:
@@ -127,7 +187,6 @@ class Preproc:
         
 
     def numerical_preproc(self):
-        
         self.df[self.bool_needed] = self.df[self.bool_needed].fillna(int(0))
         self.df[self.log_needed] = self.df[self.log_needed].fillna(0)
         self.df[self.log_needed] = self.df[self.log_needed].applymap(
@@ -140,9 +199,11 @@ class Preproc:
         self.get_df()
         if self.joined_fn != None:
             self.df.to_csv(self.joined_fn, sep='\t', encoding='utf-8')
+        self.add_macrolang_feats()
         self.numerical_preproc()
         self.add_labels()
-        self.df[self.needed + ['seed_label']].\
+        needed = self.needed + ['seed_label']
+        self.df[needed].\
                 to_csv(self.preprocessed_fn, sep='\t', encoding='utf-8')
     
 def get_args():
@@ -157,6 +218,10 @@ def get_args():
                         help='directory containing features listed for' +\
                         'normalization')
     parser.add_argument('-j', '--joined_fn', help='intermediate file name')
+    parser.add_argument('-m', '--macro_feats', action='store_true',
+                   help="features of individual languages' macro ")
+    parser.add_argument('-i', '--indi_feats', action='store_true',
+                   help="features of macro languages' sublanguages ")
     return parser.parse_args()
 
 def main():
@@ -171,7 +236,10 @@ def main():
     feat_data_dir = args.feat_data_dir
     out_fn = args.out_fn
     joined_fn = args.joined_fn
-    a = Preproc(fn, train_data_dir, feat_data_dir, joined_fn, out_fn)
+    macro_feats = args.macro_feats
+    indi_feats = args.indi_feats
+    a = Preproc(fn, train_data_dir, feat_data_dir, joined_fn, out_fn,
+               macro_feats, indi_feats)
     a.preproc_data()
 
 if __name__ == "__main__":

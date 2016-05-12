@@ -23,7 +23,11 @@ class ParseISO639_3(OnlineParser):
         self.parse_inverted_name()
         self.parse_retirements()
         os.remove(iso_zip_filen)
-        for lang_upd in self.lang_dict.itervalues():
+        # when addig macrolang, it is already in database
+        values_macros_first = sorted(
+            self.lang_dict.values(), key=lambda d:
+            0 if d['iso_scope'] == 'M' else 1)
+        for lang_upd in values_macros_first:
             if lang_upd['iso_scope'] == 'S':
                 # special situations
                 continue
