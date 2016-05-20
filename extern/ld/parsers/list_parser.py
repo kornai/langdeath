@@ -9,7 +9,7 @@ class ListParser(OfflineParser):
     
     def parse(self):
         for l in self.fh:
-            l = l.strip()
+            l = l.strip('\n').decode('utf-8')
             yield {self.key: l, self.attrib: True}
             
 class LeibzigCorporaParser(ListParser):
