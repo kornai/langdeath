@@ -30,6 +30,7 @@ class Language(models.Model):
     in_omniglot = models.BooleanField(default=False)
     uriel_feats = models.IntegerField(blank=True, null=True)
     on_bible_org = models.BooleanField(default=False)
+    in_leipzig_corpora = models.BooleanField(default=False)
 
     la_primary_texts_online = models.IntegerField(blank=True, null=True)
     la_primary_texts_all = models.IntegerField(blank=True, null=True)
