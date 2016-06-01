@@ -1,4 +1,4 @@
-from base_parsers import OnlineParser, OfflineParser, BaseParser
+from base_parsers import BaseParser, OnlineParser, OfflineParser
 from collections import defaultdict
 from utils import get_html
 import os
@@ -17,7 +17,9 @@ class FindBibleParser(BaseParser):
                 parsed = self.parse_bible_page(bible_page)
                 for k in parsed:
                     d[k] += parsed[k]
-            yield dict(d)    
+                    d['find_bible_all_versions'] += parsed[k]
+            if len(d) > 1:        
+                yield dict(d)    
     
     def get_bible_page(self, lang_code):
         for page in os.listdir('{}/{}'.format(self.resdir, lang_code)):
@@ -39,7 +41,7 @@ class FindBibleParser(BaseParser):
         return d
         
 
-class FindBibleOnlineParser(FindBibleParser):
+class FindBibleOnlineParser(OnlineParser, FindBibleParser):
 
     def __init__(self, resdir, sils):
         self.sils = sils
@@ -77,12 +79,21 @@ class FindBibleOnlineParser(FindBibleParser):
             matched = self.extract_pattern.match(tabular)
 
 
+class FindBibleOfflineParser(OfflineParser, FindBibleParser):
+
+    def __init__(self, resdir):
+        self.sils = os.listdir(resdir)
+        super(FindBibleOfflineParser, self).__init__(resdir)
+    
+    def get_lang_code(self):
+        for sil in self.sils:
+            yield sil
+         
 def main():
     
     import sys
 
-    a = FindBibleOnlineParser(sys.argv[2],
-                              [l.strip() for l in open(sys.argv[1])])
+    a = FindBibleOfflineParser(sys.argv[1])
     for d in a.parse():
         print d
         
