@@ -37,6 +37,9 @@ from ld.parsers.endangered_parser import EndangeredParser
 from ld.parsers.tsv_parser import L2Parser, EthnologueDumpParser, UrielParser,\
         EthnologueMacroParser
 from ld.parsers.bible_org_parser import BiblesParser
+from ld.parsers.list_parser import LeibzigCorporaParser, SirenLanguagesParser
+from ld.parsers.treetagger_parser import TreeTaggerParser
+from ld.parsers.find_bible_parser import FindBibleOfflineParser
 
 
 class ParserAggregator(object):
@@ -56,9 +59,10 @@ class ParserAggregator(object):
             'UrielParser', 'DbpediaParserAggregator',
             'WikipediaAdjustedSizeCounter_WPExtractor',
             'WPIncubatorAdjustedSizeCounter',
-            'EndangeredParser']
+            'EndangeredParser', 'FindBibleOfflineParser']
         eth_parser, la_parser, uriel_parser, dbpedia_parser,\
-                wp_adjusted_parser, wpinc_adj_parser, endangered_parser = \
+                wp_adjusted_parser, wpinc_adj_parser, endangered_parser,\
+        find_bible_parser= \
                 self.init_dump_based_parsers(pickles, dump_dir, parser_names,
                                              res_dir)
         #initializing all parsers
@@ -67,8 +71,11 @@ class ParserAggregator(object):
                         L2Parser(res_dir + "/" + "ethnologue_l2"),
                         CrubadanParser(), la_parser,
                         WalsInfoParser(res_dir), IndigenousParser(res_dir),
-                        GoogleTranslateParser(res_dir),
                         BiblesParser(),
+                        LeibzigCorporaParser(res_dir + "/" + "leipzig_corpora"),
+                        SirenLanguagesParser(res_dir + "/" + "siren_list"),
+                        TreeTaggerParser(),
+                        find_bible_parser,
                         WikipediaListOfLanguagesParser(res_dir),
                         WikipediaIncubatorsParser(res_dir),
                         wp_adjusted_parser,
