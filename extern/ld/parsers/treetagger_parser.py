@@ -2,7 +2,7 @@ from base_parsers import OnlineParser
 from utils import get_html
 import re
 
-class TreeTaggerParserOnlineParser(OnlineParser):
+class TreeTaggerParser(OnlineParser):
 
     def __init__(self):
         self.url = "http://www.cis.uni-muenchen.de/~schmid/tools/TreeTagger/"
@@ -29,7 +29,7 @@ class TreeTaggerParserOnlineParser(OnlineParser):
 
 def main():
 
-    a = TreeTaggerParserOnlineParser()
+    a = TreeTaggerParser()
     for d in a.parse():
         print d
 
