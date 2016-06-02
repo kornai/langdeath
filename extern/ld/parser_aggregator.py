@@ -71,7 +71,6 @@ class ParserAggregator(object):
                         L2Parser(res_dir + "/" + "ethnologue_l2"),
                         CrubadanParser(), la_parser,
                         WalsInfoParser(res_dir), IndigenousParser(res_dir),
-                        GoogleTranslateParser(res_dir),
                         BiblesParser(),
                         LeibzigCorporaParser(res_dir + "/" + "leipzig_corpora"),
                         SirenLanguagesParser(res_dir + "/" + "siren_list"),
