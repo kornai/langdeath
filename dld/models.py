@@ -20,7 +20,8 @@ class Language(models.Model):
     macrolang = models.ForeignKey('Language', blank=True, null=True,
                                   related_name='sublang2')
     eth_population = models.IntegerField(blank=True, null=True)
-
+    
+    find_bible_all_versions = models.IntegerField(blank=True, null=True)
     cru_docs = models.IntegerField(blank=True, null=True)
     cru_words = models.IntegerField(blank=True, null=True)
     cru_characters = models.IntegerField(blank=True, null=True)
@@ -31,6 +32,8 @@ class Language(models.Model):
     uriel_feats = models.IntegerField(blank=True, null=True)
     on_bible_org = models.BooleanField(default=False)
     in_leipzig_corpora = models.BooleanField(default=False)
+    in_siren_project = models.BooleanField(default=False)
+    treetagger = models.BooleanField(default=False)
 
     la_primary_texts_online = models.IntegerField(blank=True, null=True)
     la_primary_texts_all = models.IntegerField(blank=True, null=True)
