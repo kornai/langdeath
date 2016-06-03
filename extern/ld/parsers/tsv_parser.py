@@ -51,8 +51,10 @@ class EthnologueDumpParser(TSV_parser):
         return self.parse_or_load()
 
     def parse_all(self):
-        field_target = {0: "sil", 1: "name", 4: "country", 6: 'region_name',  8: "speakers",
-                        13: 'latitude', 14: 'longitude', 15: "endangered_level"}
+        field_target = {0: "sil", 1: "name", 4: "country", 6:
+                        'region_name',  8: "speakers",
+                        13: 'latitude', 14: 'longitude',
+                        15: "endangered_level"}
         header = True
         for res in super(EthnologueDumpParser, self).parse(
             self.fn, field_target):
