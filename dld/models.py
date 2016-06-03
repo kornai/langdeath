@@ -113,9 +113,9 @@ class AlternativeName(models.Model):
     def __unicode__(self):
         return self.name
 
-    def save(self, force_insert=False, force_update=False):
+    def save(self, **kwargs):
         self.name = normalize_alt_name(self.name)
-        super(AlternativeName, self).save(force_insert, force_update)
+        super(AlternativeName, self).save(kwargs)
 
 
 class LanguageAltName(models.Model):
