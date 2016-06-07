@@ -52,6 +52,8 @@ class GlottologParser(OnlineParser):
         so we download the the languages grouped by its top level family.
         '''
         for f in self.get_top_level_families():
+            if f in ['Unattested', 'Bookkeeping']:
+                continue
             html = get_html('{0}{1}'.format(self.family_based_search_url,
                                             '_'.join(f.split(' '))))
             csv_reader = csv.reader(html.encode('utf-8').split('\n'))
@@ -70,7 +72,8 @@ class GlottologParser(OnlineParser):
                         elif self.needed_indeces[i] in ['longitude', 'latitude']:
                             d[self.needed_indeces[i]] = float(l[i])
                         else:
-                            d[self.needed_keys[self.needed_indeces[i]]] = l[i]
+                            d[self.needed_keys[self.needed_indeces[i]]] =\
+                                    l[i].decode('utf-8')
                 yield d
                 l = csv_reader.next()            
 
