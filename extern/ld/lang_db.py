@@ -72,7 +72,6 @@ class LanguageDB(object):
         self.add_alt_name(data, lang)
 
     def add_alt_name(self, data, lang):
-        lang.save()
         if type(data) == str or type(data) == unicode:
             data = normalize_alt_name(data)
             if len(lang.alt_name.filter(name=data)) > 0:
@@ -85,13 +84,12 @@ class LanguageDB(object):
                 a.save()
             elif len(alts) == 1:
                 a = alts[0]
-                a.save()
             else:
                 logging.error(u"There are 2+ altnames with data {0}".format(
                     data))
 
             la = LanguageAltName(lang=lang, name=a)
-            a.save(), lang.save(), la.save()
+            la.save()
 
             if len(set(data.split()) &
                    set(["east", "west", "north", "south"])) > 0:
@@ -106,13 +104,9 @@ class LanguageDB(object):
 
     def add_codes(self, data, lang):
         for src, code in data.iteritems():
-            c = Code()
-            c.code_name = src
-            c.code = code
+            c = Code(code_name=src, code=code)
             c.save()
-            lang.save()
             lang.code.add(c)
-            lang.save()
 
     def add_country(self, data, lang):
         if data is None:
@@ -131,10 +125,7 @@ class LanguageDB(object):
                         lang.sil, repr(data)))
         else:
             c = cs[0]
-            lang.save()
-            c.save()
             lang.country.add(c)
-            lang.save()
 
     def add_champion(self, data, lang):
         chs = Language.objects.filter(sil=data)
@@ -149,44 +140,31 @@ class LanguageDB(object):
             msg += " for lang {0} with sil {1}".format(lang.sil, data)
             raise LangdeathException(msg)
         ch = chs[0]
-        ch.save(), lang.save()
         lang.champion = ch
-        ch.save(), lang.save()
 
     def add_macrolang(self, data, lang):
         d = list(data)[0] 
         mls = Language.objects.filter(sil=d)
         ml = mls[0]
-        ml.save(), lang.save()
         lang.macrolang = ml
-        ml.save(), lang.save()
 
     def add_endangered_levels(self, data, lang):
         for src, level, conf in data:
             el = EndangeredLevel(src=src[:90], level=level, confidence=conf)
             el.save()
-            lang.save()
             lang.endangered_levels.add(el)
-            el.save()
-            lang.save()
 
     def add_location(self, data, lang):
         for src, lon, lat in data:
             c = Coordinates(src=src[:90], longitude=lon, latitude=lat)
             c.save()
-            lang.save()
             lang.locations.add(c)
-            c.save()
-            lang.save()
 
     def add_speakers(self, data, lang):
         for src, type_, num in data:
             s = Speaker(src=src[:90], num=num, l_type=type_)
             s.save()
-            lang.save()
             lang.speakers.add(s)
-            s.save()
-            lang.save()
 
     def add_new_language(self, lang):
         """Inserts new language to db"""
