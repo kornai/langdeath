@@ -1,9 +1,16 @@
 import logging
 import re
 
-from dld.models import normalize_alt_name, Language, Code, Country, \
-    AlternativeName, CountryName, LanguageAltName, EndangeredLevel, Speaker, \
-    Coordinates
+from dld.models import normalize_alt_name, \
+                       AlternativeName, \
+                       Code, \
+                       Coordinates, \
+                       Country, \
+                       CountryName, \
+                       EndangeredLevel, \
+                       Language, \
+                       LanguageAltName, \
+                       Speaker
 
 from ld.langdeath_exceptions import LangdeathException
 
