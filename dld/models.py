@@ -90,7 +90,6 @@ class Language(models.Model):
     ## many to many fields
     code = models.ManyToManyField('Code', related_name='codes')
     alt_name = models.ManyToManyField('AlternativeName',
-                                      through='LanguageAltName',
                                       related_name='lang')
     country = models.ManyToManyField('Country', related_name='lang')
     speakers = models.ManyToManyField('Speaker', related_name='lang')
@@ -108,7 +107,7 @@ class Code(models.Model):
 
 
 class AlternativeName(models.Model):
-    name = models.CharField(max_length=100)
+    name = models.CharField(max_length=100, primary_key=True)
 
     def __unicode__(self):
         return self.name
@@ -116,14 +115,6 @@ class AlternativeName(models.Model):
     def save(self, **kwargs):
         self.name = normalize_alt_name(self.name)
         super(AlternativeName, self).save(kwargs)
-
-
-class LanguageAltName(models.Model):
-    lang = models.ForeignKey(Language)
-    name = models.ForeignKey(AlternativeName)
-
-    class Meta:
-        unique_together = (("lang", "name"), )
 
 
 class Speaker(models.Model):

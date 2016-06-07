@@ -9,7 +9,6 @@ from dld.models import normalize_alt_name, \
                        CountryName, \
                        EndangeredLevel, \
                        Language, \
-                       LanguageAltName, \
                        Speaker
 
 from ld.langdeath_exceptions import LangdeathException
@@ -72,26 +71,16 @@ class LanguageDB(object):
         self.add_alt_name(data, lang)
 
     def add_alt_name(self, data, lang):
-        lang.save()
         if type(data) == str or type(data) == unicode:
             data = normalize_alt_name(data)
-            if len(lang.alt_name.filter(name=data)) > 0:
-                # duplication, don't do anything
-                return
 
-            alts = AlternativeName.objects.filter(name=data).all()
-            if len(alts) == 0:
-                a = AlternativeName(name=data)
-                a.save()
-            elif len(alts) == 1:
-                a = alts[0]
-                a.save()
-            else:
-                logging.error(u"There are 2+ altnames with data {0}".format(
-                    data))
+            try:
+                alt = AlternativeName.objects.get(name=data)
+            except AlternativeName.DoesNotExist:
+                alt = AlternativeName.objects.create(name=data)
 
-            la = LanguageAltName(lang=lang, name=a)
-            a.save(), lang.save(), la.save()
+            # adding an object that already is associated is a no-op
+            lang.alt_name.add(alt)
 
             if len(set(data.split()) &
                    set(["east", "west", "north", "south"])) > 0:
