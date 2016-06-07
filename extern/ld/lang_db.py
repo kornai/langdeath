@@ -10,6 +10,7 @@ from dld.models import normalize_alt_name, \
                        EndangeredLevel, \
                        Language, \
                        LanguageAltName, \
+                       Parser, \
                        Speaker
 
 from ld.langdeath_exceptions import LangdeathException
@@ -20,9 +21,17 @@ card_dir_p = re.compile("((east)|(west)|(north)|(south))")
 class LanguageDB(object):
     def __init__(self):
         self.languages = []
-        self.spec_fields = set(["other_codes", "country", "name", "alt_names",
-                                "champion", "speaker", "speakers",
-                                "endangered_level", "location", "macrolangs"])
+        self.spec_fields = set(["other_codes",
+                                "country",
+                                "name",
+                                "alt_names",
+                                "champion",
+                                "speaker",
+                                "speakers",
+                                "endangered_level",
+                                "location",
+                                "macrolangs",
+                                "parser"])
 
     def add_attr(self, name, data, lang):
         if name in self.spec_fields:
@@ -52,6 +61,8 @@ class LanguageDB(object):
             self.add_location(data, lang)
         elif name == "macrolangs":
             self.add_macrolang(data, lang)
+        elif name == "parser":
+            self.add_parser(data, lang)
 
     def add_name(self, data, lang):
         if lang.name == "":
@@ -187,6 +198,14 @@ class LanguageDB(object):
             lang.speakers.add(s)
             s.save()
             lang.save()
+
+    def add_parser(self, parser_name, lang):
+        try:
+          p = Parser.objects.get(classname=parser_name)
+        except Parser.DoesNotExist:
+          p = Parser.objects.create(classname=parser_name)
+
+        lang.parsers.add(p)
 
     def add_new_language(self, lang):
         """Inserts new language to db"""

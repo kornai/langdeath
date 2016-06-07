@@ -98,6 +98,11 @@ class Language(models.Model):
                                                related_name='Language')
     locations = models.ManyToManyField('Coordinates', related_name='Language')
 
+    ## debugging fields
+
+    # All parsers that ever had data for this Language
+    parsers = models.ManyToManyField('Parser', related_name='parsers')
+
     def __unicode__(self):
         return u"{0} ({1})".format(self.name, self.sil)
 
@@ -165,3 +170,10 @@ class CountryName(models.Model):
     """Alternative country names"""
     country = models.ForeignKey("Country")
     name = models.CharField(max_length=100)
+
+class Parser(models.Model):
+    """A Language data source"""
+
+    # This parser's python classname, the value returned by passing its
+    # Class object to `lambda x: str(type(x))'
+    classname = models.CharField(max_length=100, primary_key=True)
