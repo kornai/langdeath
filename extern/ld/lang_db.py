@@ -99,13 +99,20 @@ class LanguageDB(object):
 
     def add_codes(self, data, lang):
         for src, code in data.iteritems():
-            c = Code()
-            c.code_name = src
-            c.code = code
-            c.save()
-            lang.save()
-            lang.code.add(c)
-            lang.save()
+            if type(code) == list:
+                for c in code:
+                    self.add_code(src, c, lang)
+            else:
+                self.add_code(src, code, lang)
+    
+    def add_code(self, src, code, lang):             
+        c = Code()
+        c.code_name = src
+        c.code = code
+        c.save()
+        lang.save()
+        lang.code.add(c)
+        lang.save()
 
     def add_country(self, data, lang):
         if data is None:
