@@ -193,8 +193,8 @@ class ParserAggregator(object):
             for a_n in a_l:
                 self.new_altnames.append((a_n, lang.get('name', ''), name))
 
-    @transaction.commit_manually
     def call_parser(self, parser):
+        transaction.set_autocommit(False)
         c = 0
         self.parser = parser
         self.new_langs = []
@@ -206,6 +206,8 @@ class ParserAggregator(object):
                 if c % 100 == 0:
                     logging.info("Added {0} langs from parser {1}".format(
                         c, type(parser)))
+
+                lang['parser'] = str(type(parser))
                 self.add_lang(lang)
 
         except ParserException as e:
@@ -230,6 +232,7 @@ class ParserAggregator(object):
                 write_out_new_altnames(
                 self.new_altnames, self.get_out_fn(altnames=True))
         transaction.commit()
+        transaction.set_autocommit(True)
     
     def get_out_fn(self, new=False, altnames=False):
         classname = self.parser.__class__.__name__
