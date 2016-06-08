@@ -210,9 +210,16 @@ class ParserAggregator(object):
 
         except ParserException as e:
             logging.exception(e)
+
         if len(self.new_langs) > 0:
-            logging.error("New langs/not found: {0}, ".format(
-                len(self.new_langs)))
+            if type(self.parser) in self.trusted_parsers:
+                logging.info("New languages added from {0}: {1}".format(
+                               type(self.parser), len(self.new_langs)))
+            else:
+                logging.warning("New languages found but not added from" + \
+                                " {0} (not a trusted parser): {1}".format(
+                                  type(self.parser), len(self.new_langs)))
+
         if self.debug_dir != None:
             if len(self.new_langs) > 0:
                 write_out_new_langs(

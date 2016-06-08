@@ -215,6 +215,8 @@ class LanguageDB(object):
                 continue
             try:
                 self.add_attr(key, update[key], l)
+            except LangdeathException as e:
+                logging.warning(e)
             except Exception as e:
                 logging.exception(e)
 
