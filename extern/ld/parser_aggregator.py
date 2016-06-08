@@ -227,7 +227,7 @@ class ParserAggregator(object):
         transaction.commit()
     
     def get_out_fn(self, new=False, altnames=False):
-        classname = str(type(self.parser)).split('.')[3].split("'")[0]
+        classname = self.parser.__class__.__name__
         if new:
             if type(self.parser) in self.trusted_parsers:
                 new_lang_label = 'new_langs'

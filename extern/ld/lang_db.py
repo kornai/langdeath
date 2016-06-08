@@ -228,6 +228,9 @@ class LanguageDB(object):
             for src, code in lang["other_codes"].iteritems():
                 languages = Language.objects.filter(code__code_name=src,
                                                     code__code=code)
+                # Relationship-spanning filters may return redundant entries
+                languages = languages.distinct()
+
                 if len(languages) > 0:
                     return languages, 'other_codes'
 

@@ -15,6 +15,7 @@ class Language(models.Model):
     last_updated = models.DateTimeField('last updated', default=timezone.now())
     iso_scope = models.CharField(max_length=20, blank=True)
     iso_type = models.CharField(max_length=100, blank=True)
+<<<<<<< HEAD
     region_name = models.CharField(max_length=100)
     longitude = models.FloatField(blank=True, null=True)
     latitude = models.FloatField(blank=True, null=True)
@@ -22,6 +23,8 @@ class Language(models.Model):
                                  related_name='sublang')
     macrolang = models.ForeignKey('Language', blank=True, null=True,
                                   related_name='sublang2')
+=======
+>>>>>>> origin/master
     eth_population = models.IntegerField(blank=True, null=True)
     
     find_bible_all_versions = models.IntegerField(blank=True, null=True)
@@ -88,7 +91,13 @@ class Language(models.Model):
     wp_real_articles = models.FloatField(blank=True, null=True)
     wp_adjusted_size = models.FloatField(blank=True, null=True)
 
-    # many to many fields
+    ## many to one fields
+    champion = models.ForeignKey('self', blank=True, null=True,
+                                 related_name='sublang')
+    macrolang = models.ForeignKey('self', blank=True, null=True,
+                                  related_name='sublang2')
+
+    ## many to many fields
     code = models.ManyToManyField('Code', related_name='codes')
     alt_name = models.ManyToManyField('AlternativeName',
                                       through='LanguageAltName',
