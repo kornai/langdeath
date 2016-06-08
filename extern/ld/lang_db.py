@@ -172,7 +172,7 @@ class LanguageDB(object):
             raise TypeError("LanguageDB.add_new_language " +
                             "got non-dict instance")
 
-        l = Language()
+        l = Language.objects.create()
         self.update_lang_data(l, lang)
         self.languages.append(l)
 
