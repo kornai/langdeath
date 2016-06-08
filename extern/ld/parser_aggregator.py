@@ -40,6 +40,7 @@ from ld.parsers.bible_org_parser import BiblesParser
 from ld.parsers.list_parser import LeibzigCorporaParser, SirenLanguagesParser
 from ld.parsers.treetagger_parser import TreeTaggerParser
 from ld.parsers.find_bible_parser import FindBibleOfflineParser
+from ld.parsers.glottolog_parser import GlottologParser
 
 
 class ParserAggregator(object):
@@ -68,6 +69,7 @@ class ParserAggregator(object):
         #initializing all parsers
         self.parsers = [ParseISO639_3(), MacroWPParser(), uriel_parser, dbpedia_parser,
                         eth_parser, EthnologueMacroParser(res_dir + "/" + "ethnologue_macro"), 
+                        GlottologParser(),
                         L2Parser(res_dir + "/" + "ethnologue_l2"),
                         CrubadanParser(), la_parser,
                         WalsInfoParser(res_dir), IndigenousParser(res_dir),
