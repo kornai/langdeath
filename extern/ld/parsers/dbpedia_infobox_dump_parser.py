@@ -28,11 +28,11 @@ class DbpediaRawInfoboxParser(DbpediaNTBaseParser):
                      for k, v in lang.iteritems())
         if 'glotto' in lang and lang['glotto'] != [u'none']:
             d['other_codes'] = {}
-            d['other_codes']['glotto'] = ';'.join(sorted(lang['glotto']))
+            d['other_codes']['glotto'] = lang['glotto']
         if 'linglist' in lang and lang['linglist'] != [u'none']:
             if 'other_codes' not in d:
                 d['other_codes'] = {}
-            d['other_codes']['linglist'] = ';'.join(sorted(lang['linglist']))
+            d['other_codes']['linglist'] = lang['linglist']
         if (len(lang.get('lc', [])) > 0 and
                 len(lang.get('lc', [])) == len(lang.get('ld', []))):
             d['lc_ld'] = zip(lang['lc'], lang['ld'])
@@ -99,9 +99,11 @@ def main():
 
     bd = sys.argv[1]
     parser = DbpediaRawInfoboxParser(bd)
-    parser.parse_and_save()
-    parser = DbpediaMapPropertiesParser(bd)
-    parser.parse_and_save()
+    #for d in parser.parse():
+    #    print d
+    #parser = DbpediaMapPropertiesParser(bd)
+    for d in parser.parse_or_load():
+        print d
 
 if __name__ == '__main__':
     main()
