@@ -72,20 +72,25 @@ class LanguageDB(object):
 
     def add_alt_name(self, data, lang):
         if type(data) == str or type(data) == unicode:
-            data = normalize_alt_name(data)
+            name = normalize_alt_name(data)
+
+            # Truth checking for blank strings: '' resolves to False
+            if not name or not data:
+                raise LangdeathException("Empty alt_name: original " + \
+                  "`{0}', normalized `{1}'".format(data, name))
 
             try:
-                alt = AlternativeName.objects.get(name=data)
+                alt = AlternativeName.objects.get(name=name)
             except AlternativeName.DoesNotExist:
-                alt = AlternativeName.objects.create(name=data)
+                alt = AlternativeName.objects.create(name=name)
 
             # adding an object that already is associated is a no-op
             lang.alt_name.add(alt)
 
-            if len(set(data.split()) &
+            if len(set(name.split()) &
                    set(["east", "west", "north", "south"])) > 0:
-                data = card_dir_p.sub("\g<1>ern", data)
-                self.add_alt_name(data, lang)
+                name = card_dir_p.sub("\g<1>ern", name)
+                self.add_alt_name(name, lang)
 
         elif type(data) == list or type(data) == set:
             for d in data:
