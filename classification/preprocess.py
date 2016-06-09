@@ -209,20 +209,22 @@ class Preproc:
     
 def get_args():
     parser = argparse.ArgumentParser()
-    parser.add_argument('data', help='data file (sqlite file)',
-                        default='../langdeath.db.sqlite3')
-    parser.add_argument('out_fn', help='output file name')
+    parser.add_argument('database', help='sqlite3 database file')
+    parser.add_argument('filename', help='path to output file')
     parser.add_argument('-t', '--train_data_dir', default='seed_data',
                         help='directory containing s, h, v, t, g files' +\
-                        'for training')
+                        ' for training')
     parser.add_argument('-f', '--feat_data_dir', default='feat_data',
                         help='directory containing features listed for' +\
-                        'normalization')
-    parser.add_argument('-j', '--joined_fn', help='intermediate file name')
-    parser.add_argument('-m', '--macro_feats', action='store_true',
-                   help="features of individual languages' macro ")
-    parser.add_argument('-i', '--indi_feats', action='store_true',
-                   help="features of macro languages' sublanguages ")
+                        ' normalization')
+    parser.add_argument('-j', '--joined', help='output file path for' +\
+                        ' optional intermediate "joined" table (in tsv form)')
+    parser.add_argument('-m', '--macros', action='store_true',
+                   help="also consider the features of each individual" +\
+                        " languages' macrolanguage")
+    parser.add_argument('-i', '--individuals', action='store_true',
+                   help="also consider the aggregated features of macro" +\
+                        " languages' sublanguages")
     return parser.parse_args()
 
 def main():
@@ -232,13 +234,13 @@ def main():
         format="%(asctime)s : " +
         "%(module)s (%(lineno)s) - %(levelname)s - %(message)s")
     args = get_args() 
-    fn = args.data
+    fn = args.database
     train_data_dir = args.train_data_dir
     feat_data_dir = args.feat_data_dir
-    out_fn = args.out_fn
-    joined_fn = args.joined_fn
-    macro_feats = args.macro_feats
-    indi_feats = args.indi_feats
+    out_fn = args.filename
+    joined_fn = args.joined
+    macro_feats = args.macros
+    indi_feats = args.individuals
     a = Preproc(fn, train_data_dir, feat_data_dir, joined_fn, out_fn,
                macro_feats, indi_feats)
     a.preproc_data()
