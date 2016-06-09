@@ -142,7 +142,11 @@ class ParserAggregator(object):
     def run(self):
         for parser in self.parsers:
             parser.pickle_dir = self.pickle_dir
-            self.call_parser(parser)
+            try:
+                self.call_parser(parser)
+            except:
+                logging.exception("Parser {0} failed; continuing anyway".format(
+                                    type(parser)))
 
     def choose_parse_call(self, parser):
         parse_call = None
