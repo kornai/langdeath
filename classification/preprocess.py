@@ -14,10 +14,10 @@ class Preproc:
         self.joined_fn = joined_fn
         self.train_dir = train_dir
         self.feat_dir = feat_dir
-        self.get_seed_sets()
-        self.get_feat_set()
         self.macro_feats = macro_feats
         self.indi_feats = indi_feats
+        self.get_seed_sets()
+        self.get_feat_set()
 
     def get_seed_sets(self):
 
@@ -35,8 +35,9 @@ class Preproc:
             '{}/log_needed'.format(self.feat_dir))]
         self.bool_needed = [l.strip() for l in open(
             '{}/bool_needed'.format(self.feat_dir))]
-        self.macro_needed = [l.strip() for l in open(
-            '{}/macro_needed'.format(self.feat_dir))]
+        if self.macro_feats or self.indi_feats:
+            self.macro_needed = [l.strip() for l in open(
+                '{}/macro_needed'.format(self.feat_dir))]
         self.individual_defaults = {'eth_status': '7',
                                     'endangered_aggregated_status': '0'}
 
