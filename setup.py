@@ -20,5 +20,9 @@ setup(
         'django-jsonfield',
         'Pillow==2.3',
         'South==0.8',
+        'pandas==0.18.1',
+        'numpy>=1.6.1',
+        'scipy>=0.9',
+        'sklearn'
     ]
 )
