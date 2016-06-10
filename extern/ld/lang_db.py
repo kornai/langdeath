@@ -1,9 +1,16 @@
 import logging
 import re
 
-from dld.models import normalize_alt_name, Language, Code, Country, \
-    AlternativeName, CountryName, LanguageAltName, EndangeredLevel, Speaker, \
-    Coordinates
+from dld.models import normalize_alt_name, \
+                       AlternativeName, \
+                       Code, \
+                       Coordinates, \
+                       Country, \
+                       CountryName, \
+                       EndangeredLevel, \
+                       Language, \
+                       Parser, \
+                       Speaker
 
 from ld.langdeath_exceptions import LangdeathException
 
@@ -13,9 +20,17 @@ card_dir_p = re.compile("((east)|(west)|(north)|(south))")
 class LanguageDB(object):
     def __init__(self):
         self.languages = []
-        self.spec_fields = set(["other_codes", "country", "name", "alt_names",
-                                "champion", "speaker", "speakers",
-                                "endangered_level", "location", "macrolangs"])
+        self.spec_fields = set(["other_codes",
+                                "country",
+                                "name",
+                                "alt_names",
+                                "champion",
+                                "speaker",
+                                "speakers",
+                                "endangered_level",
+                                "location",
+                                "macrolangs",
+                                "parser"])
 
     def add_attr(self, name, data, lang):
         if name in self.spec_fields:
@@ -45,6 +60,8 @@ class LanguageDB(object):
             self.add_location(data, lang)
         elif name == "macrolangs":
             self.add_macrolang(data, lang)
+        elif name == "parser":
+            self.add_parser(data, lang)
 
     def add_name(self, data, lang):
         if lang.name == "":
@@ -65,31 +82,26 @@ class LanguageDB(object):
         self.add_alt_name(data, lang)
 
     def add_alt_name(self, data, lang):
-        lang.save()
         if type(data) == str or type(data) == unicode:
-            data = normalize_alt_name(data)
-            if len(lang.alt_name.filter(name=data)) > 0:
-                # duplication, don't do anything
-                return
+            name = normalize_alt_name(data)
 
-            alts = AlternativeName.objects.filter(name=data).all()
-            if len(alts) == 0:
-                a = AlternativeName(name=data)
-                a.save()
-            elif len(alts) == 1:
-                a = alts[0]
-                a.save()
-            else:
-                logging.error(u"There are 2+ altnames with data {0}".format(
-                    data))
+            # Truth checking for blank strings: '' resolves to False
+            if not name or not data:
+                raise LangdeathException("Empty alt_name: original " + \
+                  "`{0}', normalized `{1}'".format(data, name))
 
-            la = LanguageAltName(lang=lang, name=a)
-            a.save(), lang.save(), la.save()
+            try:
+                alt = AlternativeName.objects.get(name=name)
+            except AlternativeName.DoesNotExist:
+                alt = AlternativeName.objects.create(name=name)
 
-            if len(set(data.split()) &
+            # adding an object that already is associated is a no-op
+            lang.alt_name.add(alt)
+
+            if len(set(name.split()) &
                    set(["east", "west", "north", "south"])) > 0:
-                data = card_dir_p.sub("\g<1>ern", data)
-                self.add_alt_name(data, lang)
+                name = card_dir_p.sub("\g<1>ern", name)
+                self.add_alt_name(name, lang)
 
         elif type(data) == list or type(data) == set:
             for d in data:
@@ -99,13 +111,9 @@ class LanguageDB(object):
 
     def add_codes(self, data, lang):
         for src, code in data.iteritems():
-            c = Code()
-            c.code_name = src
-            c.code = code
+            c = Code(code_name=src, code=code)
             c.save()
-            lang.save()
             lang.code.add(c)
-            lang.save()
 
     def add_country(self, data, lang):
         if data is None:
@@ -124,10 +132,7 @@ class LanguageDB(object):
                         lang.sil, repr(data)))
         else:
             c = cs[0]
-            lang.save()
-            c.save()
             lang.country.add(c)
-            lang.save()
 
     def add_champion(self, data, lang):
         chs = Language.objects.filter(sil=data)
@@ -142,44 +147,39 @@ class LanguageDB(object):
             msg += " for lang {0} with sil {1}".format(lang.sil, data)
             raise LangdeathException(msg)
         ch = chs[0]
-        ch.save(), lang.save()
         lang.champion = ch
-        ch.save(), lang.save()
 
     def add_macrolang(self, data, lang):
         d = list(data)[0] 
         mls = Language.objects.filter(sil=d)
         ml = mls[0]
-        ml.save(), lang.save()
         lang.macrolang = ml
-        ml.save(), lang.save()
 
     def add_endangered_levels(self, data, lang):
         for src, level, conf in data:
             el = EndangeredLevel(src=src[:90], level=level, confidence=conf)
             el.save()
-            lang.save()
             lang.endangered_levels.add(el)
-            el.save()
-            lang.save()
 
     def add_location(self, data, lang):
         for src, lon, lat in data:
             c = Coordinates(src=src[:90], longitude=lon, latitude=lat)
             c.save()
-            lang.save()
             lang.locations.add(c)
-            c.save()
-            lang.save()
 
     def add_speakers(self, data, lang):
         for src, type_, num in data:
             s = Speaker(src=src[:90], num=num, l_type=type_)
             s.save()
-            lang.save()
             lang.speakers.add(s)
-            s.save()
-            lang.save()
+
+    def add_parser(self, parser_name, lang):
+        try:
+          p = Parser.objects.get(classname=parser_name)
+        except Parser.DoesNotExist:
+          p = Parser.objects.create(classname=parser_name)
+
+        lang.parsers.add(p)
 
     def add_new_language(self, lang):
         """Inserts new language to db"""
@@ -187,7 +187,7 @@ class LanguageDB(object):
             raise TypeError("LanguageDB.add_new_language " +
                             "got non-dict instance")
 
-        l = Language()
+        l = Language.objects.create()
         self.update_lang_data(l, lang)
         self.languages.append(l)
 
@@ -208,6 +208,8 @@ class LanguageDB(object):
                 continue
             try:
                 self.add_attr(key, update[key], l)
+            except LangdeathException as e:
+                logging.warning(e)
             except Exception as e:
                 logging.exception(e)
 
