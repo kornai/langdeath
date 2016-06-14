@@ -111,6 +111,7 @@ class Preproc:
             suffixes=("", "_e"))
         self.join_ethnologue_levels(aggreg)
         self.join_end_endangered_levels(aggreg)
+
     
     def join_ethnologue_levels(self, aggreg):
         aggreg['src_is_ethnologue'] = aggreg['src'] == 'ethnologue'
@@ -118,8 +119,7 @@ class Preproc:
             lambda x:x.replace("a", ".0").replace(
                 "b", ".5").replace('x', '')))
         eth_aggreg = aggreg[aggreg['src_is_ethnologue'] == True]
-        eth_tojoin = eth_aggreg[["language_id", "eth_status"]]
-
+        eth_tojoin = eth_aggreg[["language_id", "eth_status"]].drop_duplicates()
         self.df = self.df.merge(eth_tojoin, left_on="id",
                                 right_on="language_id", how="left")
 
