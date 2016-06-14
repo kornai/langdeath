@@ -20,12 +20,16 @@ BASE_DIR = os.path.dirname(os.path.dirname(__file__))
 SECRET_KEY = '#-4*kwkgrs5lu@xipmgb_s&i_4akecbu5gk3t_%0p-vhyn=xkn'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
 TEMPLATE_DEBUG = True
 TEMPLATE_DIRS = [os.path.join(BASE_DIR, 'templates')]
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = [
+ # This is less than safest practice: if run in production, see
+ # http://django.readthedocs.io/en/1.6.x/ref/settings.html#allowed-hosts
+ '*'
+]
 
 
 # Application definition
