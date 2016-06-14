@@ -66,22 +66,32 @@ class EndangeredParser(OfflineParser):
                 html_data[('html', 'sil')] =\
                         [", ".join(html_data[('html', 'sil')])]
             d = self.merge_dicts(csv_data, html_data)
-
             d['id'] = id_
             self.aggregate_numbers(d)
             self.arrange_codes(d)
-            if d['sil'] == 'urim':
-                d['sil'] = 'uri'
-            if d['sil'] == 'drh (retired)':
-                d['sil'] = 'drh'
             if d['sil'] == set([]):
                 del d['sil']
             yield d
     
     def arrange_codes(self, d):
+        
         if 'code_type' in d and d['code_type'] == 'LINGUIST List':
             d['other_codes'] = {'linglist': d['sil']}
             del d['sil']
+        else:
+            sil = d['sil']
+            if sil != set([]):
+                codes = d['sil'].split(',')
+                if len(codes) > 1:
+                    del d['sil']
+                    d['other_codes'] = {'multiple_sils': ','.join(
+                        [c.strip() for c in codes])}
+        if d['sil'] == 'urim':
+            d['sil'] = 'uri'
+        if d['sil'] == 'drh (retired)':
+            d['sil'] = 'drh'
+        return d     
+
                                 
     def aggregate_numbers(self, d):
         speakers = [i[2] for i in d.get('speakers', [])]
@@ -437,4 +447,3 @@ if __name__ == '__main__':
     p = EndangeredParser(id_fn=argv[1], offline_dir=argv[2])
     for d in p.parse_or_load():
         print repr(d)
-
