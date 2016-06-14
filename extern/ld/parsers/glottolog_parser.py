@@ -74,6 +74,8 @@ class GlottologParser(OnlineParser):
                         else:
                             d[self.needed_keys[self.needed_indeces[i]]] =\
                                     l[i].decode('utf-8')
+                if d['sil'][:6] == 'NOCODE':  
+                    del d['sil']
                 yield d
                 l = csv_reader.next()            
 
