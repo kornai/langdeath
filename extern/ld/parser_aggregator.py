@@ -40,6 +40,7 @@ from ld.parsers.bible_org_parser import BiblesParser
 from ld.parsers.list_parser import LeibzigCorporaParser, SirenLanguagesParser
 from ld.parsers.treetagger_parser import TreeTaggerParser
 from ld.parsers.find_bible_parser import FindBibleOfflineParser
+from ld.parsers.glottolog_parser import GlottologParser
 
 
 class ParserAggregator(object):
@@ -48,7 +49,7 @@ class ParserAggregator(object):
     two langauges (or any other data) that are possibly the same
     """
     
-    def __init__(self, data_dump_dir, log_dir, pickle_dir, classname_to_fn):
+    def __init__(self, data_dump_dir, log_dir, pickle_dir, classname_to_fn, extended):
         
         pickles, dump_dir = self.check_dirs(
             data_dump_dir, classname_to_fn, pickle_dir)
@@ -66,8 +67,9 @@ class ParserAggregator(object):
                 self.init_dump_based_parsers(pickles, dump_dir, parser_names,
                                              res_dir)
         #initializing all parsers
-        self.parsers = [ParseISO639_3(), MacroWPParser(), uriel_parser, dbpedia_parser,
+        self.parsers = [ParseISO639_3(extended), MacroWPParser(), uriel_parser, dbpedia_parser,
                         eth_parser, EthnologueMacroParser(res_dir + "/" + "ethnologue_macro"), 
+                        GlottologParser(),
                         L2Parser(res_dir + "/" + "ethnologue_l2"),
                         CrubadanParser(), la_parser,
                         WalsInfoParser(res_dir), IndigenousParser(res_dir),
@@ -85,12 +87,14 @@ class ParserAggregator(object):
                         SoftwareSupportParser(res_dir), wpinc_adj_parser]
         self.parsers = filter(lambda x:x != None, self.parsers)
         self.lang_db = LanguageDB()
-        self.trusted_parsers = set([ParseISO639_3])
+        self.trusted_parsers = set([ParseISO639_3, GlottologParser, CrubadanParser,
+                                    EndangeredParser])
         self.parsers_needs_sil = set([EthnologueOfflineParser,
                                       EthnologueOnlineParser,
                                       LanguageArchivesOnlineParser])
         self.debug_dir = log_dir
         self.pickle_dir = pickle_dir
+        self.extended = extended
 
     def check_dirs(self, data_dump_dir, classname_to_fn, pickle_dir):
         
@@ -140,13 +144,15 @@ class ParserAggregator(object):
 
         
     def run(self):
+        
         for parser in self.parsers:
             parser.pickle_dir = self.pickle_dir
             try:
                 self.call_parser(parser)
             except:
                 logging.exception("Parser {0} failed; continuing anyway".format(
-                                    type(parser)))
+                    type(parser)))
+                
 
     def choose_parse_call(self, parser):
         parse_call = None
@@ -173,8 +179,14 @@ class ParserAggregator(object):
                 self.add_data_to_loglists(lang, best.name, clue)
             elif len(candidates) == 0:
                 self.new_langs.append(lang) 
-                if type(self.parser) in self.trusted_parsers:
-                    pass
+                if type(self.parser) == ParseISO639_3 or\
+                (self.extended and type(self.parser) in self.trusted_parsers): 
+                    if type(self.parser) != ParseISO639_3:
+                        # assigning temporary code 
+                        temporary_code = '{}.{}'.format(
+                            self.parser.__class__.__name__, self.temp_code_index)
+                        self.temp_code_index += 1
+                        lang['sil'] = temporary_code    
                     self.lang_db.add_new_language(lang)
                 else:
                     msg = "{0} parser produced a language with data" \
@@ -196,7 +208,7 @@ class ParserAggregator(object):
                 a_l = [a_l]
             for a_n in a_l:
                 self.new_altnames.append((a_n, lang.get('name', ''), name))
-
+    
     def call_parser(self, parser):
         transaction.set_autocommit(False)
         c = 0
@@ -204,6 +216,8 @@ class ParserAggregator(object):
         self.new_langs = []
         self.new_altnames = []
         self.found_langs = []
+        if self.extended:
+            self.temp_code_index = 0
         try:
             for lang in self.choose_parse_call(parser)():
                 c += 1
@@ -262,6 +276,10 @@ def get_args():
     parser.add_argument('-f', '--filename_mappings',
                         default='extern/ld/res/dump_filenames',
                         help='file mapping parser classnames to dumps')
+    parser.add_argument('-e', '--extended',
+                         action='store_true',
+                        help='extended language set includes languages with retired sil code' +\
+                       ', possibly extended by languages returned by trusted parsers')
     return parser.parse_args()
 
 
@@ -271,8 +289,10 @@ def main():
     classname_to_fn = dict([l.strip().split('\t')
                            for l in open(args.filename_mappings)])
     pa = ParserAggregator(args.data_dump_dir, args.log_dir,
-                          args.pickle_dir, classname_to_fn)
+                          args.pickle_dir, classname_to_fn, args.extended)
     pa.run()
+    # after collecting all information on different codes, integrate
+    pa.lang_db.integrate_codes()
 
 if __name__ == "__main__":
     main()

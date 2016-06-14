@@ -29,20 +29,19 @@ class EndangeredParser(OfflineParser):
         self.location_sep_re = re.compile(r'[,;]', re.UNICODE)
         self.set_fields = set(['alt_names', 'dialects', 'family',
                                'other_langs', 'scripts', 'places'])
-        self.fields_to_unify = set(['iso_type', 'sil', 'name'])
+        self.fields_to_unify = set(['code_type', 'sil', 'name'])
         self.to_triplet = set(['endangered_level', 'speakers'])
         self.multiply_records = set(['location'])
         self.needed_fields_csv = {
-            'Codes.code_authorities': 'iso_type',
+            'Codes.code_authorities': 'code_type',
             'Codes.classification': 'family',
-            'Codes.code_authorities': 'iso_type',
             'Codes.code_val': 'sil',
             'Codes.dialect_varieties': 'dialects',
         }
         self.needed_fields_html = {
             'ALSO KNOWN AS': 'alt_names',
             'LANGUAGE CODE': 'sil',
-            'CODE AUTHORITY': 'iso_type',
+            'CODE AUTHORITY': 'code_type',
             'VARIANTS & DIALECTS': 'dialects',
             'location': 'location',
             'CLASSIFICATION': 'family',
@@ -67,22 +66,32 @@ class EndangeredParser(OfflineParser):
                 html_data[('html', 'sil')] =\
                         [", ".join(html_data[('html', 'sil')])]
             d = self.merge_dicts(csv_data, html_data)
-
             d['id'] = id_
             self.aggregate_numbers(d)
             self.arrange_codes(d)
-            if d['sil'] == 'urim':
-                d['sil'] = 'uri'
-            if d['sil'] == 'drh (retired)':
-                d['sil'] = 'drh'
             if d['sil'] == set([]):
                 del d['sil']
             yield d
     
     def arrange_codes(self, d):
-        if 'iso_type' in d and d['iso_type'] == 'LINGUIST List':
+        
+        if 'code_type' in d and d['code_type'] == 'LINGUIST List':
             d['other_codes'] = {'linglist': d['sil']}
             del d['sil']
+        else:
+            sil = d['sil']
+            if sil != set([]):
+                codes = d['sil'].split(',')
+                if len(codes) > 1:
+                    del d['sil']
+                    d['other_codes'] = {'multiple_sils': ','.join(
+                        [c.strip() for c in codes])}
+        if d['sil'] == 'urim':
+            d['sil'] = 'uri'
+        if d['sil'] == 'drh (retired)':
+            d['sil'] = 'drh'
+        return d     
+
                                 
     def aggregate_numbers(self, d):
         speakers = [i[2] for i in d.get('speakers', [])]
@@ -438,4 +447,3 @@ if __name__ == '__main__':
     p = EndangeredParser(id_fn=argv[1], offline_dir=argv[2])
     for d in p.parse_or_load():
         print repr(d)
-

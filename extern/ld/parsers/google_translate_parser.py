@@ -26,7 +26,7 @@ class GoogleTranslateParser(OnlineParser):
                 yield title, b
     
     def process_h2_block(self, block): 
-        needed_list = block.split('<ul>')[1].split('</ul>')[0]
+        needed_list = block.split('<ol>')[1].split('</ol>')[0]
         for item in needed_list.split('<li>')[1:]:
             matched = self.lang_regex.match(item)
             if matched != None:

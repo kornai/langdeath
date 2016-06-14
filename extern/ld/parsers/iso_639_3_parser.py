@@ -10,9 +10,10 @@ class ParseISO639_3(OnlineParser):
     """
     self.lang_dict = { iso_code : dict}
     """
-    def __init__(self):
+    def __init__(self, extended=False):
         self.lang_dict = defaultdict(dict)
         self.url = 'http://www-01.sil.org/iso639-3/iso-639-3_Code_Tables_20150505.zip'  # nopep8
+        self.extended = extended
 
     def parse(self):
         (iso_zip_filen, headers) = urllib.urlretrieve(self.url)
@@ -26,9 +27,9 @@ class ParseISO639_3(OnlineParser):
         # when addig macrolang, it is already in database
         values_macros_first = sorted(
             self.lang_dict.values(), key=lambda d:
-            0 if d['iso_scope'] == 'M' else 1)
+            0 if d.get('iso_scope', 'I') == 'M' else 1)
         for lang_upd in values_macros_first:
-            if lang_upd['iso_scope'] == 'S':
+            if lang_upd.get('iso_scope', 'I') == 'S':
                 # special situations
                 continue
             yield lang_upd
@@ -64,6 +65,7 @@ class ParseISO639_3(OnlineParser):
 
                 d['iso_scope'] = scope
                 d['iso_type'] = language_type
+                d['iso_active'] = True
 
     def parse_macrolangs(self):
         """
@@ -78,13 +80,15 @@ class ParseISO639_3(OnlineParser):
             self.dir_+'iso-639-3-macrolanguages_20150112.tab') as macro_file:
             for line in macro_file:
                 macro, indiv, stat = line.strip('\n\r').split('\t')
-                if stat == 'R':
-                    continue
                 if macro == 'M_Id':
                     # header
                     continue
-                self.lang_dict[indiv]['macrolangs'] = set([macro])
-                #self.lang_dict[indiv]['iso_stat'] = stat
+                if stat == 'A' or self.extended:
+                    self.lang_dict[indiv]['macrolangs'] = set([macro])
+                    if stat == 'A':
+                        self.lang_dict[indiv]['iso_active'] = True
+                    else:
+                        self.lang_dict[indiv]['iso_active'] = False
 
     def parse_inverted_name(self):
         """
@@ -132,12 +136,19 @@ class ParseISO639_3(OnlineParser):
                     elif change_to not in self.lang_dict:
                         # data error, lcq --> ppr insted of ppr --> lcq
                         continue
+                if self.extended:
+                    d = self.lang_dict[old_code]
+                    d['iso_active'] = False
+                    d['name'] = ref_name.decode("utf-8")
+                    d['sil'] = old_code
+
 
 def main():
 
-    a = ParseISO639_3()
+    a = ParseISO639_3(extended=True)
     for d in a.parse():
-        print repr(d)
+        if not d['iso_active']:
+            print d
 
 if __name__ == "__main__":
     main()

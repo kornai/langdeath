@@ -36,6 +36,10 @@ def get_lines(list_, keys, other_codes):
     for d in list_:
         if 'sil' in d and d['sil'] == set([]):
             d['sil'] = ''
+        for code in d.get('other_codes', {}):
+            v = d['other_codes'][code]
+            if type(v) == list:
+                d['other_codes'][code] = ';'.join(v)
         all_.append([d.get(k, '') for k in keys]\
                 + [d.get('other_codes', {}).get(k, '') for k in other_codes])
     return all_
