@@ -15,6 +15,15 @@ class Language(models.Model):
     last_updated = models.DateTimeField('last updated', default=timezone.now())
     iso_scope = models.CharField(max_length=20, blank=True)
     iso_type = models.CharField(max_length=100, blank=True)
+    iso_active = models.BooleanField(default=False)
+    integrated_code = models.CharField(max_length=100)
+    region_name = models.CharField(max_length=100)
+    longitude = models.FloatField(blank=True, null=True)
+    latitude = models.FloatField(blank=True, null=True)
+    champion = models.ForeignKey('Language', blank=True, null=True,
+                                 related_name='sublang')
+    macrolang = models.ForeignKey('Language', blank=True, null=True,
+                                  related_name='sublang2')
     eth_population = models.IntegerField(blank=True, null=True)
     
     find_bible_all_versions = models.IntegerField(blank=True, null=True)

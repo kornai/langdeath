@@ -51,11 +51,40 @@ class Preproc:
         self.language_endangered_levels =\
                 read_sql(
                     "SELECT * FROM dld_language_endangered_levels", conn)
+        self.codes =\
+                read_sql("SELECT * FROM dld_code", conn)
+        self.language_codes =\
+                read_sql("SELECT * FROM dld_language_code", conn)
+        self.join_codes()
         self.join_speaker_counts()
         self.join_endangered_levels()
         self.df = self.df.set_index([u'sil'], drop=False)
-        
+
     
+    def select_if_exists(self, t):
+        return lambda x: None if t not in x[0] else x[1][x[0].index(t)]
+
+    def join_codes(self):
+        code_data = self.language_codes.join(
+            self.codes, lsuffix='_l', rsuffix='_r')[
+                ['language_id', 'code_name', 'code']]
+        code_types = list(code_data.code_name.value_counts().index)
+        # unification of the codes (of one type): the most frequent one gets added to the tabular
+        code_data_unique = code_data.groupby(
+            ['language_id', 'code_name'], as_index=False).agg(
+                lambda x:x.value_counts().index[0])
+        code_data_lists = code_data_unique.groupby(
+            'language_id').aggregate(lambda x:list(x))
+
+        select_code = dict([(t, self.select_if_exists(t)) for t in code_types])
+        # separate columns for all code types 
+        for t in code_types:
+            code_data_lists[t] = code_data_lists.apply(
+                select_code[t], axis=1)
+        code_data_needed = code_data_lists.drop('code_name', axis=1).drop('code', axis=1)
+        self.df = self.df.merge(code_data_needed, left_on='id',
+                                right_index=True, how='outer')
+
     def join_speaker_counts(self):
         
         aggreg = self.language_speakers.merge(
@@ -82,6 +111,7 @@ class Preproc:
             suffixes=("", "_e"))
         self.join_ethnologue_levels(aggreg)
         self.join_end_endangered_levels(aggreg)
+
     
     def join_ethnologue_levels(self, aggreg):
         aggreg['src_is_ethnologue'] = aggreg['src'] == 'ethnologue'
@@ -89,8 +119,7 @@ class Preproc:
             lambda x:x.replace("a", ".0").replace(
                 "b", ".5").replace('x', '')))
         eth_aggreg = aggreg[aggreg['src_is_ethnologue'] == True]
-        eth_tojoin = eth_aggreg[["language_id", "eth_status"]]
-
+        eth_tojoin = eth_aggreg[["language_id", "eth_status"]].drop_duplicates()
         self.df = self.df.merge(eth_tojoin, left_on="id",
                                 right_on="language_id", how="left")
 

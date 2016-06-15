@@ -111,9 +111,25 @@ class LanguageDB(object):
 
     def add_codes(self, data, lang):
         for src, code in data.iteritems():
-            c = Code(code_name=src, code=code)
-            c.save()
-            lang.code.add(c)
+            if type(code) == list:
+                for c in code:
+                    self.add_code(src, c, lang)
+            else:
+                self.add_code(src, code, lang)
+    
+    def add_code(self, src, code, lang):             
+        c = Code()
+        c.code_name = src
+        c.code = code
+        c.save()
+        lang.save()
+        lang.code.add(c)
+        lang.save()
+    
+    def integrate_codes(self):
+        #TODO
+        pass
+
 
     def add_country(self, data, lang):
         if data is None:
@@ -152,7 +168,7 @@ class LanguageDB(object):
     def add_macrolang(self, data, lang):
         d = list(data)[0] 
         mls = Language.objects.filter(sil=d)
-        ml = mls[0]
+        ml = mls[0] 
         lang.macrolang = ml
 
     def add_endangered_levels(self, data, lang):

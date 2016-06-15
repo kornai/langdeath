@@ -51,7 +51,9 @@ class EthnologueDumpParser(TSV_parser):
         return self.parse_or_load()
 
     def parse_all(self):
-        field_target = {0: "sil", 1: "name", 4: "country", 8: "speakers",
+        field_target = {0: "sil", 1: "name", 4: "country", 6:
+                        'region_name',  8: "speakers",
+                        13: 'latitude', 14: 'longitude',
                         15: "endangered_level"}
         header = True
         for res in super(EthnologueDumpParser, self).parse(
@@ -63,6 +65,14 @@ class EthnologueDumpParser(TSV_parser):
                                 res["speakers"] != '' else 0)]
             res["endangered_level"] = [("ethnologue", res["endangered_level"],
                                         None)]
+            if len(res['latitude']) == 0:
+                del res['latitude']
+            else:    
+                res['latitude'] = float(res['latitude'])
+            if len(res['longitude']) == 0:
+                del res['longitude']
+            else:
+                res['longitude'] = float(res['longitude'])
             yield res
 
 class EthnologueMacroParser(TSV_parser):
@@ -106,7 +116,7 @@ class UrielParser(OfflineParser):
 
 def main():
 
-     a =  EthnologueMacroParser(sys.argv[1])
+     a =  EthnologueDumpParser(sys.argv[1])
      for d in a.parse():
          print d
 
