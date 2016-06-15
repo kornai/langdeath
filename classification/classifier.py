@@ -40,12 +40,27 @@ class Classifier:
 
     def get_train_df(self):
         
-        d2 = {'-': '-', 's': 'sh', 'h': 'sh', 'v': 'vtg',
-              't': 'vtg', 'g': 'vtg'}
-        d3 = {'-': '-', 's': 'sh', 'h': 'sh', 'v': 'v', 't': 'tg',
-              'g':'tg'}
-        d4 = {'-': '-', 's': 's', 'h': 'h', 'v': 'v', 't': 'tg',
-              'g':'tg'}
+        d2 = {'-': '-',
+              's': 'sh',
+              'h': 'sh',
+              'v': 'vtg',
+              't': 'vtg',
+              'g': 'vtg'}
+
+        d3 = {'-': '-',
+              's': 'sh',
+              'h': 'sh',
+              'v': 'v',
+              't': 'tg',
+              'g': 'tg'}
+
+        d4 = {'-': '-',
+              's': 's',
+              'h': 'h',
+              'v': 'v',
+              't': 'tg',
+              'g': 'tg'}
+
         g_data = self.df[self.df.seed_label == 'g'].sample(n=5)
         t_data = self.df[self.df.seed_label == 't'].sample(n=20)
         v_data = self.df[self.df.seed_label == 'v'].sample(n=20)
@@ -182,10 +197,10 @@ class Classifier:
                           .format(self.df_res.stable[1:].value_counts()))
         self.logger.info('Crossvalidation results (filtered by limit {1}):\n{0}'.\
                          format(crossval_res_best.describe(), self.limit))
-        self.logger.info(('Statuses based on labelings' +
+        self.logger.info(('Statuses based on labelings ' +
                           '(where crossvalidation exceeds limit):\n{}')\
                          .format(self.df_res.status_best[1:].value_counts()))
-        self.logger.info(('Stable languages based on labelings' +
+        self.logger.info(('Stable languages based on labelings ' +
                           '(where crossvalidation exceeds limit):\n{}')\
                          .format(self.df_res.stable_best[1:].value_counts()))
         self.logger.info('exporting dataframe to {}'.format(self.out_fn))
@@ -217,12 +232,13 @@ def get_args():
                         help="number of experiments with random seed sets",
                         default=100)
     parser.add_argument("-c", "--class_counts", type=int, default=2,
-                        choices=[1, 2, 3, 4, 5],
-                        help="2 - still/living, 3 - still/vital/thriving,"+
-                        "4 - still/historic/vital, thriving" +
-                        "5 - still/historic/thriving/vital/global")
+                        choices=[2, 3, 4, 5],
+                        help="2 - still/historic vs. vital/thriving/global, " +
+                             "3 - still/historic vs. vital vs. thriving/global, " +
+                             "4 - still vs. historic vs. vital vs. thriving/global, " +
+                             "5 - still vs. historic vs. thriving vs. vital vs. global")
     parser.add_argument("-t", "--threshold", type=float, default=0.9, 
-                       help="lower limit on cross-validation accuracy for counting" +
+                       help="lower limit on cross-validation accuracy for counting " +
                         "statistics on 'filtered' labelings")
     parser.add_argument("-l", "--log_file", default="classifier.log",
                        help="file for logging")
