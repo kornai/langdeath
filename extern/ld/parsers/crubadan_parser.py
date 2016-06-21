@@ -119,9 +119,8 @@ def main():
     import sys
 
     parser = CrubadanParser(sys.argv[1])
-    for d in parser.parse_or_load():
-        if d['cru_words_old'] != d['cru_words']:
-            print d
+    for d in parser.parse():
+        print repr(d)
 
 if __name__ == '__main__':
     main()
