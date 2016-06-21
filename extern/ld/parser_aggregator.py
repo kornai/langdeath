@@ -60,10 +60,10 @@ class ParserAggregator(object):
             'UrielParser', 'DbpediaParserAggregator',
             'WikipediaAdjustedSizeCounter_WPExtractor',
             'WPIncubatorAdjustedSizeCounter',
-            'EndangeredParser', 'FindBibleOfflineParser']
+            'EndangeredParser', 'FindBibleOfflineParser', 'CrubadanParser']
         eth_parser, la_parser, uriel_parser, dbpedia_parser,\
                 wp_adjusted_parser, wpinc_adj_parser, endangered_parser,\
-        find_bible_parser= \
+        find_bible_parser, crubadan_parser = \
                 self.init_dump_based_parsers(pickles, dump_dir, parser_names,
                                              res_dir)
         #initializing all parsers
@@ -71,7 +71,7 @@ class ParserAggregator(object):
                         eth_parser, EthnologueMacroParser(res_dir + "/" + "ethnologue_macro"), 
                         GlottologParser(),
                         L2Parser(res_dir + "/" + "ethnologue_l2"),
-                        CrubadanParser(), la_parser,
+                        crubadan_parser, la_parser,
                         WalsInfoParser(res_dir), IndigenousParser(res_dir),
                         BiblesParser(),
                         LeibzigCorporaParser(res_dir + "/" + "leipzig_corpora"),
