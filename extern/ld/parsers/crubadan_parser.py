@@ -1,5 +1,9 @@
 import csv
 import json
+import os
+from zipfile import ZipFile
+import urllib2
+import logging
 
 from utils import get_html
 
@@ -8,12 +12,11 @@ from ld.langdeath_exceptions import ParserException
 
 class CrubadanParser(OnlineParser):
 
-    def __init__(self):
+    def __init__(self, data_dir):
         self.needed_keys = {'m_iso_639_3_code': 'sil',
                             'name_english': 'name',
                             'm_bcp_47_code': 'other_codes',
                             'm_documents_crawled': 'cru_docs',
-                            'm_words': 'cru_words',
                             'm_language_name_native': 'native_name',
                             'altnames': 'alt_names',
                             'watchtower': 'cru_watchtower',
@@ -22,6 +25,8 @@ class CrubadanParser(OnlineParser):
         }
         self.url1 = 'http://crubadan.org/writingsystems.csv?sEcho=1&iSortingCols=1&iSortCol_0=0&sSortDir_0=asc'    #nopep8
         self.script_url = 'http://crubadan.org/writingsystems.csv?sEcho=1&iSortingCols=1&iSortCol_0=4&sSortDir_0=asc&sSearch_4='    #nopep8
+        self.data_dir = data_dir
+        self.file_url = 'http://crubadan.org/files'
  
     def get_scripts(self, url1):
         html = get_html(url1)
@@ -48,10 +53,8 @@ class CrubadanParser(OnlineParser):
             for d in self.get_relevant_dict(html):
                 yield d
 
-    def parse(self):
-        return self.parse_or_load()
-
-    def parse_all(self):
+    def generate_dicts_from(self, csv):        
+        
         self.get_scripts(self.url1)
         for dict_ in self.generate_script_dicts():
             d = {}
@@ -81,14 +84,43 @@ class CrubadanParser(OnlineParser):
                     v = {'bcp_47': v}
                 d[self.needed_keys[k]] = v
             yield d    
+    
 
+    def get_word_data(self, code):
+        
+        zip_fn = '{}/{}.zip'.format(self.data_dir, code)
+        try:
+            if not os.path.exists(zip_fn):
+                url = '{}/{}.zip'.format(self.file_url, code)
+                zip_ = urllib2.urlopen(url)
+                f = open(zip_fn, 'w')
+                f.write(zip_.read())
+                f.close()
+            zipfile = ZipFile(zip_fn)
+            word_string = zipfile.open('{}-words.txt'.format(code)).read()
+            return sum([int(l.split(' ')[1]) for l in word_string.split('\n')[:-1]])
+        except urllib2.HTTPError:
+            logging.info('Failed to download {}'.format(url))
+        except KeyError:
+            logging.info('No word list found in {}.zip'.format(code))
+        return 0    
+
+
+    def parse(self):
+        return self.parse_or_load()
+
+    def parse_all(self):
+        for d in self.generate_dicts_from(csv):
+            d['cru_words'] = self.get_word_data(d['other_codes']['bcp_47'])
+            yield d
 
 def main():
 
-    parser = CrubadanParser()
+    import sys
+
+    parser = CrubadanParser(sys.argv[1])
     for d in parser.parse():
         print repr(d)
-            #print repr(d['native_name'])
 
 if __name__ == '__main__':
     main()
