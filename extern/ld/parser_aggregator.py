@@ -100,7 +100,7 @@ class ParserAggregator(object):
         
         dump_dir = {}
         pickle_fns = os.listdir(pickle_dir)
-        pickled_pattern = re.compile('(.*?).pickle')
+        pickled_pattern = re.compile('(.*?).pickle$')
         pickled = []
         for f in pickle_fns:
             matched = pickled_pattern.match(f)
