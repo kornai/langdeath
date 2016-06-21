@@ -3,7 +3,7 @@ import json
 import os
 from zipfile import ZipFile
 import urllib2
-import sys
+import logging
 
 from utils import get_html
 
@@ -100,9 +100,9 @@ class CrubadanParser(OnlineParser):
             word_string = zipfile.open('{}-words.txt'.format(code)).read()
             return sum([int(l.split(' ')[1]) for l in word_string.split('\n')[:-1]])
         except urllib2.HTTPError:
-            sys.stderr.write('Failed to download {}\n'.format(url))
+            logging.info('Failed to download {}'.format(url))
         except KeyError:
-            sys.stderr.write('No word list found in {}.zip\n'.format(code))
+            logging.info('No word list found in {}.zip'.format(code))
         return 0    
 
 
