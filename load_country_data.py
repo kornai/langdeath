@@ -1,3 +1,7 @@
+import os
+if __name__ == "__main__":
+    os.environ.setdefault("DJANGO_SETTINGS_MODULE", "langdeath.settings")
+
 import sys
 import urllib2
 import contextlib

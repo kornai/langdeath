@@ -1,6 +1,9 @@
-import logging
 import os
+if __name__ == "__main__":
+    os.environ.setdefault("DJANGO_SETTINGS_MODULE", "langdeath.settings")
+
 import sys
+import logging
 from argparse import ArgumentParser
 import re
 
