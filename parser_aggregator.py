@@ -1,6 +1,9 @@
-import logging
 import os
+if __name__ == "__main__":
+    os.environ.setdefault("DJANGO_SETTINGS_MODULE", "langdeath.settings")
+
 import sys
+import logging
 from argparse import ArgumentParser
 import re
 
@@ -49,11 +52,14 @@ class ParserAggregator(object):
     two langauges (or any other data) that are possibly the same
     """
     
-    def __init__(self, data_dump_dir, log_dir, pickle_dir, classname_to_fn, extended):
-        
+    def __init__(self, data_dump_dir, log_dir, pickle_dir, res_dir, extended):
+        mappings_file = "/".join([res_dir, "dump_filenames"])
+        mappings      = dict([l.strip().split('\t')
+                                 for l in open(mappings_file)])
+
         pickles, dump_dir = self.check_dirs(
-            data_dump_dir, classname_to_fn, pickle_dir)
-        res_dir = '{}/res'.format(os.path.dirname(sys.argv[0]))
+            data_dump_dir, mappings, pickle_dir)
+
         # initializing parsers which need data dumps
         parser_names = [
             'EthnologueDumpParser','LanguageArchivesOfflineParser',
@@ -269,27 +275,40 @@ class ParserAggregator(object):
 
 def get_args():
     parser = ArgumentParser()
-    parser.add_argument('-d', '--data_dump_dir', help='directory of data dumps')
-    parser.add_argument('-p', '--pickle_dir', help='directory of pickles')
-    parser.add_argument('-l', '--log_dir', default='.',
-                        help='directory for log files')
-    parser.add_argument('-f', '--filename_mappings',
-                        default='extern/ld/res/dump_filenames',
-                        help='file mapping parser classnames to dumps')
+
+    parser.add_argument('data_dump_dir',
+                        help='directory of data dumps')
+
+    parser.add_argument('-p', '--pickle_dir',
+                        help="directory of pickles (defaults to 'pickles/')",
+                        default='pickles')
+
+    parser.add_argument('-l', '--log_dir',
+                        help="directory for log files (defaults to 'logs/')",
+                        default='logs')
+
+    parser.add_argument('-r', '--res_dir',
+                        help="directory of required extra files (defaults to" +\
+                        " 'res/')",
+                        default='res')
+
     parser.add_argument('-e', '--extended',
-                         action='store_true',
-                        help='extended language set includes languages with retired sil code' +\
-                       ', possibly extended by languages returned by trusted parsers')
+                        action='store_true',
+                        help='extended language set: includes languages with' +\
+                        ' a retired sil code, possibly extended by languages' +\
+                        ' found by trusted parsers')
+
     return parser.parse_args()
 
 
 def main():
     logging.basicConfig(level=logging.INFO)
     args = get_args()
-    classname_to_fn = dict([l.strip().split('\t')
-                           for l in open(args.filename_mappings)])
-    pa = ParserAggregator(args.data_dump_dir, args.log_dir,
-                          args.pickle_dir, classname_to_fn, args.extended)
+    pa = ParserAggregator(args.data_dump_dir,
+                          args.log_dir,
+                          args.pickle_dir,
+                          args.res_dir,
+                          args.extended)
     pa.run()
     # after collecting all information on different codes, integrate
     pa.lang_db.integrate_codes()
