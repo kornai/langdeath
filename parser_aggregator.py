@@ -272,17 +272,29 @@ class ParserAggregator(object):
 
 def get_args():
     parser = ArgumentParser()
-    parser.add_argument('-d', '--data_dump_dir', help='directory of data dumps')
-    parser.add_argument('-p', '--pickle_dir', help='directory of pickles')
-    parser.add_argument('-l', '--log_dir', default='.',
-                        help='directory for log files')
+
+    parser.add_argument('data_dump_dir',
+                        help='directory of data dumps')
+
+    parser.add_argument('-p', '--pickle_dir',
+                        help="directory of pickles (defaults to 'pickles/')",
+                        default='pickles')
+
+    parser.add_argument('-l', '--log_dir',
+                        help="directory for log files (defaults to 'logs/')",
+                        default='logs')
+
     parser.add_argument('-r', '--res_dir',
-                        help="directory of required extra files",
+                        help="directory of required extra files (defaults to" +\
+                        " 'res/')",
                         default='res')
+
     parser.add_argument('-e', '--extended',
-                         action='store_true',
-                        help='extended language set includes languages with retired sil code' +\
-                       ', possibly extended by languages returned by trusted parsers')
+                        action='store_true',
+                        help='extended language set: includes languages with' +\
+                        ' a retired sil code, possibly extended by languages' +\
+                        ' found by trusted parsers')
+
     return parser.parse_args()
 
 
