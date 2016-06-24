@@ -1,8 +1,8 @@
 This repository is for collecting data regarding the digital vitality of languages listed in iso-693-3.
 The data collected get stored in an sqlite database, its schema can be seen in dld/models.py .
-For the several data sources there are different parsers in extern/ld/parsers; some of these 
-download the data they process, some need input data which was downloded before, and some can work both in online
-and offline mode. There is a script (extern/ld/parser_aggregator.py) for running all parsers and
+For the several data sources there are different parsers in ld/parsers; some of these
+download the data they process, some need input data which was donwloaded before, and some can work both in online
+and offline mode. There is a script (parser_aggregator.py) for running all parsers and
 merging their outputs into a table (langdeath.db.sqlite).
 
 The repository also contains scripts for performing machine learning experiments for
@@ -14,32 +14,30 @@ part of the training data, and classifying all the languages into the categories
 still, historic, vital, thriving and global.
 
 
-Usage 
+Usage
 
 0. In the langdeath folder:
     pip install -U .
-    pip install -e .
-    export DJANGO_SETTINGS_MODULE=langdeath.settings
 
 0.2 Getting the data
     For the parsers, that use offline data, these have to be put in a common directory, and the default filenames where the parser_aggregator
-    looks for them are listed in extern/ld/res/dump_filenames.
+    looks for them are listed in res/dump_filenames.
     (If these files/directories are missing, the parser_aggregator still runs, but skips these sources.)
 
     The listed filenames:
     -Ethnologue_Table_of_Languages.tab
-    
+
     -olac_language_archives_20151212: html sites of http://www.language-archives.org/language/${LANGUAGE_CODE}
         If it is not given, the parser itself downloads the data
-    
+
     -DBPedia_201510/: containing the following files:
                             instance-types_en.nt
                             raw_infobox_properties_en.nt
                             mappingbased_properties_cleaned_en.nt
                             short_abstracts_en.nt
-                            dbpedia_ontology_languages:  
+                            dbpedia_ontology_languages:
                             (this can be generated from instance-types_en.nt,
-                        by taking the lines with "<http://dbpedia.org/ontology\/Language\> ." as last column) 
+                        by taking the lines with "<http://dbpedia.org/ontology\/Language\> ." as last column)
 
     -WP_20151209_wikiextractor: containing all wikipedia dumps, from
     https://dumps.wikimedia.org/${WIKI_CODE}wiki/latest/${WIKI_CODE}wiki-latest-pages-articles.xml.bz2
@@ -47,32 +45,31 @@ Usage
     (see http://attardi.github.io/wikiextractor/)
 
     WP_incubator_20151226.bz2: a wikipedia incubator dump, extracted using WikiExtractor.
-    
+
     -endangered_html_20151211_csv20160114: html sites of http://www.endangeredlanguages.com/lang/${LANGUAGE_CODE}
         If empty, the parser itself downloads the data
-    -uriel_v0_2_features_avg.csv: from uriel typological database, http://www.cs.cmu.edu/~dmortens/uriel.html 
+    -uriel_v0_2_features_avg.csv: from uriel typological database, http://www.cs.cmu.edu/~dmortens/uriel.html
 
 
 1. Prior to running the parsers:
     python manage.py syncdb
-    python extern/ld/load_country_data.py extern/ld/res/country_alt_names
-    
+    python load_country_data.py res/country_alt_names
+
 
 2. To run the parsers
-    python expern/ld/parser_aggregator.py -d DATA_DUMP_DIR -p PICKLE_DIR -l LOG_DIR -f FILENAME_MAPPINGS 
-   
-    (run python expern/ld/parser_aggregator.py --help for listing the options)
+    python parser_aggregator.py DATA_DUMP_DIR
+
+    (run python parser_aggregator.py --help for listing the options)
     This will call all the parsers, which collect the data in a langdeath.db.sqlite database.
     This should take a couple of minutes for all parsers, except for the parsers which process dbpedia and wikipedia dumps.
     The options for the parser_aggregator (see python parser_aggregator --help):
-    
+
     DATA_DUMP_DIR: Dump files (listed in 0.2 are to be put here.)
-    FILENAME_MAPPING: Default is extern/ld/res/dump filenames
-    PICKLE_DIR: The output of the more slower parsers get saved, so when re-running it only reads the data from here. These are simple lists of python
-    dictionaries. 
-    LOG_DIR:  For every parser there will be a ${ParserClass}.found, ${ParserClass}.not_found file produced
-              containing the languages produced by the parsers which could or could not be merged to an SIL language (based on the language code or name
-              parsed). For those parsers which produce alternative names to some languages, these are listed in a ${ParserClass}.altnames file.
+    About pickles: The output of the more slower parsers get saved, so when re-running it only reads the data from here. These are simple lists of python
+    dictionaries.
+    About the logs:  For every parser there will be a ${ParserClass}.found, ${ParserClass}.not_found file produced
+                     containing the languages produced by the parsers which could or could not be merged to an SIL language (based on the language code
+                     or name parsed). For those parsers which produce alternative names to some languages, these are listed in a ${ParserClass}.altnames file.
 
 
 3. To export the data into tsv, run python preprocess.py from the classifier directory.
@@ -81,9 +78,13 @@ Usage
    It produces two files, 'joined.tsv'(result of merging several data tables) and 'preproc.tsv'
    (plus some preprocessings, e.g. N/A filling). This letter, preprc.tsv has to be given to the classifier script as input.
 
-4. To perform the classification experiments using the exported data, run python classifier.py from the classifier directory. 
+4. To perform the classification experiments using the exported data, run python classifier.py from the classifier directory.
    (see python classifier.py --help for listing the options)
-   
+
+usage: classifier.py [-h] [-e EXPERIMENT_COUNT] [-c {2,3,4,5}] [-t THRESHOLD]
+                     [-l LOG_FILE] [-s]
+                     input_tsv output_fn
+
 positional arguments:
   input_tsv             data file in tsv format
   output_fn             file for writing labelings
@@ -92,16 +93,18 @@ optional arguments:
   -h, --help            show this help message and exit
   -e EXPERIMENT_COUNT, --experiment_count EXPERIMENT_COUNT
                         number of experiments with random seed sets
-  -c {1,2,3,4,5}, --class_counts {1,2,3,4,5}
-                        2 - still/living, 3 - still/vital/thriving,4 -
-                        still/historic/vital, thriving5 -
-                        still/historic/thriving/vital/global
+  -c {2,3,4,5}, --class_counts {2,3,4,5}
+                        2 - still/historic vs. vital/thriving/global, 3 -
+                        still/historic vs. vital vs. thriving/global, 4 -
+                        still vs. historic vs. vital vs. thriving/global, 5 -
+                        still vs. historic vs. thriving vs. vital vs. global
   -t THRESHOLD, --threshold THRESHOLD
-                        lower limit on cross-validation accuracy for
-                        counting statistics on 'filtered' labelings
+                        lower limit on cross-validation accuracy for counting
+                        statistics on 'filtered' labelings
   -l LOG_FILE, --log_file LOG_FILE
                         file for logging
+  -s, --status          use status features
 
 After running the experiments some simple statistics will be printed, containing the number of languages labeled
 consistently to the same class ('stable'), and the count of the languages of the broader statuses 'living',
-'still', and 'borderline'. The status of the individual languages get written in the output_fn.  
+'still', and 'borderline'. The status of the individual languages get written in the output_fn.
