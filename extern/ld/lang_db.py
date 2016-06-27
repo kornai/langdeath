@@ -125,11 +125,6 @@ class LanguageDB(object):
         lang.save()
         lang.code.add(c)
         lang.save()
-    
-    def integrate_codes(self):
-        #TODO
-        pass
-
 
     def add_country(self, data, lang):
         if data is None:
@@ -272,3 +267,80 @@ class LanguageDB(object):
     def choose_candidates(self, lang, l):
         """TODO later proper candidate selection"""
         return l
+
+    def compile_name_pattern(self):
+        self.pname_pattern = re.compile('(Online|Offline){0,1}Parser')
+
+    def format_integrated_code(self, code, notation):
+        '''
+        Currently all codes are padded to 16 characters
+        (which is the size of the top-size code occured)
+        '''
+        if notation == 'M':
+            return '{}M'.format(code.split(',')[0].ljust(16, '_'))
+        elif notation == 'O':
+            pname = re.split(self.pname_pattern, code)[0][:12]
+            index = code.split('.')[1]
+            return '{}{}O'.format(pname, index.ljust(16-len(pname), '_'))
+        else:
+            return '{}{}'.format(code.ljust(16, '_'), notation)
+
+    def get_other_code(self, codes, code_type):
+        filtered_codes = codes.filter(code_name=code_type).all()
+        if len(filtered_codes) == 0:
+            return
+        co = [pair.code for pair in filtered_codes]
+        return max(set(co), key=co.count)
+
+    def get_indi_code_mapping(self):
+        '''
+        sil codes in sil clusters (returned by EndangeredParser)
+        get code specified here
+        '''
+        ms = [c.code for c in Code.objects.all()
+              .filter(code_name='multiple_sils')]
+        self.indi_codes = dict(
+            sum([[(sil, '{}{}{}'.format(cluster.split(',')[0], sil, i))
+                  for i, sil in enumerate(cluster.split(','))]
+                 for cluster in ms], []))
+
+    def integrate_codes(self):
+        self.compile_name_pattern()
+        self.get_indi_code_mapping()
+        for lang in Language.objects.all():
+            sil = lang.sil
+            found = False
+            if len(sil) == 3:
+                # sil code; active or retired
+                found = True
+                if sil not in self.indi_codes:
+                    code = sil
+                    if lang.iso_active:
+                        notation = 'A'
+                    else:
+                        notation = 'R'
+                else:
+                    code = self.indi_codes[sil]
+                    if lang.iso_active:
+                        notation = 'a'
+                    else:
+                        notation = 'r'
+            else:
+                # look for other code
+                other_codes = lang.code.all()\
+                        .exclude(code=None).exclude(code='none')
+                for code_type, notation in [('multiple_sils', 'M'),
+                                            ('linglist', 'L'),
+                                            ('glotto', 'G'),
+                                            ('bcp_47', 'B')]:
+                    code = self.get_other_code(other_codes, code_type)
+                    if code:
+                        found = True
+                        break
+            if not found:
+                # integrated code is just the temporary (ParserName_{index})
+                code = sil
+                notation = 'O'
+            formatted = self.format_integrated_code(code, notation)
+            lang.integrated_code = formatted
+            lang.save()

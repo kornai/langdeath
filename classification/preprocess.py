@@ -232,6 +232,7 @@ class Preproc:
         self.add_macrolang_feats()
         self.numerical_preproc()
         self.add_labels()
+        self.df = self.df.set_index(['integrated_code'])
         needed = self.needed + ['seed_label']
         self.df[needed].\
                 to_csv(self.preprocessed_fn, sep='\t', encoding='utf-8')
