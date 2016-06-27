@@ -311,6 +311,7 @@ def main():
                           args.extended)
     pa.run()
     # after collecting all information on different codes, integrate
+    logging.info('Integrating codes')
     pa.lang_db.integrate_codes()
 
 if __name__ == "__main__":

@@ -15,9 +15,9 @@ class Classifier:
                 out_fn, status_use):
 
         self.df = pandas.read_csv(tsv, sep='\t')
-        series = ['crossval_res'] + self.df['sil'].tolist()
+        series = ['crossval_res'] + self.df['integrated_code'].tolist()
         self.df_res = pandas.DataFrame(index=series)
-        self.df = self.df.set_index(u'sil')
+        self.df = self.df.set_index(u'integrated_code')
         if not status_use:
             self.df = self.df.drop('eth_status', axis=1)\
                     .drop('endangered_aggregated_status', axis=1)
