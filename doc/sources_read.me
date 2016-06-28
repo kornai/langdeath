@@ -1,0 +1,81 @@
+This file lists the data sources and the extracted attributes of the individual languages, later used as features in the classification process.
+Among the sources there are data dumps, web pages and manually collected lists, this variability is handled by different types
+of parsers (Offline, for processing data dumps/manually collected lists / Online, for downloading and parsing web pages).
+The list contains all data sources used, and those attributes extracted from them, which were used for classification
+(some of the attributes - alternative name, different codes are used only for data merging).
+
+Database description                                Extracted features
+
+Ethnologue database:                                L1:   number of L1 speakers
+
+Crubadan:
+
+https://http://crubadan.org/                        cru_docs:   number of documents (as reported on the site)
+Collection of (crawled) textual data                cru_words:   number of words (based on the downloadable language datasets)
+for 2000 languages                                  cru_floss_splchk:    existence of free, open source spell checker
+                                                    cru_watchtower:    existence of Watchtower edition
+                                                    cru_udhr:    existence of an edition of the Universal Declaration of Human Rights
+
+Omniglot:                                           in_omniglot:    listed by omniglot site
+
+www.omniglot.com
+Encyclopedia of writing systems and languages
+
+Language archives:
+
+
+Archive of language resources, for                  la_primary_texts_online
+            languages, maintained by                la_primary_texts_all
+the Open Language Archives Community                la_lang_descr_online
+                                                    la_lang_descr_all
+The resources are categorized as:                   la_lex_res_online
+ - Primary texts  (la_primary_texts_)               la_lex_res_all
+ - Lexical resources (la_lex_res_)                  la_res_in_online
+ - Language descriptions (la_lang_descr_)           la_res_in_all
+ For other types of resources:                      la_res_about_online
+     If none of the above is listed:                la_res_about_all
+ - Resources about the language (la_res_about_)     la_oth_res_in_online
+ - Resources in the language (la_res_in_)           la_oth_res_in_all
+     Otherwise                                      la_oth_res_about_online
+ - Resources about the language (la_oth_res_about_) la_oth_res_about_all
+ - Resources in the language (la_oth_res_in_)
+
+ For all categories two features are extracted,
+ one for the number of all resources listed (_all), 
+ and one for number of the resources online 
+ available (_online).
+
+Software support
+MAC                   mac_input
+                      mac_input_partial
+Microsoft             microsoft_pack
+                      win10_input_method
+                      office13_if_pack
+                      office13_lp
+Ubuntu                ubuntu_pack
+                      ubuntu_input
+Firefox               firefox_lpack
+                      firefox_dict
+
+Wals info             wals_samples_100
+                      wals_samples_200
+Indigenious languages  indi_blogs
+                        indi_posts
+                        indi_words
+                        indi_users
+                        indi_tweets
+Wikipedia:              wp_articles
+                        wp_total
+                        wp_edits
+                        wp_admins
+                        wp_users
+                        wp_active_users
+                        wp_depth
+                        wp_inc
+                        wp_real_articles
+                        wp_adjusted_size
+Uriel:                  uriel_feats
+Leipzig corpora:        in_leipzig_corpora
+                        treetagger
+Bible.org:              on_bible_org
+Find bible versions     find_bible_all_versions
