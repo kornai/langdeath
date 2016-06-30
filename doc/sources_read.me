@@ -7,6 +7,12 @@ The list contains all data sources used, and those attributes extracted from the
 Database description                                Extracted features
 
 Ethnologue database:                                L1:   number of L1 speakers
+                                                                               -> mean of the two value for languages for which both data is present
+Endangered languages Project:                       L1:   number of L1 speakers
+
+http://www.endangeredlanguages.com/
+Catalog of 3346 languages 
+
 
 Crubadan:
 
@@ -41,29 +47,52 @@ The resources are categorized as:                   la_lex_res_online
  - Resources in the language (la_oth_res_in_)
 
  For all categories two features are extracted,
- one for the number of all resources listed (_all), 
- and one for number of the resources online 
+ one for the number of all resources listed (_all),
+ and one for number of the resources online
  available (_online).
 
-Software support
-MAC                   mac_input
-                      mac_input_partial
-Microsoft             microsoft_pack
-                      win10_input_method
-                      office13_if_pack
-                      office13_lp
-Ubuntu                ubuntu_pack
-                      ubuntu_input
-Firefox               firefox_lpack
-                      firefox_dict
+Software support data
 
-Wals info             wals_samples_100
-                      wals_samples_200
-Indigenious languages  indi_blogs
-                        indi_posts
-                        indi_words
-                        indi_users
-                        indi_tweets
+These define a set of binary features
+(whether the language is supported)
+
+Operation system language packs and
+supported keyboard layouts:
+collected manually
+
+-OS X                                               mac_input: language pack
+                                                    mac_input_partial: keyboard input language
+-Microsoft                                          microsoft_pack: language pack
+                                                    win10_input_method: keyboard input language
+-Ubuntu                                             ubuntu_pack: language pack
+                                                    ubuntu_input: keyboard input language
+
+Office 13 language pack:                            office13_if_pack: language interface pac
+lists downloaded from https://support.office.com    office13_lp: language pack
+
+Firefox language tools:
+(language packs and dictionaries)                   firefox_lpack
+https://addons.mozilla.org/...                      firefox_dict
+.../en-US/firefox/language-tools/                   
+
+
+World Atlas of Language Structures (WALS):          wals_samples_100: in 100_language sample
+                                                    wals_samples_200
+http://wals.info/                                     
+database of structural properties of languages
+gathered from descriptive materials
+
+Indigenous Tweets project:
+
+http://indigenoustweets.com/
+http://indigenoustweets.com/blogs/                  
+a website that records minority language Twitter
+messages to help indigenous speakers contact        indi_blogs
+each other.                                         indi_posts: number of blog posts
+                                                    indi_words: number of blog words
+                                                    indi_users
+                                                    indi_tweets
+
 Wikipedia:              wp_articles
                         wp_total
                         wp_edits
