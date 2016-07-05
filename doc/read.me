@@ -1,5 +1,6 @@
 This repository is for collecting data regarding the digital vitality of languages listed in iso-693-3.
 The data collected get stored in an sqlite database, its schema can be seen in dld/models.py .
+The various data sources and the attributes extracted from them are explained in the sources_read.me file.
 For the several data sources there are different parsers in ld/parsers; some of these
 download the data they process, some need input data which was donwloaded before, and some can work both in online
 and offline mode. There is a script (parser_aggregator.py) for running all parsers and
