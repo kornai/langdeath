@@ -93,18 +93,43 @@ each other.                                         indi_posts: number of blog p
                                                     indi_users
                                                     indi_tweets
 
-Wikipedia:              wp_articles
-                        wp_total
-                        wp_edits
-                        wp_admins
-                        wp_users
-                        wp_active_users
-                        wp_depth
-                        wp_inc
-                        wp_real_articles
-                        wp_adjusted_size
-Uriel:                  uriel_feats
-Leipzig corpora:        in_leipzig_corpora
-                        treetagger
-Bible.org:              on_bible_org
-Find bible versions     find_bible_all_versions
+Wikipedia:                                          wp_articles
+                                                    wp_total
+wp inc data from                                    wp_admins
+http://incubator.wikimedia.org/wiki/Incubator:Wikis wp_users
+wp_real_articles, wp_adjusted_size                  wp_active_users
+calculated from wp dumps                            wp_depth
+(https://dumps.wikimedia.org)                       wp_inc
+all other features from                             wp_real_articles: number of articles with length greater than a threshold (supposedly not generated)
+http://meta.wikimedia.org/wiki/List_of_Wikipedias   wp_adjusted_size: character length normalized by unigram character entropy
+
+
+Uriel:                                              uriel_feats:   number of (linguistic) features reported
+
+http://www.cs.cmu.edu/~dmortens/uriel.html
+structured compendium of information on language
+typology and language universals
+
+Leipzig corpora:                                    in_leipzig_corpora
+
+http://corpora.uni-leipzig.de/en
+Corpus-Based Monolingual Dictionaries
+
+TreeTagger:                                         treetagger:   whether there is a parameter file for the language
+
+http://www.cis.uni-muenchen.de/...+
+...~schmid/tools/TreeTagger/
+Part of Speech tagger for many languages
+
+Bibles.org:                                         on_bible_org:   bible edition on the given language
+
+https://bibles.org
+Collection of bible versions maintained
+by the American Bible Society
+
+Find-A-Bible                                        find_bible_all_versions:   number of all versions (printed, online...)
+                                                                             of all bible editions listed for the given language
+https://find.bible/
+Platform for collaboration of the
+major Bible agencies for making biblical
+resources available
