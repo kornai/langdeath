@@ -44,6 +44,7 @@ from ld.parsers.list_parser import LeibzigCorporaParser, SirenLanguagesParser
 from ld.parsers.treetagger_parser import TreeTaggerParser
 from ld.parsers.find_bible_parser import FindBibleOfflineParser
 from ld.parsers.glottolog_parser import GlottologParser
+from ld.parsers.endangered_resources_parser import EndangeredResourcesParser
 
 
 class ParserAggregator(object):
@@ -79,7 +80,7 @@ class ParserAggregator(object):
                         L2Parser(res_dir + "/" + "ethnologue_l2"),
                         crubadan_parser, la_parser,
                         WalsInfoParser(res_dir), IndigenousParser(res_dir),
-                        BiblesParser(),
+                        BiblesParser(), EndangeredResourcesParser(),
                         LeibzigCorporaParser(res_dir + "/" + "leipzig_corpora"),
                         SirenLanguagesParser(res_dir + "/" + "siren_list"),
                         TreeTaggerParser(),

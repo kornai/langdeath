@@ -18,3 +18,5 @@ wals_samples_100
 wals_samples_200
 in_leipzig_corpora
 treetagger
+endangered_langspec
+endangered_lex
