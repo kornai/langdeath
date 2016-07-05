@@ -39,6 +39,8 @@ class Language(models.Model):
     in_leipzig_corpora = models.BooleanField(default=False)
     in_siren_project = models.BooleanField(default=False)
     treetagger = models.BooleanField(default=False)
+    endangered_langspec = models.BooleanField(default=False)
+    endangered_lex = models.BooleanField(default=False)
 
     la_primary_texts_online = models.IntegerField(blank=True, null=True)
     la_primary_texts_all = models.IntegerField(blank=True, null=True)
