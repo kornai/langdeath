@@ -1,0 +1,135 @@
+This file lists the data sources and the extracted attributes of the individual languages, later used as features in the classification process.
+Among the sources there are data dumps, web pages and manually collected lists, this variability is handled by different types
+of parsers (Offline, for processing data dumps/manually collected lists / Online, for downloading and parsing web pages).
+The list contains all data sources used, and those attributes extracted from them, which were used for classification
+(some of the attributes - alternative name, different codes are used only for data merging).
+
+Database description                                Extracted features
+
+Ethnologue database:                                L1:   number of L1 speakers
+                                                                               -> mean of the two value for languages for which both data is present
+Endangered languages Project:                       L1:   number of L1 speakers
+
+http://www.endangeredlanguages.com/
+Catalog of 3346 languages 
+
+
+Crubadan:
+
+https://http://crubadan.org/                        cru_docs:   number of documents (as reported on the site)
+Collection of (crawled) textual data                cru_words:   number of words (based on the downloadable language datasets)
+for 2000 languages                                  cru_floss_splchk:    existence of free, open source spell checker
+                                                    cru_watchtower:    existence of Watchtower edition
+                                                    cru_udhr:    existence of an edition of the Universal Declaration of Human Rights
+
+Omniglot:                                           in_omniglot:    listed by omniglot site
+
+www.omniglot.com
+Encyclopedia of writing systems and languages
+
+Language archives:
+
+
+Archive of language resources, for                  la_primary_texts_online
+            languages, maintained by                la_primary_texts_all
+the Open Language Archives Community                la_lang_descr_online
+                                                    la_lang_descr_all
+The resources are categorized as:                   la_lex_res_online
+ - Primary texts  (la_primary_texts_)               la_lex_res_all
+ - Lexical resources (la_lex_res_)                  la_res_in_online
+ - Language descriptions (la_lang_descr_)           la_res_in_all
+ For other types of resources:                      la_res_about_online
+     If none of the above is listed:                la_res_about_all
+ - Resources about the language (la_res_about_)     la_oth_res_in_online
+ - Resources in the language (la_res_in_)           la_oth_res_in_all
+     Otherwise                                      la_oth_res_about_online
+ - Resources about the language (la_oth_res_about_) la_oth_res_about_all
+ - Resources in the language (la_oth_res_in_)
+
+ For all categories two features are extracted,
+ one for the number of all resources listed (_all),
+ and one for number of the resources online
+ available (_online).
+
+Software support data
+
+These define a set of binary features
+(whether the language is supported)
+
+Operation system language packs and
+supported keyboard layouts:
+collected manually
+
+-OS X                                               mac_input: language pack
+                                                    mac_input_partial: keyboard input language
+-Microsoft                                          microsoft_pack: language pack
+                                                    win10_input_method: keyboard input language
+-Ubuntu                                             ubuntu_pack: language pack
+                                                    ubuntu_input: keyboard input language
+
+Office 13 language pack:                            office13_if_pack: language interface pac
+lists downloaded from https://support.office.com    office13_lp: language pack
+
+Firefox language tools:
+(language packs and dictionaries)                   firefox_lpack
+https://addons.mozilla.org/...                      firefox_dict
+.../en-US/firefox/language-tools/                   
+
+
+World Atlas of Language Structures (WALS):          wals_samples_100: in 100_language sample
+                                                    wals_samples_200
+http://wals.info/                                     
+database of structural properties of languages
+gathered from descriptive materials
+
+Indigenous Tweets project:
+
+http://indigenoustweets.com/
+http://indigenoustweets.com/blogs/                  
+a website that records minority language Twitter
+messages to help indigenous speakers contact        indi_blogs
+each other.                                         indi_posts: number of blog posts
+                                                    indi_words: number of blog words
+                                                    indi_users
+                                                    indi_tweets
+
+Wikipedia:                                          wp_articles
+                                                    wp_total
+wp inc data from                                    wp_admins
+http://incubator.wikimedia.org/wiki/Incubator:Wikis wp_users
+wp_real_articles, wp_adjusted_size                  wp_active_users
+calculated from wp dumps                            wp_depth
+(https://dumps.wikimedia.org)                       wp_inc
+all other features from                             wp_real_articles: number of articles with length greater than a threshold (supposedly not generated)
+http://meta.wikimedia.org/wiki/List_of_Wikipedias   wp_adjusted_size: character length normalized by unigram character entropy
+
+
+Uriel:                                              uriel_feats:   number of (linguistic) features reported
+
+http://www.cs.cmu.edu/~dmortens/uriel.html
+structured compendium of information on language
+typology and language universals
+
+Leipzig corpora:                                    in_leipzig_corpora
+
+http://corpora.uni-leipzig.de/en
+Corpus-Based Monolingual Dictionaries
+
+TreeTagger:                                         treetagger:   whether there is a parameter file for the language
+
+http://www.cis.uni-muenchen.de/...+
+...~schmid/tools/TreeTagger/
+Part of Speech tagger for many languages
+
+Bibles.org:                                         on_bible_org:   bible edition on the given language
+
+https://bibles.org
+Collection of bible versions maintained
+by the American Bible Society
+
+Find-A-Bible                                        find_bible_all_versions:   number of all versions (printed, online...)
+                                                                             of all bible editions listed for the given language
+https://find.bible/
+Platform for collaboration of the
+major Bible agencies for making biblical
+resources available
