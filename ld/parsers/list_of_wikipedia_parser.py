@@ -20,7 +20,7 @@ class WikipediaListOfLanguagesParser(OnlineParser):
             "Admins": "wp_admins",
             "Users": "wp_users",
             "Active Users": "wp_active_users",
-            "Images": "wp_images",
+            "Files": "wp_images",
             "Depth": "wp_depth"
         }
         self.numnorm = lambda x: re.compile(",([0-9]{3})").sub("\\1", x)
