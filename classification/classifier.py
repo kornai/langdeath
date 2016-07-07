@@ -66,7 +66,9 @@ class Classifier:
         v_data = self.df[self.df.seed_label == 'v'].sample(n=20)
         h_data = self.df[self.df.seed_label == 'h'].sample(n=20)
         s_data = self.df[self.df.seed_label == 's'].sample(n=80)
+
         self.train_df = pandas.concat([g_data, t_data, v_data, h_data, s_data])
+
         if self.classes == 2:
             self.train_df.seed_label = self.train_df.seed_label.map(
                 lambda x:d2[x])
@@ -75,10 +77,12 @@ class Classifier:
             self.train_df.seed_label = self.train_df.seed_label.map(
                 lambda x:d3[x])
 
-            
         if self.classes == 4:
             self.train_df.seed_label = self.train_df.seed_label.map(
                 lambda x:d4[x])
+
+        # if self.classes == 5 no grouping is necessary
+
         self.train_df = self.shuffle_rows(self.train_df)    
         self.feats = self.train_df.drop('seed_label', axis=1)
         self.labels = self.train_df.seed_label
@@ -167,42 +171,58 @@ class Classifier:
             crossval_res = self.train_crossval(selector=self.selector)
             self.train_label(crossval_res=crossval_res, selector=self.selector,
                          label='exp_with_feature_sel_{0}'.format(i))
+
         status_series = self.df_res.apply(lambda x:Counter(x),
                                                   axis=1).apply(self.map_borderline_values)
         stable_series = self.df_res.apply(lambda x:Counter(x),
                                                   axis=1).apply(self.map_stable_values)
-        needed = self.df_res.iloc[0] > self.limit
-        needed_list = numpy.where(needed.tolist())[0].tolist()
-        self.best = self.df_res.iloc[:, needed_list]
-        status_best_series = self.best.apply(lambda x:Counter(x), axis=1)\
-                .apply(self.map_borderline_values)
-        
-        stable_best_series = self.best.apply(lambda x:Counter(x), axis=1)\
-                .apply(self.map_stable_values)
         self.df_res['status'] = status_series
         self.df_res['stable'] = stable_series
-        self.df_res['status_best'] = status_best_series
-        self.df_res['stable_best'] = stable_best_series
+
+        needed = self.df_res.iloc[0] > self.limit
+        needed_list = numpy.where(needed.tolist())[0].tolist()
+
+        if needed_list:
+            self.best = self.df_res.iloc[:, needed_list]
+
+            status_best_series = self.best.apply(lambda x:Counter(x), axis=1)\
+                    .apply(self.map_borderline_values)
+        
+            stable_best_series = self.best.apply(lambda x:Counter(x), axis=1)\
+                    .apply(self.map_stable_values)
+
+            self.df_res['status_best'] = status_best_series
+            self.df_res['stable_best'] = stable_best_series
+        else:
+          self.logger.warn("No experiment had crossvalidation accuracy higher " +\
+                           "than the minimum threshold of %i" % (self.limit))
+
         self.log_stats()
     
     def log_stats(self):
         
         crossval_res_all = pandas.to_numeric(self.df_res.iloc[0, :-4])
-        crossval_res_best = pandas.to_numeric(self.best.iloc[0, :-4])
+
         self.logger.debug('Crossvalidation results (all):\n{}'.\
                          format(crossval_res_all.describe()))
         self.logger.debug(('Statuses based on all labelings:\n{}')\
                           .format(self.df_res.status[1:].value_counts()))
         self.logger.debug(('Stable languages based on all labelings:\n{}')\
                           .format(self.df_res.stable[1:].value_counts()))
-        self.logger.info('Crossvalidation results (filtered by limit {1}):\n{0}'.\
-                         format(crossval_res_best.describe(), self.limit))
-        self.logger.info(('Statuses based on labelings ' +
-                          '(where crossvalidation exceeds limit):\n{}')\
-                         .format(self.df_res.status_best[1:].value_counts()))
-        self.logger.info(('Stable languages based on labelings ' +
-                          '(where crossvalidation exceeds limit):\n{}')\
-                         .format(self.df_res.stable_best[1:].value_counts()))
+
+        if hasattr(self, "best"):
+            crossval_res_best = pandas.to_numeric(self.best.iloc[0, :-4])
+
+            self.logger.info('Crossvalidation results (filtered by limit {1}):\n{0}'.\
+                             format(crossval_res_best.describe(), self.limit))
+
+            self.logger.info(('Statuses based on labelings ' +
+                              '(where crossvalidation exceeds limit):\n{}')\
+                             .format(self.df_res.status_best[1:].value_counts()))
+            self.logger.info(('Stable languages based on labelings ' +
+                              '(where crossvalidation exceeds limit):\n{}')\
+                             .format(self.df_res.stable_best[1:].value_counts()))
+
         self.logger.info('exporting dataframe to {}'.format(self.out_fn))
         self.df_res.to_csv(self.out_fn, sep='\t', encoding='utf-8')
 
