@@ -152,7 +152,7 @@ class Classifier:
         if d2['+'] > 0.95 * all_:
             return 'living'
         if d2['-']  > 0.95 * all_:
-            return 'still'
+            return 'dead'
         else:
             return 'borderline'
 
