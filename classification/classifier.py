@@ -15,8 +15,11 @@ class Classifier:
                 out_fn, status_use):
 
         self.df = pandas.read_csv(tsv, sep='\t')
-        series = ['crossval_res'] + self.df['integrated_code'].tolist()
-        self.df_res = pandas.DataFrame(index=series)
+        series = self.df['integrated_code'].tolist()
+
+        self.df_res          = pandas.DataFrame(index=series)
+        self.df_res_crossval = pandas.Series()
+
         self.df = self.df.set_index(u'integrated_code')
         if not status_use:
             self.df = self.df.drop('eth_status', axis=1)\
@@ -136,9 +139,12 @@ class Classifier:
             train_data = selector.transform(train_data)
             all_data = selector.transform(self.all_feats)
         model.fit(train_data, self.labels)
-        self.df_res[label] = [crossval_res] +  list(model.predict(all_data))
+
+        self.df_res[label] = list(model.predict(all_data))
+        self.df_res_crossval[label] = crossval_res
+
         self.logger.debug('labelings:\n{}'.format(pandas.value_counts(
-            self.df_res[label].values[1:])))
+            self.df_res[label])))
     
     def map_borderline_values(self, d):
 
@@ -179,11 +185,12 @@ class Classifier:
         self.df_res['status'] = status_series
         self.df_res['stable'] = stable_series
 
-        needed = self.df_res.iloc[0] > self.limit
+        needed = self.df_res_crossval > self.limit
         needed_list = numpy.where(needed.tolist())[0].tolist()
 
         if needed_list:
-            self.best = self.df_res.iloc[:, needed_list]
+            self.best          = self.df_res.iloc[:, needed_list]
+            self.best_crossval = self.df_res_crossval.iloc[needed_list]
 
             status_best_series = self.best.apply(lambda x:Counter(x), axis=1)\
                     .apply(self.map_borderline_values)
@@ -201,7 +208,7 @@ class Classifier:
     
     def log_stats(self):
         
-        crossval_res_all = pandas.to_numeric(self.df_res.iloc[0, :-4])
+        crossval_res_all = pandas.to_numeric(self.df_res_crossval)
 
         self.logger.debug('Crossvalidation results (all):\n{}'.\
                          format(crossval_res_all.describe()))
@@ -211,7 +218,7 @@ class Classifier:
                           .format(self.df_res.stable[1:].value_counts()))
 
         if hasattr(self, "best"):
-            crossval_res_best = pandas.to_numeric(self.best.iloc[0, :-4])
+            crossval_res_best = pandas.to_numeric(self.best_crossval)
 
             self.logger.info('Crossvalidation results (filtered by limit {1}):\n{0}'.\
                              format(crossval_res_best.describe(), self.limit))
@@ -225,7 +232,6 @@ class Classifier:
 
         self.logger.info('exporting dataframe to {}'.format(self.out_fn))
         self.df_res.to_csv(self.out_fn, sep='\t', encoding='utf-8')
-
       
 def get_logger(fn):
     
