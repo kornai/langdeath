@@ -12,7 +12,7 @@ from sklearn.metrics import accuracy_score
 class Classifier:
 
     def __init__(self, tsv, exp_count, classcount, limit, logger,
-                out_fn, status_use):
+                out_template, status_use):
 
         self.df = pandas.read_csv(tsv, sep='\t')
         series = self.df['integrated_code'].tolist()
@@ -30,7 +30,7 @@ class Classifier:
         self.classes = classcount
         self.limit = limit
         self.logger = logger
-        self.out_fn = out_fn
+        self.out_template = out_template
         self.status_use = status_use
 
 
@@ -42,7 +42,7 @@ class Classifier:
         return df
 
     def get_train_df(self):
-        
+
         d2 = {'-': '-',
               's': 'sh',
               'h': 'sh',
@@ -230,8 +230,15 @@ class Classifier:
                               '(where crossvalidation exceeds limit):\n{}')\
                              .format(self.df_res.stable_best[1:].value_counts()))
 
-        self.logger.info('exporting dataframe to {}'.format(self.out_fn))
-        self.df_res.to_csv(self.out_fn, sep='\t', encoding='utf-8')
+
+        df_filename       = self.out_template + ".tsv"
+        crossval_filename = self.out_template + "-crossval.tsv"
+
+        self.logger.info('exporting dataframe to {}.tsv'.format(df_filename))
+        self.df_res.to_csv(df_filename, sep='\t', encoding='utf-8')
+
+        self.logger.info('exporting crossvalidations to {}.tsv'.format(crossval_filename))
+        self.df_res_crossval.to_csv(crossval_filename, sep='\t', encoding='utf-8')
       
 def get_logger(fn):
     
@@ -249,11 +256,15 @@ def get_logger(fn):
     return logger
 
 def get_args():
+    parser = argparse.ArgumentParser(description="""
+        5-way Logistic Regression (Maximum Entropy) classifier for the
+        langdeath language data. Two output files are created from the specified
+        template: "template.tsv", classification results, (both per-experiment and
+        summary); and "template-crossval.tsv", per-experiment crossvalidation values.""")
 
-    parser = argparse.ArgumentParser()
     parser.add_argument("input_tsv", help="data file in tsv format")
-    parser.add_argument("output_fn",
-                       help="file for writing labelings")
+    parser.add_argument("output_template",
+                       help="filename template for writing output files")
     parser.add_argument("-e", "--experiment_count", type=int,
                         help="number of experiments with random seed sets",
                         default=100)
@@ -281,10 +292,10 @@ def main():
     exp_count = args.experiment_count
     classcount = args.class_counts
     limit = args.threshold
-    out_fn = args.output_fn
+    out_template = args.output_template
     status_usage = args.status
     a = Classifier(preprocessed_tsv, exp_count, classcount, limit, logger,
-                  out_fn, status_usage)
+                  out_template, status_usage)
     a.train_classify()
 
 if __name__ == '__main__':
