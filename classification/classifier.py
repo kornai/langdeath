@@ -42,7 +42,6 @@ class Classifier:
         return df
 
     def get_train_df(self):
-
         d2 = {'-': '-',
               's': 'sh',
               'h': 'sh',
@@ -111,9 +110,9 @@ class Classifier:
             m.fit(train_data[train], self.labels[train])
             predicted = m.predict(train_data[test])
             sc = accuracy_score(predicted, self.labels[test])
-            error_indeces = (predicted != self.labels[test]).as_matrix()
-            debug_df = pandas.DataFrame({'gold': self.labels[test][error_indeces],
-                                         'predicted': predicted[error_indeces]})
+            error_indices = (predicted != self.labels[test]).as_matrix()
+            debug_df = pandas.DataFrame({'gold': self.labels[test][error_indices],
+                                         'predicted': predicted[error_indices]})
             logging.debug('crossval score {}: {}'.format(i, sc))
             if not debug_df.empty:
                 logging.debug('errors in classification:\n{}'.format(debug_df))
@@ -147,14 +146,16 @@ class Classifier:
             self.df_res[label])))
     
     def map_borderline_values(self, d):
-
         d2 = defaultdict(int)
+
         for k in d:
             if k in ['s', 'h', 'sh']:
                 d2['-'] += d[k]
             else:
                 d2['+'] += d[k]
+
         all_ = d2['+'] + d2['-']        
+
         if d2['+'] > 0.95 * all_:
             return 'living'
         if d2['-']  > 0.95 * all_:
@@ -163,7 +164,6 @@ class Classifier:
             return 'borderline'
 
     def map_stable_values(self, d):
-
         sort_values = sorted(d.iteritems(), key=lambda x:x[1], reverse=True)
         if sort_values[0][1] > sum(d.itervalues()) * 0.95:
             return sort_values[0][0]
@@ -171,7 +171,7 @@ class Classifier:
             return '-' 
 
     def train_classify(self):
-        for i in range(self.exp_count):
+        for i in range(1, self.exp_count+1):
             self.get_train_df()
             self.get_selector()
             crossval_res = self.train_crossval(selector=self.selector)
@@ -207,7 +207,6 @@ class Classifier:
         self.log_stats()
     
     def log_stats(self):
-        
         crossval_res_all = pandas.to_numeric(self.df_res_crossval)
 
         self.logger.debug('Crossvalidation results (all):\n{}'.\
