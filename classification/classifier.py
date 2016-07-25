@@ -18,6 +18,7 @@ class Classifier:
         series = self.df['integrated_code'].tolist()
 
         self.df_res          = pandas.DataFrame(index=series)
+        self.df_res_proba    = pandas.DataFrame(index=series)
         self.df_res_crossval = pandas.Series()
 
         self.df = self.df.set_index(u'integrated_code')
@@ -137,9 +138,12 @@ class Classifier:
         if selector is not None:
             train_data = selector.transform(train_data)
             all_data = selector.transform(self.all_feats)
+
         model.fit(train_data, self.labels)
+        max_prob = [max(array) for array in model.predict_proba(all_data)]
 
         self.df_res[label] = list(model.predict(all_data))
+        self.df_res_proba[label] = list(max_prob)
         self.df_res_crossval[label] = crossval_res
 
         self.logger.debug('labelings:\n{}'.format(pandas.value_counts(
@@ -229,14 +233,17 @@ class Classifier:
                               '(where crossvalidation exceeds limit):\n{}')\
                              .format(self.df_res.stable_best[1:].value_counts()))
 
-
         df_filename       = self.out_template + ".tsv"
+        proba_filename    = self.out_template + "-prob.tsv"
         crossval_filename = self.out_template + "-crossval.tsv"
 
-        self.logger.info('exporting dataframe to {}.tsv'.format(df_filename))
+        self.logger.info('exporting dataframe to {}'.format(df_filename))
         self.df_res.to_csv(df_filename, sep='\t', encoding='utf-8')
 
-        self.logger.info('exporting crossvalidations to {}.tsv'.format(crossval_filename))
+        self.logger.info('exporting probabilities to {}'.format(proba_filename))
+        self.df_res_proba.to_csv(proba_filename, sep='\t', encoding='utf-8')
+
+        self.logger.info('exporting crossvalidations to {}'.format(crossval_filename))
         self.df_res_crossval.to_csv(crossval_filename, sep='\t', encoding='utf-8')
       
 def get_logger(fn):
@@ -257,9 +264,10 @@ def get_logger(fn):
 def get_args():
     parser = argparse.ArgumentParser(description="""
         5-way Logistic Regression (Maximum Entropy) classifier for the
-        langdeath language data. Two output files are created from the specified
+        langdeath language data. Three output files are created from the specified
         template: "template.tsv", classification results, (both per-experiment and
-        summary); and "template-crossval.tsv", per-experiment crossvalidation values.""")
+        summary); "template-prob.tsv", per-experiment classification probabilities;
+        and "template-crossval.tsv", per-experiment crossvalidation values.""")
 
     parser.add_argument("input_tsv", help="data file in tsv format")
     parser.add_argument("output_template",
