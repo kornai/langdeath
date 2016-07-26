@@ -18,8 +18,8 @@ class Classifier:
         series = self.df['integrated_code'].tolist()
 
         self.df_res          = pandas.DataFrame(index=series)
-        self.df_res_proba    = pandas.DataFrame(index=series)
         self.df_res_crossval = pandas.Series()
+        self.df_res_dprobas  = defaultdict(lambda: pandas.DataFrame(index=series))
 
         self.df = self.df.set_index(u'integrated_code')
         if not status_use:
@@ -140,11 +140,14 @@ class Classifier:
             all_data = selector.transform(self.all_feats)
 
         model.fit(train_data, self.labels)
-        max_prob = [max(array) for array in model.predict_proba(all_data)]
+        probas = model.predict_proba(all_data)
+        categories = sorted(set(self.labels))
 
         self.df_res[label] = list(model.predict(all_data))
-        self.df_res_proba[label] = list(max_prob)
         self.df_res_crossval[label] = crossval_res
+
+        for index, category in enumerate(categories):
+            self.df_res_dprobas[category][label] = probas[:, index]
 
         self.logger.debug('labelings:\n{}'.format(pandas.value_counts(
             self.df_res[label])))
@@ -234,17 +237,23 @@ class Classifier:
                              .format(self.df_res.stable_best[1:].value_counts()))
 
         df_filename       = self.out_template + ".tsv"
-        proba_filename    = self.out_template + "-prob.tsv"
         crossval_filename = self.out_template + "-crossval.tsv"
 
         self.logger.info('exporting dataframe to {}'.format(df_filename))
         self.df_res.to_csv(df_filename, sep='\t', encoding='utf-8')
 
-        self.logger.info('exporting probabilities to {}'.format(proba_filename))
-        self.df_res_proba.to_csv(proba_filename, sep='\t', encoding='utf-8')
-
         self.logger.info('exporting crossvalidations to {}'.format(crossval_filename))
         self.df_res_crossval.to_csv(crossval_filename, sep='\t', encoding='utf-8')
+
+
+        # The probabilities
+        proba_filename_template = self.out_template + "-prob-"
+
+        for category, df in self.df_res_dprobas.iteritems():
+            proba_filename = proba_filename_template + category + ".tsv"
+
+            self.logger.info('exporting probabilities to {}'.format(proba_filename))
+            df.to_csv(proba_filename, sep='\t', encoding='utf-8')
       
 def get_logger(fn):
     
