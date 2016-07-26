@@ -8,7 +8,8 @@ import argparse
 class Preproc:
 
     def __init__(self, sqlite_fn, train_dir, feat_dir,
-                 joined_fn, preprocessed_fn, macro_feats, indi_feats):
+                 joined_fn, preprocessed_fn, macro_feats, indi_feats,
+                 normalize):
         self.sqlite_fn = sqlite_fn
         self.preprocessed_fn = preprocessed_fn
         self.joined_fn = joined_fn
@@ -16,6 +17,8 @@ class Preproc:
         self.feat_dir = feat_dir
         self.macro_feats = macro_feats
         self.indi_feats = indi_feats
+        self.should_normalize = normalize
+
         self.get_seed_sets()
         self.get_feat_set()
 
@@ -219,8 +222,11 @@ class Preproc:
     def numerical_preproc(self):
         self.df[self.bool_needed] = self.df[self.bool_needed].fillna(int(0))
         self.df[self.log_needed] = self.df[self.log_needed].fillna(0)
-        self.df[self.log_needed] = self.df[self.log_needed].applymap(
-            lambda x: log(x+1))
+
+        if self.should_normalize:
+            self.df[self.log_needed] = self.df[self.log_needed].applymap(
+                lambda x: log(x+1))
+
         for f in self.individual_defaults:
             self.df[f] = self.df[f].fillna(self.individual_defaults[f])
 
@@ -247,6 +253,9 @@ def get_args():
     parser.add_argument('-f', '--feat_data_dir', default='feat_data',
                         help='directory containing features listed for' +\
                         ' normalization')
+    parser.add_argument('-n', '--no-normalization',
+                        action='store_true',
+                        help="don't do log normalization")
     parser.add_argument('-j', '--joined', help='output file path for' +\
                         ' optional intermediate "joined" table (in tsv form)')
     parser.add_argument('-m', '--macros', action='store_true',
@@ -258,21 +267,22 @@ def get_args():
     return parser.parse_args()
 
 def main():
-    
     logging.basicConfig(
         level=logging.INFO,
         format="%(asctime)s : " +
         "%(module)s (%(lineno)s) - %(levelname)s - %(message)s")
+
     args = get_args() 
-    fn = args.database
-    train_data_dir = args.train_data_dir
-    feat_data_dir = args.feat_data_dir
-    out_fn = args.filename
-    joined_fn = args.joined
-    macro_feats = args.macros
-    indi_feats = args.individuals
-    a = Preproc(fn, train_data_dir, feat_data_dir, joined_fn, out_fn,
-               macro_feats, indi_feats)
+
+    a = Preproc(args.database,
+                args.train_data_dir,
+                args.feat_data_dir,
+                args.joined,
+                args.filename,
+                args.macros,
+                args.individuals,
+                not args.no_normalization)
+
     a.preproc_data()
 
 if __name__ == "__main__":
