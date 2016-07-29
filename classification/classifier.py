@@ -12,11 +12,15 @@ from sklearn.metrics import accuracy_score
 class Classifier:
 
     def __init__(self, tsv, exp_count, classcount, limit, logger,
-                out_fn, status_use):
+                out_template, status_use):
 
         self.df = pandas.read_csv(tsv, sep='\t')
-        series = ['crossval_res'] + self.df['integrated_code'].tolist()
-        self.df_res = pandas.DataFrame(index=series)
+        series = self.df['integrated_code'].tolist()
+
+        self.df_res          = pandas.DataFrame(index=series)
+        self.df_res_crossval = pandas.Series()
+        self.df_res_dprobas  = defaultdict(lambda: pandas.DataFrame(index=series))
+
         self.df = self.df.set_index(u'integrated_code')
         if not status_use:
             self.df = self.df.drop('eth_status', axis=1)\
@@ -27,7 +31,7 @@ class Classifier:
         self.classes = classcount
         self.limit = limit
         self.logger = logger
-        self.out_fn = out_fn
+        self.out_template = out_template
         self.status_use = status_use
 
 
@@ -39,7 +43,6 @@ class Classifier:
         return df
 
     def get_train_df(self):
-        
         d2 = {'-': '-',
               's': 'sh',
               'h': 'sh',
@@ -108,9 +111,9 @@ class Classifier:
             m.fit(train_data[train], self.labels[train])
             predicted = m.predict(train_data[test])
             sc = accuracy_score(predicted, self.labels[test])
-            error_indeces = (predicted != self.labels[test]).as_matrix()
-            debug_df = pandas.DataFrame({'gold': self.labels[test][error_indeces],
-                                         'predicted': predicted[error_indeces]})
+            error_indices = (predicted != self.labels[test]).as_matrix()
+            debug_df = pandas.DataFrame({'gold': self.labels[test][error_indices],
+                                         'predicted': predicted[error_indices]})
             logging.debug('crossval score {}: {}'.format(i, sc))
             if not debug_df.empty:
                 logging.debug('errors in classification:\n{}'.format(debug_df))
@@ -135,20 +138,31 @@ class Classifier:
         if selector is not None:
             train_data = selector.transform(train_data)
             all_data = selector.transform(self.all_feats)
+
         model.fit(train_data, self.labels)
-        self.df_res[label] = [crossval_res] +  list(model.predict(all_data))
+        probas = model.predict_proba(all_data)
+        categories = sorted(set(self.labels))
+
+        self.df_res[label] = list(model.predict(all_data))
+        self.df_res_crossval[label] = crossval_res
+
+        for index, category in enumerate(categories):
+            self.df_res_dprobas[category][label] = probas[:, index]
+
         self.logger.debug('labelings:\n{}'.format(pandas.value_counts(
-            self.df_res[label].values[1:])))
+            self.df_res[label])))
     
     def map_borderline_values(self, d):
-
         d2 = defaultdict(int)
+
         for k in d:
             if k in ['s', 'h', 'sh']:
                 d2['-'] += d[k]
             else:
                 d2['+'] += d[k]
+
         all_ = d2['+'] + d2['-']        
+
         if d2['+'] > 0.95 * all_:
             return 'living'
         if d2['-']  > 0.95 * all_:
@@ -157,7 +171,6 @@ class Classifier:
             return 'borderline'
 
     def map_stable_values(self, d):
-
         sort_values = sorted(d.iteritems(), key=lambda x:x[1], reverse=True)
         if sort_values[0][1] > sum(d.itervalues()) * 0.95:
             return sort_values[0][0]
@@ -165,7 +178,7 @@ class Classifier:
             return '-' 
 
     def train_classify(self):
-        for i in range(self.exp_count):
+        for i in range(1, self.exp_count+1):
             self.get_train_df()
             self.get_selector()
             crossval_res = self.train_crossval(selector=self.selector)
@@ -179,11 +192,12 @@ class Classifier:
         self.df_res['status'] = status_series
         self.df_res['stable'] = stable_series
 
-        needed = self.df_res.iloc[0] > self.limit
+        needed = self.df_res_crossval > self.limit
         needed_list = numpy.where(needed.tolist())[0].tolist()
 
         if needed_list:
-            self.best = self.df_res.iloc[:, needed_list]
+            self.best          = self.df_res.iloc[:, needed_list]
+            self.best_crossval = self.df_res_crossval.iloc[needed_list]
 
             status_best_series = self.best.apply(lambda x:Counter(x), axis=1)\
                     .apply(self.map_borderline_values)
@@ -200,8 +214,7 @@ class Classifier:
         self.log_stats()
     
     def log_stats(self):
-        
-        crossval_res_all = pandas.to_numeric(self.df_res.iloc[0, :-4])
+        crossval_res_all = pandas.to_numeric(self.df_res_crossval)
 
         self.logger.debug('Crossvalidation results (all):\n{}'.\
                          format(crossval_res_all.describe()))
@@ -211,7 +224,7 @@ class Classifier:
                           .format(self.df_res.stable[1:].value_counts()))
 
         if hasattr(self, "best"):
-            crossval_res_best = pandas.to_numeric(self.best.iloc[0, :-4])
+            crossval_res_best = pandas.to_numeric(self.best_crossval)
 
             self.logger.info('Crossvalidation results (filtered by limit {1}):\n{0}'.\
                              format(crossval_res_best.describe(), self.limit))
@@ -223,9 +236,24 @@ class Classifier:
                               '(where crossvalidation exceeds limit):\n{}')\
                              .format(self.df_res.stable_best[1:].value_counts()))
 
-        self.logger.info('exporting dataframe to {}'.format(self.out_fn))
-        self.df_res.to_csv(self.out_fn, sep='\t', encoding='utf-8')
+        df_filename       = self.out_template + ".tsv"
+        crossval_filename = self.out_template + "-crossval.tsv"
 
+        self.logger.info('exporting dataframe to {}'.format(df_filename))
+        self.df_res.to_csv(df_filename, sep='\t', encoding='utf-8')
+
+        self.logger.info('exporting crossvalidations to {}'.format(crossval_filename))
+        self.df_res_crossval.to_csv(crossval_filename, sep='\t', encoding='utf-8')
+
+
+        # The probabilities
+        proba_filename_template = self.out_template + "-prob-"
+
+        for category, df in self.df_res_dprobas.iteritems():
+            proba_filename = proba_filename_template + category + ".tsv"
+
+            self.logger.info('exporting probabilities to {}'.format(proba_filename))
+            df.to_csv(proba_filename, sep='\t', encoding='utf-8')
       
 def get_logger(fn):
     
@@ -243,11 +271,16 @@ def get_logger(fn):
     return logger
 
 def get_args():
+    parser = argparse.ArgumentParser(description="""
+        5-way Logistic Regression (Maximum Entropy) classifier for the
+        langdeath language data. Three output files are created from the specified
+        template: "template.tsv", classification results, (both per-experiment and
+        summary); "template-prob.tsv", per-experiment classification probabilities;
+        and "template-crossval.tsv", per-experiment crossvalidation values.""")
 
-    parser = argparse.ArgumentParser()
     parser.add_argument("input_tsv", help="data file in tsv format")
-    parser.add_argument("output_fn",
-                       help="file for writing labelings")
+    parser.add_argument("output_template",
+                       help="filename template for writing output files")
     parser.add_argument("-e", "--experiment_count", type=int,
                         help="number of experiments with random seed sets",
                         default=100)
@@ -275,10 +308,10 @@ def main():
     exp_count = args.experiment_count
     classcount = args.class_counts
     limit = args.threshold
-    out_fn = args.output_fn
+    out_template = args.output_template
     status_usage = args.status
     a = Classifier(preprocessed_tsv, exp_count, classcount, limit, logger,
-                  out_fn, status_usage)
+                  out_template, status_usage)
     a.train_classify()
 
 if __name__ == '__main__':
