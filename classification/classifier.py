@@ -115,10 +115,10 @@ class Classifier:
         train_data = self.feats
         all_data = self.all_feats
         self.pipeline.fit(train_data, self.labels)
-        support = self.pipeline.named_steps['selector']\
+        self.support = self.pipeline.named_steps['selector']\
                 .get_support(indices=True)
-        logging.debug('selected features:{} {}'.format(len(support),
-            self.df.iloc[:, support].keys()))
+        logging.debug('selected features:{} {}'.format(len(self.support),
+            self.df.iloc[:, self.support].keys()))
         probas = self.pipeline.predict_proba(all_data)
         categories = sorted(set(self.labels))
 
@@ -131,6 +131,20 @@ class Classifier:
         self.logger.debug('labelings:\n{}'.format(pandas.value_counts(
             self.df_res[label])))
     
+    def log_weights(self):
+        categories = sorted(set(self.labels))
+        print categories
+        if len(categories) == 2:
+            categories = categories[:1]
+        supported_feats = self.df.iloc[:, self.support].keys() 
+        self.df_res_weights = {}
+        print categories
+        for index, category in enumerate(categories):
+            print index, category
+            w = self.pipeline.named_steps['model'].coef_[index]
+            self.df_res_weights[category] = pandas.DataFrame(
+                    {'feature': supported_feats, 'weigth': w})
+            
     def map_borderline_values(self, d):
         d2 = defaultdict(int)
 
@@ -163,6 +177,8 @@ class Classifier:
             crossval_res = self.train_crossval()
             self.train_label(crossval_res=crossval_res,
                     label='exp_with_feature_sel_{0}'.format(i))
+            if i == 1:
+                self.log_weights()
 
         status_series = self.df_res.apply(lambda x:Counter(x),
                                                   axis=1).apply(self.map_borderline_values)
@@ -233,6 +249,14 @@ class Classifier:
 
             self.logger.info('exporting probabilities to {}'.format(proba_filename))
             df.to_csv(proba_filename, sep='\t', encoding='utf-8')
+       
+        #The weights of the model of the first experiment
+        weight_filename_template = self.out_template + "-weight-"
+        for category, df in self.df_res_weights.iteritems():
+            weight_filename = weight_filename_template + category + ".tsv"
+            self.logger.info('exporting weights of first model to {}'.format(weight_filename))
+            df.to_csv(weight_filename, sep='\t', encoding='utf-8')
+
       
 def get_logger(fn):
     
