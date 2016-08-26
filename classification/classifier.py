@@ -6,8 +6,9 @@ from sklearn.linear_model import LogisticRegression
 from sklearn.feature_selection import SelectFromModel
 import numpy
 import argparse
-from sklearn.cross_validation import KFold
+from sklearn.cross_validation import cross_val_score, cross_val_predict
 from sklearn.metrics import accuracy_score
+from sklearn.pipeline import Pipeline
 
 class Classifier:
 
@@ -90,60 +91,38 @@ class Classifier:
         self.feats = self.train_df.drop('seed_label', axis=1)
         self.labels = self.train_df.seed_label
         
-    def train_crossval(self, selector=None):
-        train_data = self.feats
-        if selector is not None:
-            train_data = selector.transform(train_data)
-            logging.debug('number of feats after selection: {}'.format(
-                train_data.shape[1]))
-        scores = self.get_scores(train_data)    
-
-        logging.debug('crossval score:average:{}'.format(
+    def train_crossval(self):
+        scores = cross_val_score(self.pipeline, self.feats, self.labels, cv=5)
+        predicted = cross_val_predict(self.pipeline, self.feats, self.labels, cv=5)
+        error_indices = (predicted != self.labels).as_matrix()
+        debug_df = pandas.DataFrame({'gold': self.labels[error_indices],
+                                         'predicted': predicted[error_indices]})
+        logging.debug('crossval score - average:{}'.format(
             sum(scores)/5))
+        if not debug_df.empty:
+            logging.debug('errors in classification:\n{}'.format(debug_df))
         return sum(scores)/5
 
-    def get_scores(self, train_data):
-        model = LogisticRegression()
-        scores = []
-        kf = KFold(len(train_data), n_folds=5)
-        for i, (train, test) in enumerate(kf):
-            m = model
-            m.fit(train_data[train], self.labels[train])
-            predicted = m.predict(train_data[test])
-            sc = accuracy_score(predicted, self.labels[test])
-            error_indices = (predicted != self.labels[test]).as_matrix()
-            debug_df = pandas.DataFrame({'gold': self.labels[test][error_indices],
-                                         'predicted': predicted[error_indices]})
-            logging.debug('crossval score {}: {}'.format(i, sc))
-            if not debug_df.empty:
-                logging.debug('errors in classification:\n{}'.format(debug_df))
-            scores.append(sc)
-        return scores
-        
 
-    def get_selector(self):
+    def get_pipeline(self):
         selector_model = LogisticRegression(penalty='l1', C=0.1)
-        self.selector = SelectFromModel(selector_model)
-        self.selector.fit(self.feats, self.labels)
-        support = self.selector.get_support(indices=True)
-        logging.debug('selected features:{}'.format(
-            self.df.iloc[:, support].keys()))
+        selector = SelectFromModel(selector_model)
+        self.pipeline = Pipeline([('selector', selector),
+            ('model', LogisticRegression())])
 
 
-    def train_label(self, crossval_res=0.0, selector=None,
-                    label='exp'):
-        model = LogisticRegression()
+    def train_label(self, crossval_res=0.0, label='exp'):
         train_data = self.feats
         all_data = self.all_feats
-        if selector is not None:
-            train_data = selector.transform(train_data)
-            all_data = selector.transform(self.all_feats)
-
-        model.fit(train_data, self.labels)
-        probas = model.predict_proba(all_data)
+        self.pipeline.fit(train_data, self.labels)
+        support = self.pipeline.named_steps['selector']\
+                .get_support(indices=True)
+        logging.debug('selected features:{} {}'.format(len(support),
+            self.df.iloc[:, support].keys()))
+        probas = self.pipeline.predict_proba(all_data)
         categories = sorted(set(self.labels))
 
-        self.df_res[label] = list(model.predict(all_data))
+        self.df_res[label] = list(self.pipeline.predict(all_data))
         self.df_res_crossval[label] = crossval_res
 
         for index, category in enumerate(categories):
@@ -180,10 +159,10 @@ class Classifier:
     def train_classify(self):
         for i in range(1, self.exp_count+1):
             self.get_train_df()
-            self.get_selector()
-            crossval_res = self.train_crossval(selector=self.selector)
-            self.train_label(crossval_res=crossval_res, selector=self.selector,
-                         label='exp_with_feature_sel_{0}'.format(i))
+            self.get_pipeline()
+            crossval_res = self.train_crossval()
+            self.train_label(crossval_res=crossval_res,
+                    label='exp_with_feature_sel_{0}'.format(i))
 
         status_series = self.df_res.apply(lambda x:Counter(x),
                                                   axis=1).apply(self.map_borderline_values)
