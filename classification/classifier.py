@@ -145,7 +145,6 @@ class Classifier:
             intercept_df = pandas.DataFrame({'weigth':\
                     [self.pipeline.named_steps['model'].intercept_[index]],
                     'feature': ['intercept']})
-            print intercept_df
             self.df_res_weights[category] = self.df_res_weights[category].append(intercept_df)
             
     def map_borderline_values(self, d):
