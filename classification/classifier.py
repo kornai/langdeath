@@ -133,17 +133,20 @@ class Classifier:
     
     def log_weights(self):
         categories = sorted(set(self.labels))
-        print categories
         if len(categories) == 2:
-            categories = categories[:1]
+            categories = categories[1:]
         supported_feats = self.df.iloc[:, self.support].keys() 
         self.df_res_weights = {}
-        print categories
         for index, category in enumerate(categories):
-            print index, category
             w = self.pipeline.named_steps['model'].coef_[index]
             self.df_res_weights[category] = pandas.DataFrame(
                     {'feature': supported_feats, 'weigth': w})
+            # log intercept value
+            intercept_df = pandas.DataFrame({'weigth':\
+                    [self.pipeline.named_steps['model'].intercept_[index]],
+                    'feature': ['intercept']})
+            print intercept_df
+            self.df_res_weights[category] = self.df_res_weights[category].append(intercept_df)
             
     def map_borderline_values(self, d):
         d2 = defaultdict(int)
