@@ -53,6 +53,8 @@ class WalsInfoParser(OnlineParser):
         for d in self.generate_dictionaries(data):
             if d['name'] in self.mapping_dict:
                 d['name'] = self.mapping_dict[d['name']]
+            if d['name'] in ['Yazva', 'Nenets (Tundra)']:
+                continue
             yield d
 
 

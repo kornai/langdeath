@@ -80,17 +80,34 @@ class LanguageArchivesBaseParser(BaseParser):
     def get_sil_codes(**kwargs):
         raise NotImplementedError()
 
+    def manual_filter(self, name, altnames):
+        to_filter = {'English':['Norfolk'],
+                     'French': ['Norman'],
+                     'Romanian': ['Moldovan'], 
+                     'Sicilian': ['Tarantino'],
+                     'Komi-Zyrian': ['Yazva'],
+                     'Nenets': ['Tundra Nenets'],
+                     'Mansi': ['Northern Mansi', 'Eastern Mansi', 'Western Mansi'],
+                     'Selkup': ['Central Selkup', 'Central Selkups'],
+                    }
+        if name in to_filter:
+            altnames = list(set(altnames).difference(set(to_filter[name])))
+        return altnames
+
+
     def parse_all(self):
-        sil_codes = self.get_sil_codes() 
+        sil_codes = self.get_sil_codes()
         errors = []
         for sil in sil_codes:
             try:
                 html = self.get_html(sil)
                 dictionary = {}
                 dictionary['sil'] = sil
-                dictionary['name'] = self.get_name(html)
-                dictionary['alt_names'] =\
+                name = self.get_name(html)
+                dictionary['name'] = name
+                altnames =\
                     self.get_alternative_names(html)
+                dictionary['alt_names'] = self.manual_filter(name, altnames)
                 d = self.get_tabular_data(html)
                 if d is not None:
                     for key in d:
