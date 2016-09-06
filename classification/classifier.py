@@ -9,13 +9,14 @@ import argparse
 from sklearn.cross_validation import cross_val_score, cross_val_predict
 from sklearn.metrics import accuracy_score
 from sklearn.pipeline import Pipeline
+from sklearn.preprocessing import MinMaxScaler
 
 class Classifier:
 
     def __init__(self, tsv, exp_count, classcount, limit, logger,
-                out_template, status_use):
+                out_template, status_use, c):
 
-        self.df = pandas.read_csv(tsv, sep='\t')
+        self.df = pandas.read_csv(tsv, sep='\t').fillna(0)
         series = self.df['integrated_code'].tolist()
 
         self.df_res          = pandas.DataFrame(index=series)
@@ -34,6 +35,7 @@ class Classifier:
         self.logger = logger
         self.out_template = out_template
         self.status_use = status_use
+        self.c = c
 
 
     def shuffle_rows(self, df):
@@ -52,11 +54,11 @@ class Classifier:
               'g': 'vtg'}
 
         d3 = {'-': '-',
-              's': 'sh',
-              'h': 'sh',
-              'v': 'v',
-              't': 'tg',
-              'g': 'tg'}
+              's': 's',
+              'h': 'h',
+              'v': 'vtg',
+              't': 'vtg',
+              'g': 'vtg'}
 
         d4 = {'-': '-',
               's': 's',
@@ -64,32 +66,38 @@ class Classifier:
               'v': 'v',
               't': 'tg',
               'g': 'tg'}
-
-        g_data = self.df[self.df.seed_label == 'g'].sample(n=4)
-        t_data = self.df[self.df.seed_label == 't'].sample(n=20)
-        v_data = self.df[self.df.seed_label == 'v'].sample(n=20)
-        h_data = self.df[self.df.seed_label == 'h'].sample(n=20)
-        s_data = self.df[self.df.seed_label == 's'].sample(n=80)
-
-        self.train_df = pandas.concat([g_data, t_data, v_data, h_data, s_data])
+        
+        nums = {'g':4, 't':8, 'v':8, 'h': 8, 's': 8}
+        map_ = {'g': 'g', 't': 't', 'v': 'v', 'h': 'h',
+                's': 's', '-': '-'}
 
         if self.classes == 2:
-            self.train_df.seed_label = self.train_df.seed_label.map(
-                lambda x:d2[x])
+            map_ = d2
+            nums = {'g':2, 't':8, 'v':10, 'h': 10, 's': 10}
             
         if self.classes == 3:
-            self.train_df.seed_label = self.train_df.seed_label.map(
-                lambda x:d3[x])
+            map_ = d3
+            nums = {'g':1, 't':6, 'v':8, 'h': 15, 's': 15}
 
         if self.classes == 4:
-            self.train_df.seed_label = self.train_df.seed_label.map(
-                lambda x:d4[x])
+            map_ = d4
+            nums = {'g':2, 't':8, 'v':10, 'h': 10, 's': 10}
 
         # if self.classes == 5 no grouping is necessary
+        g_data = self.df[self.df.seed_label == 'g'].sample(n=nums['g'])
+        t_data = self.df[self.df.seed_label == 't'].sample(n=nums['t'])
+        v_data = self.df[self.df.seed_label == 'v'].sample(n=nums['v'])
+        h_data = self.df[self.df.seed_label == 'h'].sample(n=nums['h'])
+        s_data = self.df[self.df.seed_label == 's'].sample(n=nums['s'])
 
+        self.train_df = pandas.concat([g_data, t_data, v_data, h_data, s_data])
+        self.train_df.seed_label = self.train_df.seed_label.map(lambda x: map_[x])
         self.train_df = self.shuffle_rows(self.train_df)    
         self.feats = self.train_df.drop('seed_label', axis=1)
         self.labels = self.train_df.seed_label
+
+        logging.debug('training data: {}'.format(self.train_df[
+            ['seed_label']]))
         
     def train_crossval(self):
         scores = cross_val_score(self.pipeline, self.feats, self.labels, cv=5)
@@ -105,9 +113,12 @@ class Classifier:
 
 
     def get_pipeline(self):
-        selector_model = LogisticRegression(penalty='l1', C=0.1)
+        selector_model = LogisticRegression(penalty='l1', C=self.c)
         selector = SelectFromModel(selector_model)
-        self.pipeline = Pipeline([('selector', selector),
+        normalizer = MinMaxScaler()
+        normalizer.fit(self.feats)
+        self.pipeline = Pipeline([('normalizer', normalizer),
+            ('selector', selector),
             ('model', LogisticRegression())])
 
 
@@ -301,6 +312,7 @@ def get_args():
     parser.add_argument("-l", "--log_file", default="classifier.log",
                        help="file for logging")
     parser.add_argument('-s', '--status', action="store_true", help='use status features')
+    parser.add_argument('-r', '--regularizaton_weight', type=float)
     return parser.parse_args()
 
 
@@ -315,8 +327,9 @@ def main():
     limit = args.threshold
     out_template = args.output_template
     status_usage = args.status
+    c = args.regularizaton_weight
     a = Classifier(preprocessed_tsv, exp_count, classcount, limit, logger,
-                  out_template, status_usage)
+                  out_template, status_usage, c)
     a.train_classify()
 
 if __name__ == '__main__':
