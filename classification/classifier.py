@@ -95,6 +95,9 @@ class Classifier:
         self.train_df = self.shuffle_rows(self.train_df)    
         self.feats = self.train_df.drop('seed_label', axis=1)
         self.labels = self.train_df.seed_label
+
+        logging.debug('training data: {}'.format(self.train_df[
+            ['seed_label']]))
         
     def train_crossval(self):
         scores = cross_val_score(self.pipeline, self.feats, self.labels, cv=5)
