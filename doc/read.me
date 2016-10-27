@@ -111,4 +111,8 @@ optional arguments:
 
 After running the experiments some simple statistics will be printed, containing the number of languages labeled
 consistently to the same class ('stable'), and the count of the languages of the broader statuses 'living',
-'still', and 'borderline'. The status of the individual languages get written in the output_fn.
+ 'dead', and 'borderline'. Furthermore, the following output files get produced:
+ {output_fn}.tsv - results on the individual languages;resulted categorization of the individual experiments, plus the aggregated status ('living'/'dead'/'borderline')
+ {output_fn}-crossval.tsv - per-experiment crossvalidation values
+ {output_fn}-prob-{category}.tsv - per-experiment classification probabilities
+ {output_fn}-weight-{category}.tsv - category-weights of the first model for all features
