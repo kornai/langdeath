@@ -1,0 +1,8 @@
+The 'data' directory contains the latest data table ('langdata.tsv', collected in Oectober 2016), 
+and the classification results based on this data ('results').
+
+The header of data/langdata.tsv (the meaning of each column) is explained in sources_read.me. For most attributes, the values listed are the original ones (apart from the L1 and L2 columns, for which the table contains the logarithm of the speaker counts), these get transformed prior to logistic regression to the 0-1 interval, see classification/classifier.py).
+
+The files in data/results/* are explained in read.me, the output templates {res.c2.r1}, {res.c3.r1}, {res.c4.r1}, {res.c5.r1} denote experiments with 2 ... 5 classes.
+
+In both data/langdata.tsv and data/results/* files we denote the languages with a unique code (created for this project). The mapping between iso-693-3 and these codes is listed in data/sil_2_integrated_code file.
