@@ -15,11 +15,18 @@ class Language(models.Model):
     last_updated = models.DateTimeField('last updated', default=timezone.now())
     iso_scope = models.CharField(max_length=20, blank=True)
     iso_type = models.CharField(max_length=100, blank=True)
+    iso_active = models.BooleanField(default=False)
+    integrated_code = models.CharField(max_length=100)
+    region_name = models.CharField(max_length=100)
+    longitude = models.FloatField(blank=True, null=True)
+    latitude = models.FloatField(blank=True, null=True)
     champion = models.ForeignKey('Language', blank=True, null=True,
                                  related_name='sublang')
-
+    macrolang = models.ForeignKey('Language', blank=True, null=True,
+                                  related_name='sublang2')
     eth_population = models.IntegerField(blank=True, null=True)
-
+    
+    find_bible_all_versions = models.IntegerField(blank=True, null=True)
     cru_docs = models.IntegerField(blank=True, null=True)
     cru_words = models.IntegerField(blank=True, null=True)
     cru_characters = models.IntegerField(blank=True, null=True)
@@ -28,6 +35,12 @@ class Language(models.Model):
     cru_udhr = models.BooleanField(default=False)
     in_omniglot = models.BooleanField(default=False)
     uriel_feats = models.IntegerField(blank=True, null=True)
+    on_bible_org = models.BooleanField(default=False)
+    in_leipzig_corpora = models.BooleanField(default=False)
+    in_siren_project = models.BooleanField(default=False)
+    treetagger = models.BooleanField(default=False)
+    endangered_langspec = models.BooleanField(default=False)
+    endangered_lex = models.BooleanField(default=False)
 
     la_primary_texts_online = models.IntegerField(blank=True, null=True)
     la_primary_texts_all = models.IntegerField(blank=True, null=True)
@@ -79,16 +92,26 @@ class Language(models.Model):
     wp_real_articles = models.FloatField(blank=True, null=True)
     wp_adjusted_size = models.FloatField(blank=True, null=True)
 
-    # many to many fields
+    ## many to one fields
+    champion = models.ForeignKey('self', blank=True, null=True,
+                                 related_name='sublang')
+    macrolang = models.ForeignKey('self', blank=True, null=True,
+                                  related_name='sublang2')
+
+    ## many to many fields
     code = models.ManyToManyField('Code', related_name='codes')
     alt_name = models.ManyToManyField('AlternativeName',
-                                      through='LanguageAltName',
                                       related_name='lang')
     country = models.ManyToManyField('Country', related_name='lang')
     speakers = models.ManyToManyField('Speaker', related_name='lang')
     endangered_levels = models.ManyToManyField('EndangeredLevel',
                                                related_name='Language')
     locations = models.ManyToManyField('Coordinates', related_name='Language')
+
+    ## debugging fields
+
+    # All parsers that ever had data for this Language
+    parsers = models.ManyToManyField('Parser', related_name='parsers')
 
     def __unicode__(self):
         return u"{0} ({1})".format(self.name, self.sil)
@@ -100,22 +123,14 @@ class Code(models.Model):
 
 
 class AlternativeName(models.Model):
-    name = models.CharField(max_length=100)
+    name = models.CharField(max_length=100, primary_key=True)
 
     def __unicode__(self):
         return self.name
 
-    def save(self, force_insert=False, force_update=False):
+    def save(self, **kwargs):
         self.name = normalize_alt_name(self.name)
-        super(AlternativeName, self).save(force_insert, force_update)
-
-
-class LanguageAltName(models.Model):
-    lang = models.ForeignKey(Language)
-    name = models.ForeignKey(AlternativeName)
-
-    class Meta:
-        unique_together = (("lang", "name"), )
+        super(AlternativeName, self).save(kwargs)
 
 
 class Speaker(models.Model):
@@ -157,3 +172,10 @@ class CountryName(models.Model):
     """Alternative country names"""
     country = models.ForeignKey("Country")
     name = models.CharField(max_length=100)
+
+class Parser(models.Model):
+    """A Language data source"""
+
+    # This parser's python classname, the value returned by passing its
+    # Class object to `lambda x: str(type(x))'
+    classname = models.CharField(max_length=100, primary_key=True)
