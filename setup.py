@@ -12,9 +12,9 @@ setup(
     author='Judit Acs',
     author_email='judit@sch.bme.hu',
     install_requires=[
-        'django==1.6',
+        'django==1.11.18',
         'django-jsonfield',
-        'Pillow==2.3',
+        'Pillow==3.1.1' ,
         'South==0.8',
         'pandas==0.18.1',
         'numpy>=1.6.1',
