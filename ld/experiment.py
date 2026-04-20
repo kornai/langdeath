@@ -3,7 +3,7 @@ import os
 
 import subprocess as sub
 import random
-from maxent import MaxentModel
+from nltk.classify.maxent import MaxentClassifier
 from math import ceil
 from collections import defaultdict
 from math import log
@@ -17,13 +17,13 @@ def orig_train(event_list):
 
 
 def simple_train(event_list):
-    m = MaxentModel()
-    m.begin_add_event()
-    for e in event_list:
-        m.add_event(e[0], e[1])
-    m.end_add_event()
-    #maxent.set_verbose(1)
-    m.train(30, 'lbfgs', 2)
+    # m = MaxentClassifier()
+    # m.begin_add_event()
+    # for e in event_list:
+    #     m.add_event(e[0], e[1])
+    # m.end_add_event()
+    # #maxent.set_verbose(1)
+    m = MaxentClassifier.train(30, 'lbfgs', 2)
     return m
 
 
@@ -191,7 +191,7 @@ def process_seed(c, v, h, m, ff, seed_path):
 
     m_2, m_3a, m_3b, m_4, e_2 ,e_3a, e_3b, e_4, r_2, r_3a, r_3b, r_4 = \
     train_orig_models(c, v, h, m, features, seed_path)
-    print r_2, r_3a, r_3b, r_4
+    print(r_2, r_3a, r_3b, r_4)
 
     for t in '2', '3a', '3b', '4':
         res['e_{0}'.format(t)]['all'].append(eval('r_{0}'.format(t)))
@@ -212,7 +212,7 @@ def process_seed(c, v, h, m, ff, seed_path):
                 m, r = train_filtered_models(set(eval(fset_name)
                                                  [:eval(count_name)]),
                                               eval(task_name))
-                print r, task_name, fset_name, count_name
+                print(r, task_name, fset_name, count_name)
                 label(m, langs, features,
                       '{0}/labelings/{1}_class_{2}_from_{3}_sel'.format(
                         seed_path, task_name[2:], count_name, fset_name[3:]))

@@ -6,7 +6,7 @@ from sklearn.linear_model import LogisticRegression
 from sklearn.feature_selection import SelectFromModel
 import numpy
 import argparse
-from sklearn.cross_validation import cross_val_score, cross_val_predict
+from sklearn.model_selection import cross_val_score, cross_val_predict
 from sklearn.metrics import accuracy_score
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import MinMaxScaler
@@ -20,13 +20,13 @@ class Classifier:
         series = self.df['integrated_code'].tolist()
 
         self.df_res          = pandas.DataFrame(index=series)
-        self.df_res_crossval = pandas.Series()
+        self.df_res_crossval = pandas.Series(dtype=float)
         self.df_res_dprobas  = defaultdict(lambda: pandas.DataFrame(index=series))
 
         self.df = self.df.set_index(u'integrated_code')
         if not status_use:
-            self.df = self.df.drop('eth_status', axis=1)\
-                    .drop('endangered_aggregated_status', axis=1)
+            # drop status-related columns if present; tolerate missing columns
+            self.df = self.df.drop(columns=['eth_status', 'endangered_aggregated_status'], errors='ignore')
             logging.info('Dropping status features')
         self.all_feats = self.df.drop('seed_label', axis=1)
         self.exp_count = exp_count
@@ -41,7 +41,7 @@ class Classifier:
     def shuffle_rows(self, df):
         index = list(df.index)
         random.shuffle(index)
-        df = df.ix[index]
+        df = df.loc[index]
         df.reset_index()
         return df
 
@@ -102,9 +102,11 @@ class Classifier:
     def train_crossval(self):
         scores = cross_val_score(self.pipeline, self.feats, self.labels, cv=5)
         predicted = cross_val_predict(self.pipeline, self.feats, self.labels, cv=5)
-        error_indices = (predicted != self.labels).as_matrix()
-        debug_df = pandas.DataFrame({'gold': self.labels[error_indices],
-                                         'predicted': predicted[error_indices]})
+        error_indices = (predicted != self.labels.to_numpy())
+        debug_df = pandas.DataFrame({
+            'gold': self.labels.to_numpy()[error_indices],
+            'predicted': predicted[error_indices]
+        })
         logging.debug('crossval score - average:{}'.format(
             sum(scores)/5))
         if not debug_df.empty:
@@ -113,7 +115,11 @@ class Classifier:
 
 
     def get_pipeline(self):
-        selector_model = LogisticRegression(penalty='l1', C=self.c)
+        selector_model = LogisticRegression(
+            penalty='l1',
+            C=self.c,
+            solver='liblinear'
+        )
         selector = SelectFromModel(selector_model)
         normalizer = MinMaxScaler()
         normalizer.fit(self.feats)
@@ -139,8 +145,8 @@ class Classifier:
         for index, category in enumerate(categories):
             self.df_res_dprobas[category][label] = probas[:, index]
 
-        self.logger.debug('labelings:\n{}'.format(pandas.value_counts(
-            self.df_res[label])))
+        self.logger.debug('labelings:\n{}'.format(
+            self.df_res[label].value_counts()))
     
     def log_weights(self):
         categories = sorted(set(self.labels))
@@ -156,7 +162,9 @@ class Classifier:
             intercept_df = pandas.DataFrame({'weigth':\
                     [self.pipeline.named_steps['model'].intercept_[index]],
                     'feature': ['intercept']})
-            self.df_res_weights[category] = self.df_res_weights[category].append(intercept_df)
+            self.df_res_weights[category] = pandas.concat(
+                [self.df_res_weights[category], intercept_df],
+                ignore_index=True)
             
     def map_borderline_values(self, d):
         d2 = defaultdict(int)
@@ -177,8 +185,8 @@ class Classifier:
             return 'borderline'
 
     def map_stable_values(self, d):
-        sort_values = sorted(d.iteritems(), key=lambda x:x[1], reverse=True)
-        if sort_values[0][1] > sum(d.itervalues()) * 0.95:
+        sort_values = sorted(d.items(), key=lambda x:x[1], reverse=True)
+        if sort_values[0][1] > sum(d.values()) * 0.95:
             return sort_values[0][0]
         else:
             return '-' 
@@ -216,7 +224,7 @@ class Classifier:
             self.df_res['status_best'] = status_best_series
             self.df_res['stable_best'] = stable_best_series
         else:
-          self.logger.warn("No experiment had crossvalidation accuracy higher " +\
+          self.logger.warning("No experiment had crossvalidation accuracy higher " +\
                            "than the minimum threshold of %i" % (self.limit))
 
         self.log_stats()
@@ -257,7 +265,7 @@ class Classifier:
         # The probabilities
         proba_filename_template = self.out_template + "-prob-"
 
-        for category, df in self.df_res_dprobas.iteritems():
+        for category, df in self.df_res_dprobas.items():
             proba_filename = proba_filename_template + category + ".tsv"
 
             self.logger.info('exporting probabilities to {}'.format(proba_filename))
@@ -265,7 +273,7 @@ class Classifier:
        
         #The weights of the model of the first experiment
         weight_filename_template = self.out_template + "-weight-"
-        for category, df in self.df_res_weights.iteritems():
+        for category, df in self.df_res_weights.items():
             weight_filename = weight_filename_template + category + ".tsv"
             self.logger.info('exporting weights of first model to {}'.format(weight_filename))
             df.to_csv(weight_filename, sep='\t', encoding='utf-8')

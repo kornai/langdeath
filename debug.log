@@ -1,0 +1,491 @@
+2025-11-19 14:32:57,437 : classifier (99) - DEBUG - training data:                   seed_label
+integrated_code             
+pli_____________A         sh
+mdf_____________A        vtg
+tel_____________A        vtg
+nld_____________A        vtg
+gmx_____________A         sh
+dum_____________A         sh
+juy_____________A         sh
+syc_____________A         sh
+kzd_____________A         sh
+cor_____________A         sh
+zho_____________A        vtg
+rus_____________A        vtg
+kor_____________A        vtg
+uka_____________A         sh
+soj_____________A         sh
+mal_____________A        vtg
+ind_____________A        vtg
+non_____________A         sh
+fin_____________A        vtg
+nrt_____________A         sh
+glg_____________A        vtg
+mtk_____________A         sh
+ell_____________A        vtg
+ota_____________A         sh
+afr_____________A        vtg
+eng_____________A        vtg
+sin_____________A        vtg
+xru_____________A         sh
+cop_____________A         sh
+hbo_____________A         sh
+zul_____________A        vtg
+ukr_____________A        vtg
+tam_____________A        vtg
+chu_____________A         sh
+mon_____________A        vtg
+hun_____________A        vtg
+kzn_____________A         sh
+lat_____________A         sh
+pmz_____________A         sh
+kaz_____________A        vtg
+2025-11-19 14:33:15,724 : classifier (99) - DEBUG - training data:                   seed_label
+integrated_code             
+mya_____________A        vtg
+avd_____________A         sh
+kan_____________A        vtg
+pli_____________A         sh
+ybl_____________A         sh
+wuu_____________A        vtg
+afg_____________A         sh
+pol_____________A        vtg
+khm_____________A        vtg
+non_____________A         sh
+lzh_____________A         sh
+afr_____________A        vtg
+cor_____________A         sh
+rus_____________A        vtg
+byq_____________A         sh
+arb_____________A        vtg
+tam_____________A        vtg
+kat_____________A        vtg
+spa_____________A        vtg
+syc_____________A         sh
+enm_____________A         sh
+bbw_____________A         sh
+kte_____________A         sh
+bpq_____________A         sh
+por_____________A        vtg
+ota_____________A         sh
+tur_____________A        vtg
+heb_____________A        vtg
+nkn_____________A         sh
+goj_____________A         sh
+lao_____________A        vtg
+fra_____________A        vtg
+tuk_____________A        vtg
+swe_____________A        vtg
+cop_____________A         sh
+ang_____________A         sh
+mal_____________A        vtg
+nci_____________A         sh
+slk_____________A        vtg
+zlq_____________A         sh
+2025-11-19 14:33:15,778 : classifier (110) - DEBUG - crossval score - average:0.925
+2025-11-19 14:33:15,779 : classifier (113) - DEBUG - errors in classification:
+  gold predicted
+0  vtg        sh
+1   sh       vtg
+2  vtg        sh
+2025-11-19 14:33:15,783 : classifier (137) - DEBUG - selected features:7 Index(['eth_status', 'cru_watchtower', 'in_omniglot', 'win10_input_method',
+       'ubuntu_input', 'office13_lp', 'uriel_feats'],
+      dtype='object')
+2025-11-19 14:33:15,795 : classifier (148) - DEBUG - labelings:
+exp1
+sh     8591
+vtg     206
+Name: count, dtype: int64
+2025-11-19 14:33:15,796 : classifier (235) - DEBUG - Crossvalidation results (all):
+count    1.000
+mean     0.925
+std        NaN
+min      0.925
+25%      0.925
+50%      0.925
+75%      0.925
+max      0.925
+dtype: float64
+2025-11-19 14:34:54,777 : classifier (99) - DEBUG - training data:                   seed_label
+integrated_code             
+bka_____________A         sh
+orv_____________A         sh
+oge_____________A         sh
+nep_____________A        vtg
+ruz_____________A         sh
+zul_____________A        vtg
+sin_____________A        vtg
+swe_____________A        vtg
+por_____________A        vtg
+llb_____________A         sh
+lug_____________A        vtg
+bel_____________A        vtg
+vie_____________A        vtg
+ell_____________A        vtg
+tne_____________A         sh
+ota_____________A         sh
+xiy_____________A         sh
+ita_____________A        vtg
+ang_____________A         sh
+khm_____________A        vtg
+tsn_____________A        vtg
+zlm_____________A        vtg
+lzh_____________A         sh
+kor_____________A        vtg
+lat_____________A         sh
+xbc_____________A         sh
+clh_____________A         sh
+spa_____________A        vtg
+ego_____________A         sh
+aze_____________A        vtg
+ind_____________A        vtg
+teg_____________A         sh
+nci_____________A         sh
+eng_____________A        vtg
+cop_____________A         sh
+txm_____________A         sh
+bam_____________A        vtg
+grc_____________A         sh
+non_____________A         sh
+arb_____________A        vtg
+2025-11-19 14:34:54,828 : classifier (110) - DEBUG - crossval score - average:0.925
+2025-11-19 14:34:54,829 : classifier (113) - DEBUG - errors in classification:
+  gold predicted
+0  vtg        sh
+1   sh       vtg
+2025-11-19 14:34:54,833 : classifier (137) - DEBUG - selected features:6 Index(['eth_status', 'cru_watchtower', 'in_omniglot', 'win10_input_method',
+       'ubuntu_input', 'firefox_lpack'],
+      dtype='object')
+2025-11-19 14:34:54,847 : classifier (148) - DEBUG - labelings:
+exp_with_feature_sel_1
+sh     8557
+vtg     240
+Name: count, dtype: int64
+2025-11-19 15:15:19,998 : classifier (99) - DEBUG - training data:                   seed_label
+integrated_code             
+ang_____________A         sh
+bjn_____________A        vtg
+xcl_____________A         sh
+lat_____________A         sh
+ldq_____________A         sh
+lug_____________A        vtg
+ota_____________A         sh
+grr_____________A         sh
+por_____________A        vtg
+smy_____________A         sh
+heb_____________A        vtg
+nob_____________A        vtg
+zho_____________A        vtg
+ces_____________A        vtg
+fin_____________A        vtg
+enm_____________A         sh
+iki_____________A         sh
+afr_____________A        vtg
+tir_____________A        vtg
+nci_____________A         sh
+lao_____________A        vtg
+hbs_____________A        vtg
+xlg_____________A         sh
+oge_____________A         sh
+arb_____________A        vtg
+hrx_____________A         sh
+grc_____________A         sh
+hnd_____________A         sh
+syc_____________A         sh
+zul_____________A        vtg
+jpn_____________A        vtg
+tvt_____________A         sh
+clt_____________A         sh
+orm_____________A        vtg
+ful_____________A        vtg
+non_____________A         sh
+mya_____________A        vtg
+fra_____________A        vtg
+pmk_____________A         sh
+hun_____________A        vtg
+2025-11-19 15:15:20,044 : classifier (110) - DEBUG - crossval score - average:0.9
+2025-11-19 15:15:20,046 : classifier (113) - DEBUG - errors in classification:
+  gold predicted
+0  vtg        sh
+1   sh       vtg
+2  vtg        sh
+3  vtg        sh
+2025-11-19 15:15:20,049 : classifier (137) - DEBUG - selected features:7 Index(['L1', 'eth_status', 'cru_watchtower', 'ubuntu_input', 'office13_lp',
+       'firefox_lpack', 'in_leipzig_corpora'],
+      dtype='object')
+2025-11-19 15:15:20,060 : classifier (148) - DEBUG - labelings:
+exp_with_feature_sel_1
+sh     8595
+vtg     202
+Name: count, dtype: int64
+2025-11-19 15:15:20,068 : classifier (99) - DEBUG - training data:                   seed_label
+integrated_code             
+pnv_____________A         sh
+tir_____________A        vtg
+oge_____________A         sh
+ats_____________A         sh
+xsc_____________A         sh
+heb_____________A        vtg
+tmk_____________A         sh
+por_____________A        vtg
+urd_____________A        vtg
+lzh_____________A         sh
+ell_____________A        vtg
+tve_____________A         sh
+osx_____________A         sh
+aze_____________A        vtg
+kad_____________A         sh
+nob_____________A        vtg
+cor_____________A         sh
+ukr_____________A        vtg
+mvt_____________A         sh
+grc_____________A         sh
+hun_____________A        vtg
+non_____________A         sh
+khm_____________A        vtg
+afr_____________A        vtg
+kan_____________A        vtg
+syc_____________A         sh
+tsn_____________A        vtg
+glg_____________A        vtg
+tur_____________A        vtg
+hau_____________A        vtg
+goh_____________A         sh
+yom_____________A         sh
+dum_____________A         sh
+ita_____________A        vtg
+kjt_____________A         sh
+glv_____________A         sh
+pnb_____________A        vtg
+spa_____________A        vtg
+itm_____________A         sh
+fra_____________A        vtg
+2025-11-19 15:15:20,115 : classifier (110) - DEBUG - crossval score - average:0.975
+2025-11-19 15:15:20,116 : classifier (113) - DEBUG - errors in classification:
+  gold predicted
+0  vtg        sh
+2025-11-19 15:15:20,120 : classifier (137) - DEBUG - selected features:7 Index(['eth_status', 'cru_watchtower', 'cru_udhr', 'office13_lp',
+       'firefox_lpack', 'firefox_dict', 'in_leipzig_corpora'],
+      dtype='object')
+2025-11-19 15:15:20,130 : classifier (148) - DEBUG - labelings:
+exp_with_feature_sel_2
+sh     8630
+vtg     167
+Name: count, dtype: int64
+2025-11-19 15:15:20,137 : classifier (99) - DEBUG - training data:                   seed_label
+integrated_code             
+lzh_____________A         sh
+hbo_____________A         sh
+eng_____________A        vtg
+mya_____________A        vtg
+thu_____________A         sh
+ibo_____________A        vtg
+ell_____________A        vtg
+hau_____________A        vtg
+por_____________A        vtg
+tow_____________A         sh
+nrg_____________A         sh
+swe_____________A        vtg
+jpn_____________A        vtg
+nob_____________A        vtg
+lae_____________A         sh
+pys_____________A         sh
+pol_____________A        vtg
+lat_____________A         sh
+osx_____________A         sh
+krx_____________A         sh
+orv_____________A         sh
+wuu_____________A        vtg
+nld_____________A        vtg
+cor_____________A         sh
+bmm_____________A         sh
+mkq_____________A         sh
+lug_____________A        vtg
+zul_____________A        vtg
+aze_____________A        vtg
+ngs_____________A         sh
+vil_____________A         sh
+bam_____________A        vtg
+dum_____________A         sh
+ota_____________A         sh
+got_____________A         sh
+ita_____________A        vtg
+tuk_____________A        vtg
+som_____________A        vtg
+ang_____________A         sh
+spa_____________A        vtg
+2025-11-19 15:15:20,186 : classifier (110) - DEBUG - crossval score - average:0.95
+2025-11-19 15:15:20,187 : classifier (113) - DEBUG - errors in classification:
+  gold predicted
+0   sh       vtg
+1  vtg        sh
+2025-11-19 15:15:20,191 : classifier (137) - DEBUG - selected features:7 Index(['L1', 'eth_status', 'cru_watchtower', 'in_omniglot', 'ubuntu_input',
+       'office13_lp', 'uriel_feats'],
+      dtype='object')
+2025-11-19 15:15:20,201 : classifier (148) - DEBUG - labelings:
+exp_with_feature_sel_3
+sh     8537
+vtg     260
+Name: count, dtype: int64
+2025-11-19 15:15:20,209 : classifier (99) - DEBUG - training data:                   seed_label
+integrated_code             
+ind_____________A        vtg
+fin_____________A        vtg
+jen_____________A         sh
+ces_____________A        vtg
+tel_____________A        vtg
+urd_____________A        vtg
+tuk_____________A        vtg
+glw_____________A         sh
+kaz_____________A        vtg
+cor_____________A         sh
+zho_____________A        vtg
+kor_____________A        vtg
+tat_____________A        vtg
+mxz_____________A         sh
+nob_____________A        vtg
+nci_____________A         sh
+lat_____________A         sh
+kmy_____________A         sh
+pli_____________A         sh
+lzh_____________A         sh
+iri_____________A         sh
+nya_____________A        vtg
+rus_____________A        vtg
+eng_____________A        vtg
+rts_____________A         sh
+non_____________A         sh
+swe_____________A        vtg
+lba_____________A         sh
+por_____________A        vtg
+hke_____________A         sh
+goh_____________A         sh
+gro_____________A         sh
+bos_____________A        vtg
+mdf_____________A        vtg
+wol_____________A        vtg
+sin_____________A        vtg
+ota_____________A         sh
+ang_____________A         sh
+glv_____________A         sh
+kid_____________A         sh
+2025-11-19 15:15:20,256 : classifier (110) - DEBUG - crossval score - average:0.95
+2025-11-19 15:15:20,257 : classifier (113) - DEBUG - errors in classification:
+  gold predicted
+0   sh       vtg
+1  vtg        sh
+2025-11-19 15:15:20,261 : classifier (137) - DEBUG - selected features:5 Index(['eth_status', 'cru_watchtower', 'win10_input_method', 'office13_lp',
+       'firefox_lpack'],
+      dtype='object')
+2025-11-19 15:15:20,271 : classifier (148) - DEBUG - labelings:
+exp_with_feature_sel_4
+sh     8571
+vtg     226
+Name: count, dtype: int64
+2025-11-19 15:15:20,278 : classifier (99) - DEBUG - training data:                   seed_label
+integrated_code             
+por_____________A        vtg
+tsn_____________A        vtg
+got_____________A         sh
+cor_____________A         sh
+lzh_____________A         sh
+xcl_____________A         sh
+nmh_____________A         sh
+grc_____________A         sh
+heb_____________A        vtg
+nmg_____________A         sh
+cdo_____________A        vtg
+uka_____________A         sh
+ita_____________A        vtg
+bod_____________A        vtg
+fin_____________A        vtg
+kfi_____________A         sh
+ibo_____________A        vtg
+ind_____________A        vtg
+kat_____________A        vtg
+mdf_____________A        vtg
+ljl_____________A         sh
+hbo_____________A         sh
+mya_____________A        vtg
+sde_____________A         sh
+hin_____________A        vtg
+ota_____________A         sh
+uig_____________A        vtg
+mtk_____________A         sh
+zho_____________A        vtg
+eng_____________A        vtg
+kor_____________A        vtg
+nci_____________A         sh
+non_____________A         sh
+orv_____________A         sh
+vah_____________A         sh
+ddw_____________A         sh
+nld_____________A        vtg
+rus_____________A        vtg
+xmb_____________A         sh
+kab_____________A        vtg
+2025-11-19 15:15:20,326 : classifier (110) - DEBUG - crossval score - average:0.9
+2025-11-19 15:15:20,328 : classifier (113) - DEBUG - errors in classification:
+  gold predicted
+0   sh       vtg
+1  vtg        sh
+2   sh       vtg
+3   sh       vtg
+2025-11-19 15:15:20,331 : classifier (137) - DEBUG - selected features:8 Index(['eth_status', 'cru_watchtower', 'mac_input_partial',
+       'win10_input_method', 'ubuntu_pack', 'ubuntu_input', 'uriel_feats',
+       'in_leipzig_corpora'],
+      dtype='object')
+2025-11-19 15:15:20,342 : classifier (148) - DEBUG - labelings:
+exp_with_feature_sel_5
+sh     8585
+vtg     212
+Name: count, dtype: int64
+2025-11-19 15:15:20,504 : classifier (235) - DEBUG - Crossvalidation results (all):
+count    5.000000
+mean     0.935000
+std      0.033541
+min      0.900000
+25%      0.900000
+50%      0.950000
+75%      0.950000
+max      0.975000
+dtype: float64
+2025-11-19 15:15:20,505 : classifier (237) - DEBUG - Statuses based on all labelings:
+status
+dead          8471
+borderline     201
+living         124
+Name: count, dtype: int64
+2025-11-19 15:15:20,505 : classifier (239) - DEBUG - Stable languages based on all labelings:
+stable
+sh     8471
+-       201
+vtg     124
+Name: count, dtype: int64
+2025-11-19 15:15:20,507 : classifier (245) - INFO - Crossvalidation results (filtered by limit 0.9):
+count    3.000000
+mean     0.958333
+std      0.014434
+min      0.950000
+25%      0.950000
+50%      0.950000
+75%      0.962500
+max      0.975000
+dtype: float64
+2025-11-19 15:15:20,508 : classifier (248) - INFO - Statuses based on labelings (where crossvalidation exceeds limit):
+status_best
+dead          8484
+borderline     183
+living         129
+Name: count, dtype: int64
+2025-11-19 15:15:20,508 : classifier (251) - INFO - Stable languages based on labelings (where crossvalidation exceeds limit):
+stable_best
+sh     8484
+-       183
+vtg     129
+Name: count, dtype: int64
+2025-11-19 15:15:20,508 : classifier (258) - INFO - exporting dataframe to classification/results/test.tsv
+2025-11-19 15:15:20,520 : classifier (261) - INFO - exporting crossvalidations to classification/results/test-crossval.tsv
+2025-11-19 15:15:20,521 : classifier (271) - INFO - exporting probabilities to classification/results/test-prob-sh.tsv
+2025-11-19 15:15:20,549 : classifier (271) - INFO - exporting probabilities to classification/results/test-prob-vtg.tsv
+2025-11-19 15:15:20,580 : classifier (278) - INFO - exporting weights of first model to classification/results/test-weight-vtg.tsv
